@@ -1,10 +1,11 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
 
     public UserData userData = new UserData();
+    public string accessToken;  // JWT 토큰 저장
 
     void Awake()
     {
@@ -16,6 +17,7 @@ public class GameManager : MonoBehaviour
         else Destroy(gameObject);
     }
 }
+
 
 [System.Serializable]
 public class UserData
