@@ -6962,7 +6962,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1675272681
 RectTransform:
   m_ObjectHideFlags: 0
@@ -7540,10 +7540,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   profile:
     user_id: 0
+    nickname: 
     profile_icon_id: 0
     main_champion_id: 0
-    nickname: 
     level: 0
+    exp: 0
+    gold: 0
   record:
     user_id: 0
     win: 0

@@ -1,14 +1,4 @@
-[System.Serializable]
-public class UserProfile
-{
-    public int user_id;
-    public string nickname;
-    public int profile_icon_id;
-    public int main_champion_id;
-    public int level;
-    public int exp;
-    public int gold;
-}
+
 
 
 [System.Serializable]
