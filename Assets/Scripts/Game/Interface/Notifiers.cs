@@ -6,10 +6,9 @@ public interface IAttackNotifier
     event Action<IDamageable> OnAttackPerformed;
 }
 
-public interface IMovementNotifier
+public interface IMoveNotifier
 {
-    event Action OnMoveStart;
-    event Action OnMoveEnd;
+    event Action OnMove;
 }
 
 public interface IDeathNotifier
