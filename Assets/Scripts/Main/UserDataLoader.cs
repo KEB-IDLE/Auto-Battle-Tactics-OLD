@@ -40,7 +40,7 @@ public class UserDataLoader : MonoBehaviour
     IEnumerator LoadRecord()
     {
         yield return APIService.Instance.Get<UserRecord>(
-            APIEndpoints.RankRecord,
+            APIEndpoints.Record,
             res => GameManager.Instance.record = res,
             err => Debug.LogError("Record load failed: " + err)
         );
@@ -49,7 +49,7 @@ public class UserDataLoader : MonoBehaviour
     IEnumerator LoadChampions()
     {
         yield return APIService.Instance.GetList<UserChampion>(
-            APIEndpoints.ChampionList,
+            APIEndpoints.Champion,
             res => GameManager.Instance.champions = res,
             err => Debug.LogError("Champion load failed: " + err)
         );
@@ -58,7 +58,7 @@ public class UserDataLoader : MonoBehaviour
     IEnumerator LoadDecks()
     {
         yield return APIService.Instance.GetList<UserDeck>(
-            APIEndpoints.DeckList,
+            APIEndpoints.Deck,
             res => GameManager.Instance.decks = res,
             err => Debug.LogError("Deck load failed: " + err)
         );

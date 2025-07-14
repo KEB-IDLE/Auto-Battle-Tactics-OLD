@@ -1849,10 +1849,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   profile:
     user_id: 0
+    nickname: 
     profile_icon_id: 0
     main_champion_id: 0
-    nickname: 
     level: 0
+    exp: 0
+    gold: 0
   record:
     user_id: 0
     win: 0
@@ -7857,9 +7859,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 846377014}
-        m_TargetAssemblyTypeName: UserDataLoader, Assembly-CSharp
-        m_MethodName: LoadAllUserData
+      - m_Target: {fileID: 1785153142}
+        m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
+        m_MethodName: UpdateProfileUI
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
