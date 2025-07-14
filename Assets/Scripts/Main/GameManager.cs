@@ -1,34 +1,31 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.SocialPlatforms.Impl;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
 
-    public UserData userData = new UserData();
+    public UserProfile profile;
+    public UserRecord record;
+    public List<UserChampion> champions = new();
+    public List<UserDeck> decks = new();
+    public List<MatchHistory> matchHistory = new();
+
     public string accessToken;  // JWT 토큰 저장
 
-    void Awake()
+
+
+    private void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
+            DontDestroyOnLoad(gameObject); // 씬 전환 시 유지
         }
-        else Destroy(gameObject);
+        else
+        {
+            Destroy(gameObject);
+        }
     }
-}
-
-
-[System.Serializable]
-public class UserData
-{
-    public int userId;
-    public string nickname;
-    public int level;
-    public int exp;
-    public int gold;
-    public string tier;
-    public int rankPoint;
-    public int rankWins;
-    public int rankLosses;
 }

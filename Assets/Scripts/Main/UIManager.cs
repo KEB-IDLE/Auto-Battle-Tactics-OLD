@@ -1,29 +1,45 @@
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
-public class UIManager : MonoBehaviour
+public class ProfileIconChanger : MonoBehaviour
 {
-    public TMP_Text goldText;
+    public Image profileIconImage;      // ³»²¨
+    public Sprite[] profileIcons;       // ÀüÃ¼
 
-    //public void OnClickAddGold()
-    //{
-    //    StartCoroutine(APIService.Instance.Post<UpdateGoldRequest, UpdateGoldResponse>(
-    //        APIEndpoints.UpdateGold,
-    //        new UpdateGoldRequest { userId = GameManager.Instance.userData.userId, amount = 1000 },
-    //        res =>
-    //        {
-    //            if (res.success)
-    //            {
-    //                GameManager.Instance.userData.gold = res.newGold;
-    //                UpdateGoldText();
-    //            }
-    //        }
-    //    ));
-    //}
-
-    public void UpdateGoldText()
+    public void ChangeProfileIcon(int iconId)
     {
-        goldText.text = "Gold: " + GameManager.Instance.userData.gold;
+        var req = new ProfileSettingsRequest
+        {
+            profile_icon_id = iconId,
+            main_champion_id = 0
+        };
+
+        StartCoroutine(APIService.Instance.Put<ProfileSettingsRequest, ResponseData>(
+            "/profile/settings",
+            req,
+            res =>
+            {
+                Debug.Log($"Profile icon updated to {iconId}");
+                if (iconId >= 0 && iconId < profileIcons.Length)
+                {
+                    profileIconImage.sprite = profileIcons[iconId];
+                }
+            },
+            err =>
+            {
+                Debug.LogWarning("Update failed: " + err);
+            }
+        ));
     }
 }
+
+
+
+
+[System.Serializable]
+public class ProfileSettingsRequest
+{
+    public int profile_icon_id;
+    public int main_champion_id;
+}
+

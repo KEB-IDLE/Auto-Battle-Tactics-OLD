@@ -56,9 +56,10 @@ public class LoginManager : MonoBehaviour
                     statusText.text = "Login failed: No token received";
                 }
             },
-            err =>
+           err =>
             {
-                statusText.text = "Login failed: " + err;
+                statusText.text = err.Contains("User not found") ? "User not found." :
+                 err.Contains("Incorrect password") ? "Incorrect password." : "Login failed: " + err;
             }
         ));
     }
@@ -98,9 +99,38 @@ public class LoginManager : MonoBehaviour
             },
             err =>
             {
-                registerStatusText.text = err.Contains("409") ? "중복된 이메일 또는 닉네임입니다." : "Register failed: " + err;
+                registerStatusText.text = err.Contains("Email already exists") ? "Email already exists." :
+                err.Contains("Nickname already exists") ? "Nickname already exists." : "Register failed: " + err;
             }
         ));
     }
 }
 
+[System.Serializable]
+public class LoginRequest
+{
+    public string email;
+    public string password;
+}
+
+[System.Serializable]
+public class RegisterRequest
+{
+    public string email;
+    public string password;
+    public string nickname;
+}
+
+
+[System.Serializable]
+public class LoginResponse
+{
+    public string token;
+}
+
+[System.Serializable]
+public class ResponseData
+{
+    public bool success;
+    public string message;
+}
