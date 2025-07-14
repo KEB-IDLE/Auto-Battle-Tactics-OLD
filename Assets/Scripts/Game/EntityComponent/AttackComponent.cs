@@ -1,20 +1,20 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using Unity.IO.LowLevel.Unsafe;
 using UnityEngine;
 
-public class AttackComponent : MonoBehaviour, IAttackable
-{       
+public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
+{
+    // Ony for Gizmo test
+    private EntityData _entityData; // EntityData를 통해 초기화할 수 있도록
+    
     private float attackDamage;         // 대미지
     private float attackCoreDamage; // 코어 공격 대미지
 
     private float attackCooldown;       // 재공격까지 대기시간
     private float lastAttackTime;       // 마지막 공격 시간
     private float detectionRadius;      // 공격 대상 인지 범위
-    private float attackRange; // 공격 범위
-    private float disengageRange; // 공격 대상과의 거리가 이 범위를 벗어나면 공격 중지
+    private float attackRange;          // 공격 범위
+    private float disengageRange;       // 공격 대상과의 거리가 이 범위를 벗어나면 공격 중지
 
     private IDamageable lockedTarget;   // 현재 공격 대상
     private ITeamProvider teamProvider; // 팀 정보 제공자
@@ -25,7 +25,9 @@ public class AttackComponent : MonoBehaviour, IAttackable
     private LayerMask targetLayer;
 
     public event Action<bool> OnAttackStateChanged; // 공격 상태 변경 이벤트
-        //private Transform firePoint;     // 투사체나 이펙트 시작 위치
+    public event Action<IDamageable> OnAttackPerformed; // 공격 수행 이벤트
+    
+
 
     public Transform LockedTargetTransform
         => (lockedTarget as MonoBehaviour)?.transform;
@@ -34,7 +36,6 @@ public class AttackComponent : MonoBehaviour, IAttackable
     private void Awake()
     {
         teamProvider = GetComponent<ITeamProvider>();
-        Debug.Log($"[{name}] AttackComponent.Awake → 내 팀: {teamProvider?.Team}");
         if (teamProvider == null)
         {
             Debug.LogError($"{name}에 ITeamProvider(TeamComponent)가 할당되지 않았습니다!");
@@ -43,12 +44,15 @@ public class AttackComponent : MonoBehaviour, IAttackable
 
     public void Initialize(EntityData data)
     {
+        // only for gizmo test
+        _entityData = data;
 
         attackDamage = data.attackDamage;
         attackCoreDamage = data.attackCoreDamage;
         attackCooldown = data.attackCooldown;
         detectionRadius = data.detectionRadius;
         attackRange = data.attackRange;
+        disengageRange = data.disengageRange;
         lastAttackTime = 0f;
 
         allUnitMask = LayerMask.GetMask("Agent", "Tower", "Core");
@@ -71,22 +75,13 @@ public class AttackComponent : MonoBehaviour, IAttackable
 
     void Update()
     {
-
         var newTarget = DetectTarget();
-        if (newTarget != null)
-        {
-            lockedTarget = newTarget;
-        }
 
+        if (newTarget != null)
+            lockedTarget = newTarget;
         // 2) 공격 조건 검사
         if (lockedTarget != null && CanAttack(lockedTarget))
-        {
-            //Gizmos.color = Color.yellow;
-            //Gizmos.DrawWireSphere(transform.position, detectionRadius);
-
-            // 3) 공격 실행 (코루틴으로도 전환 가능)
             StartCoroutine(AttackRoutine(lockedTarget));
-        }
     }
 
     public IDamageable DetectTarget()
@@ -108,9 +103,7 @@ public class AttackComponent : MonoBehaviour, IAttackable
 
             var provider = col.GetComponent<ITeamProvider>();
             if (provider == null || provider.Team == teamProvider.Team)
-            {
                 continue;
-            }
             float dist = Vector3.Distance(transform.position, col.transform.position);
             if (dist < bestDist)
             {
@@ -125,7 +118,7 @@ public class AttackComponent : MonoBehaviour, IAttackable
 
     private bool CanAttack(IDamageable target)
     {
-        if (Time.time < lastAttackTime + attackCooldown)
+        if (IsAttacking())
             return false;
 
         float dist = Vector3.Distance(
@@ -135,27 +128,27 @@ public class AttackComponent : MonoBehaviour, IAttackable
         return dist <= attackRange;
     }
 
-    private void Attack(IDamageable target)
+    private void TryAttack(IDamageable target)
     {
-        // 애니메이션 트리거 같은 부가 로직 추가 가능
-        target.TakeDamage(attackDamage);
+        if (IsAttacking()) return;
+
         lastAttackTime = Time.time;
+        lockedTarget = target;
+        OnAttackPerformed?.Invoke(target);
     }
     private IEnumerator AttackRoutine(IDamageable target)
     {
         // 이동 정지 이벤트(외부 MoveComponent 구독)
         OnAttackStateChanged?.Invoke(true);
 
-        // 한 번 공격
-        Attack(target);
-
+        TryAttack(target);
         // 사거리 이탈 또는 대상 사망 전까지, 자동으로 재공격
         while (target.IsAlive() &&
                Vector3.Distance(transform.position,
                    (target as MonoBehaviour).transform.position) <= attackRange)
         {
             yield return new WaitForSeconds(attackCooldown);
-            Attack(target);
+            TryAttack(target);
         }
 
         // 공격 종료 이벤트
@@ -164,12 +157,47 @@ public class AttackComponent : MonoBehaviour, IAttackable
         // 범위 벗어나면 타겟 초기화
         if (!target.IsAlive() ||
             Vector3.Distance(transform.position,
-                (target as MonoBehaviour).transform.position) > detectionRadius)
+                (target as MonoBehaviour).transform.position) > disengageRange)
         {
             lockedTarget = null;
         }
     }
+
+    public void OnAttackHit()
+    {
+        if (lockedTarget == null || !lockedTarget.IsAlive())
+            return;
+
+        // “이 대상이 코어인가?” 체크
+        var coreComp = (lockedTarget as MonoBehaviour)
+                          .GetComponent<CoreComponent>();
+        if (coreComp != null)
+            lockedTarget.TakeDamage(attackCoreDamage);
+        else
+            lockedTarget.TakeDamage(attackDamage);
+    }
+
+
     public bool IsAttacking()
         => Time.time < lastAttackTime + attackCooldown;
+
+#if UNITY_EDITOR
+    private void OnDrawGizmosSelected()
+    {
+        if (_entityData == null) return;
+
+        // 감지 반경(detectionRadius)
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, _entityData.detectionRadius);
+
+        // 공격 반경(attackRange)
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, _entityData.attackRange);
+
+        // 해제 반경(disengageRange)
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawWireSphere(transform.position, _entityData.disengageRange);
+    }
+#endif
 
 }

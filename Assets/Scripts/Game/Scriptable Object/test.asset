@@ -12,19 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a12ddfc6129accb4a9c4719a65aec2c8, type: 3}
   m_Name: test
   m_EditorClassIdentifier: 
-  entityName: test1
   maxHP: 2
   attackDamage: 1
   attackCoreDamage: 1
   attackCooldown: 1
   moveSpeed: 5
-  entityType: 0
   entityScale: 0
-  detectionRadius: 100
+  detectionRadius: 30
   attackRange: 5
   disengageRange: 10
   attackableType: 0
-  attackPriority: 2
+  attackPriority: 0
   entityPrefab: {fileID: 0}
   summonEffectPrefab: {fileID: 0}
   attackEffectPrefab: {fileID: 0}
@@ -32,3 +30,8 @@ MonoBehaviour:
   summonSound: {fileID: 0}
   attackSound: {fileID: 0}
   deathSound: {fileID: 0}
+  animatorController: {fileID: 9100000, guid: 69ce5dd747afb75488c00ed0f554f1d6, type: 2}
+  attackClip: {fileID: 0}
+  runClip: {fileID: 0}
+  deathClip: {fileID: 0}
+  idleClip: {fileID: 0}
