@@ -53,14 +53,13 @@ public class UIManager : MonoBehaviour
 
     public void ChangeProfileIcon(int iconId)
     {
-
-        var req = new ProfilePatchData
+        var req = new ProfileUpdateRequest
         {
             profile_icon_id = iconId
         };
 
-        StartCoroutine(APIService.Instance.Put<ProfilePatchData, UserProfile>(
-            APIEndpoints.UpdateProfile,
+        StartCoroutine(APIService.Instance.Put<ProfileUpdateRequest, UserProfile>(
+            APIEndpoints.Profile, // 이제 APIEndpoints.UpdateProfile 안 써도 됨
             req,
             res =>
             {
@@ -74,11 +73,11 @@ public class UIManager : MonoBehaviour
         ));
     }
 
+
 }
 
-// 임시 클래스 정의
 [System.Serializable]
-class ProfilePatchData
+class ProfileUpdateRequest
 {
     public int profile_icon_id;
 }
