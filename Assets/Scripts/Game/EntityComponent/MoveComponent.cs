@@ -1,16 +1,20 @@
 using UnityEngine;
 using System.Linq;
 using UnityEngine.AI;
+using System;
 
 
-public class MoveComponent : MonoBehaviour
+
+public class MoveComponent : MonoBehaviour, IMoveNotifier
 {
+    public event Action OnMove;
 
     Transform coreTransform;
     NavMeshAgent _agent;
     IAttackable _attacker;
     ITeamProvider _teamProvider;
     private float moveSpeed;
+    bool _isMoving;
 
     private void Awake()
     {
@@ -26,17 +30,17 @@ public class MoveComponent : MonoBehaviour
 
     void Update()
     {
-        // 공격 중이면 이동 중지
         if(_attacker.IsAttacking())
         {
+            if(_isMoving) 
+                _isMoving = false;
             _agent.isStopped = true;
             _agent.ResetPath();
             return;
         }
         if (_agent.isStopped)
-        {
             _agent.isStopped = false;
-        }
+
         var target = _attacker.DetectTarget();
         if (target != null && target.IsAlive())
         {
@@ -44,8 +48,11 @@ public class MoveComponent : MonoBehaviour
             _agent.SetDestination(mb.transform.position);
         }
         else
-        {
             _agent.SetDestination(coreTransform.position);
+        if (!_isMoving)
+        {
+            _isMoving = true;
+            OnMove?.Invoke();
         }
     }
 
@@ -55,6 +62,7 @@ public class MoveComponent : MonoBehaviour
         _agent.speed = moveSpeed;
         _agent.acceleration = moveSpeed;
         _agent.autoBraking = false;
-        
+        _isMoving = false;
+
     }
 }
