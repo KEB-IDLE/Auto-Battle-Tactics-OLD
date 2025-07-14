@@ -1,2 +1,13 @@
 fileFormatVersion: 2
-guid: 62e825131d7655c4695d3a5bfa1ebc25
+guid: 9db31b226c2a44843a9cd1f8f6e79002
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - redCoreTransform: {fileID: 4671885540065217608, guid: d8214dc9bf7b93a468d3bef275d48b9c, type: 3}
+  - blueCoreTransform: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
