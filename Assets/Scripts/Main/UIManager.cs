@@ -6,6 +6,32 @@ public class ProfileIconChanger : MonoBehaviour
     public Image profileIconImage;      // 내꺼
     public Sprite[] profileIcons;       // 전체
 
+
+    void Start()
+    {
+        UpdateProfileUI();
+    }
+
+    public void UpdateProfileUI()
+    {
+        int iconId = GameManager.Instance.profile.profile_icon_id;
+
+        if (iconId >= 0 && iconId < profileIcons.Length)
+        {
+            profileIconImage.sprite = profileIcons[iconId];
+        }
+        else
+        {
+            Debug.LogWarning("Invalid profile icon ID");
+        }
+
+        // 닉네임, 레벨, 경험치 등 추가 가능
+        // nicknameText.text = GameManager.Instance.profile.nickname;
+    }
+
+
+
+
     public void ChangeProfileIcon(int iconId)
     {
         var req = new ProfileSettingsRequest
