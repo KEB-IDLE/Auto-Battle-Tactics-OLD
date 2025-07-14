@@ -3,9 +3,8 @@ public static class APIEndpoints
     public const string Register = "/auth/register";
     public const string Login = "/auth/login";
 
-    public const string InitProfile = "/user/profile/settings";
     public const string Profile = "/user/profile";
-    public const string UpdateProfile = "/user/profile";
+    public const string UpdateProfile = "/user/profile/settings";
 
     public const string RankRecord = "/user/record";
     public const string MatchHistory = "/user/match/history";

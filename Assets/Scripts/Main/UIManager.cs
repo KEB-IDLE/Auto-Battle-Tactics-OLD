@@ -1,16 +1,11 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 
-public class ProfileIconChanger : MonoBehaviour
+public class UIManager : MonoBehaviour
 {
-    public Image profileIconImage;      // ³»²¨
-    public Sprite[] profileIcons;       // ÀüÃ¼
+    public Image profileIconImage;      // ë‚´êº¼
+    public Sprite[] profileIcons;       // ì „ì²´
 
-
-    void Start()
-    {
-        UpdateProfileUI();
-    }
 
     public void UpdateProfileUI()
     {
@@ -25,7 +20,7 @@ public class ProfileIconChanger : MonoBehaviour
             Debug.LogWarning("Invalid profile icon ID");
         }
 
-        // ´Ğ³×ÀÓ, ·¹º§, °æÇèÄ¡ µî Ãß°¡ °¡´É
+        // ë‹‰ë„¤ì„, ë ˆë²¨, ê²½í—˜ì¹˜ ë“± ì¶”ê°€ ê°€ëŠ¥
         // nicknameText.text = GameManager.Instance.profile.nickname;
     }
 
@@ -37,19 +32,21 @@ public class ProfileIconChanger : MonoBehaviour
         var req = new ProfileSettingsRequest
         {
             profile_icon_id = iconId,
-            main_champion_id = 0
+            main_champion_id = 0 // ì´í›„ ì‹¤ì œ ì„ íƒê°’ìœ¼ë¡œ êµì²´ ê°€ëŠ¥
         };
 
         StartCoroutine(APIService.Instance.Put<ProfileSettingsRequest, ResponseData>(
-            "/profile/settings",
+            APIEndpoints.UpdateProfile,
             req,
             res =>
             {
                 Debug.Log($"Profile icon updated to {iconId}");
-                if (iconId >= 0 && iconId < profileIcons.Length)
-                {
-                    profileIconImage.sprite = profileIcons[iconId];
-                }
+
+                // GameManager ë°ì´í„° ê°±ì‹ 
+                GameManager.Instance.profile.profile_icon_id = iconId;
+
+                // UI ê°±ì‹ 
+                UpdateProfileUI();
             },
             err =>
             {
@@ -57,6 +54,7 @@ public class ProfileIconChanger : MonoBehaviour
             }
         ));
     }
+
 }
 
 

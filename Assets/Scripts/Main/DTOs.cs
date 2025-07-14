@@ -5,6 +5,7 @@ public class UserProfile
     public int profile_icon_id;
     public int main_champion_id;
     public string nickname;
+    public int level;
 }
 
 [System.Serializable]

@@ -12,7 +12,7 @@ public class GameManager : MonoBehaviour
     public List<UserDeck> decks = new();
     public List<MatchHistory> matchHistory = new();
 
-    public string accessToken;  // JWT 토큰 저장
+    public string accessToken;  // JWT 토큰
 
 
 
@@ -21,7 +21,7 @@ public class GameManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject); // 씬 전환 시 유지
+            DontDestroyOnLoad(gameObject);
         }
         else
         {

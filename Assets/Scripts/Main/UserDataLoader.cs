@@ -3,13 +3,29 @@ using System.Collections;
 
 public class UserDataLoader : MonoBehaviour
 {
-    public void LoadAllUserData()
+    public UIManager uiManager;
+
+    public IEnumerator LoadAllUserDataCoroutine()
     {
-        StartCoroutine(LoadProfile());
-        StartCoroutine(LoadRecord());
-        StartCoroutine(LoadChampions());
-        StartCoroutine(LoadDecks());
-        StartCoroutine(LoadMatchHistory());
+        yield return LoadProfile();
+        yield return LoadRecord();
+        yield return LoadChampions();
+        yield return LoadDecks();
+        yield return LoadMatchHistory();
+
+        if (uiManager != null)
+        {
+            uiManager.UpdateProfileUI();
+        }
+        else
+        {
+            Debug.LogWarning("ProfileIconChanger is not assigned!");
+        }
+    }
+
+    void Start()
+    {
+        StartCoroutine(LoadAllUserDataCoroutine());
     }
 
     IEnumerator LoadProfile()
