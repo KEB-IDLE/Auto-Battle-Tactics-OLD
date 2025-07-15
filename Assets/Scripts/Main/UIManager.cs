@@ -5,6 +5,9 @@ using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
+    public UserDataLoader userdataloader;
+
+
     public TMP_Text nicknameText;
 
     public Image profileIconImage;
@@ -150,6 +153,62 @@ public class UIManager : MonoBehaviour
         ));
     }
 
+    // 기록 갱신 함수
+    public void UpdateUserRecord(int deltaMatch, int deltaWins, int deltaLosses, int deltaPoint)
+    {
+        var record = GameManager.Instance.record;
+
+        // 변화량을 기존 값에 반영
+        int newMatchCount = record.rank_match_count + deltaMatch;
+        int newWins = record.rank_wins + deltaWins;
+        int newLosses = record.rank_losses + deltaLosses;
+        int newPoint = record.rank_point + deltaPoint;
+
+        var req = new UserRecordUpdateRequest
+        {
+            rank_match_count = newMatchCount,
+            rank_wins = newWins,
+            rank_losses = newLosses,
+            rank_point = newPoint
+        };
+
+        StartCoroutine(APIService.Instance.Put<UserRecordUpdateRequest, APIMessageResponse>(
+            APIEndpoints.Record,
+            req,
+            res =>
+            {
+                StartCoroutine(userdataloader.LoadRecord());
+
+                // UI 갱신 - 함수 작성 필요
+                // UpdateRecordUI();
+            },
+            err =>
+            {
+                Debug.LogWarning("Failed to update user record: " + err);
+            }
+        ));
+    }
+
+    // 실험용
+    public void RecordButton()
+    {
+        UpdateUserRecord(1,1,0,10);
+    }
+
+    [System.Serializable]
+    public class UserRecordUpdateRequest
+    {
+        public int rank_match_count;
+        public int rank_wins;
+        public int rank_losses;
+        public int rank_point;
+    }
+
+    [System.Serializable]
+    public class APIMessageResponse
+    {
+        public string message;
+    }
 }
 
 [System.Serializable]

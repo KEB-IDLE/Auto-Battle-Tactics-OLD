@@ -37,7 +37,7 @@ public class UserDataLoader : MonoBehaviour
         );
     }
 
-    IEnumerator LoadRecord()
+    public IEnumerator LoadRecord()
     {
         yield return APIService.Instance.Get<UserRecord>(
             APIEndpoints.Record,
@@ -72,4 +72,56 @@ public class UserDataLoader : MonoBehaviour
             err => Debug.LogError("Match history load failed: " + err)
         );
     }
+}
+
+[System.Serializable]
+public class UserRecord
+{
+    public int user_id;
+    public string last_login_at;
+    public int rank_match_count;
+    public int rank_wins;
+    public int rank_losses;
+    public int rank_point;
+    public string tier;
+    public int global_rank;
+}
+
+
+[System.Serializable]
+public class Champion
+{
+    public int id;
+    public string name;
+    public string type;
+    public byte cost;
+    public int base_hp;
+    public int base_attack;
+}
+
+[System.Serializable]
+public class UserChampion
+{
+    public int user_id;
+    public int champion_id;
+    public Champion Champion;
+}
+
+[System.Serializable]
+public class UserDeck
+{
+    public int id;
+    public int user_id;
+    public string deck_name;
+    public int[] champion_ids;
+}
+
+[System.Serializable]
+public class MatchHistory
+{
+    public int id;
+    public int user_id;
+    public int match_id;
+    public string result;
+    public string created_at;
 }
