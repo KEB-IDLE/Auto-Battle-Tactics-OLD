@@ -8,8 +8,6 @@ public class GameManager : MonoBehaviour
 
     public UserProfile profile;
     public UserRecord record;
-    public List<UserChampion> champions = new();
-    public List<UserDeck> decks = new();
     public List<MatchHistory> matchHistory = new();
 
     public string accessToken;  // JWT 토큰
