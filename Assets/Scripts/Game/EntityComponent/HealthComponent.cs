@@ -5,7 +5,6 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
 {
 
     private float currentHP;
-
     public event Action OnDeath; // 죽음 이벤트
 
     public void Initialize(EntityData data) 
