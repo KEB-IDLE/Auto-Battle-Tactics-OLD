@@ -65,7 +65,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         else
         {
             projectilePrefab = data.projectilePrefab;
-            projectileData = data.projectileData;
+            //projectileData = data.projectileData;
         }
         
         lastAttackTime = 0f;
@@ -151,7 +151,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
                 AttackRanged(target);
                 break;
             case AttackType.Magic:
-                //AttackMagic(target);
+                AttackMagic(target);
                 break;
             default:
                 Debug.LogWarning("지원하지 않는 공격 타입");
@@ -231,7 +231,24 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         target: (target as MonoBehaviour).transform);   // 목표 Transform 전달
 
     }
-    
+    private void AttackMagic(IDamageable target)
+    {
+        lockedTarget = target;
+        OnAttackPerformed?.Invoke(target);
+
+        // 즉시 피해!
+        if (lockedTarget != null && lockedTarget.IsAlive())
+        {
+            var coreComp = (lockedTarget as MonoBehaviour).GetComponent<CoreComponent>();
+            if (coreComp != null)
+                lockedTarget.TakeDamage(attackCoreDamage);
+            else
+                lockedTarget.TakeDamage(attackDamage);
+
+            // 추가: 연출 효과, 파티클, 사운드 등 여기서 Instantiate
+        }
+    }
+
 
     public bool IsAttacking()
         => Time.time < lastAttackTime + attackCooldown;

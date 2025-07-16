@@ -88,10 +88,23 @@ public class Projectile : MonoBehaviour
                 if (hp != null)
                     hp.TakeDamage(damage); // 필요하다면 falloff 로직 등 추가 가능
             }
-
-
             Destroy(gameObject);
             break;
         }
     }
+
+#if UNITY_EDITOR
+    private void OnDrawGizmosSelected()
+    {
+        if (data == null) return;
+
+        // 감지 반경(detectionRadius)
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, data.detectionRadius);
+
+        // 공격 반경(attackRange)
+        Gizmos.color = Color.brown;
+        Gizmos.DrawWireSphere(transform.position, data.explosionRadius);
+    }
+#endif
 }

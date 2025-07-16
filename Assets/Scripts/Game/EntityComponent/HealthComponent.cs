@@ -29,7 +29,6 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
     public void Die()
     {
         if(IsAlive()) return;
-        //Debug.Log("entity is Dead!");
         OnDeath?.Invoke(); // Á×À½ ÀÌ¹êÆ® ¾Ë¸²
         return;
     }

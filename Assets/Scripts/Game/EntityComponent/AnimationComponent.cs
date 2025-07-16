@@ -52,6 +52,7 @@ public class AnimationComponent : MonoBehaviour
         _animator.SetTrigger("Die");
     }
 
+    // 이 함수는 Die 애니메이션이 끝날 때 실행되어야 함.
     public void OnDeathAnimationComplete()
     {
         Unbind();
