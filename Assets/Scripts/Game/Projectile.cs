@@ -4,22 +4,27 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody))]
 public class Projectile : MonoBehaviour
 {
-    public ProjectileData data;
+    private Rigidbody _rb;
+    [SerializeField] private ProjectileData data;
+
     private Entity owner;
     private Team team; // 소환자의 팀(직접 저장)
-    private float lifeTime;
     private float timer;
     private float damage;
-    private float detectionRadius;
-    private float explosionRadius;
 
-    public void Initialize(ProjectileData data, Entity owner, float damage)
+    private Transform target;
+
+    private void Awake()
     {
-        this.data = data;
+        _rb = GetComponent<Rigidbody>();
+        _rb.useGravity = true;
+    }
+
+    public void Initialize(/*ProjectileData data, */ Entity owner, float damage, Transform target)
+    {
         this.owner = owner;
-        this.lifeTime = data.lifeTime;
-        this.detectionRadius = data.detectionRadius;
         this.damage = damage;
+        this.target = target;
         timer = 0f;
 
         // 안전하게 Team 정보 받기
@@ -28,45 +33,52 @@ public class Projectile : MonoBehaviour
             this.team = teamComponent.Team;
         else
             Debug.LogWarning("[Projectile] Owner에 TeamComponent가 없습니다!");
+
+        _rb.linearVelocity = (target.position - transform.position).normalized
+                       * data.speed + Vector3.up * data.verticalSpeed;
     }
 
     // Update is called once per frame
     void Update()
     {
         timer += Time.deltaTime;
-        if(timer > lifeTime)
+        if(timer > data.lifeTime || target == null /*lifeTime*/)
         {
             Destroy(gameObject);
             return;
         }
+        Move();
+        CheckHit();
+    }
 
-        Collider[] hits = Physics.OverlapSphere(transform.position, data.detectionRadius, LayerMask.GetMask("Agent", "Tower", "Core"));
+    protected virtual void Move()
+    {
+        Vector3 dir = (target.position - transform.position).normalized;
+        transform.position += dir * data.speed * Time.deltaTime;
+        transform.forward = dir;
+    }
+
+    protected virtual void CheckHit()
+    {
+        Collider[] hits = Physics.OverlapSphere(
+            transform.position,
+            data.detectionRadius,
+            LayerMask.GetMask("Agent", "Tower", "Core"));
 
         foreach (var hit in hits)
         {
-            // 1. 한 번만 꺼내서 재사용
-            Entity targetEntity = hit.GetComponent<Entity>();
-            if (targetEntity == null)
+            // 위를 아래로 변경
+            var e = hit.GetComponent<Entity>();
+            if (e == null || e.GetComponent<TeamComponent>().Team == team)
                 continue;
 
-            TeamComponent targetTeamComp = targetEntity.GetComponent<TeamComponent>();
-            if (targetTeamComp == null)
-                continue;
+            var hp = e.GetComponent<HealthComponent>();
+            if (hp != null)
+                hp.TakeDamage(damage);
 
-            if (targetTeamComp.Team == this.team)
-                continue;
+            Destroy(gameObject);
+            break;
 
-            HealthComponent health = targetEntity.GetComponent<HealthComponent>();
-
-
-            if (health != null)
-            {
-                health.TakeDamage(damage);
-                Destroy(gameObject);
-                break;
-            }
         }
-
-
     }
 }

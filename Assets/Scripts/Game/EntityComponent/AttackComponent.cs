@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using static UnityEngine.UI.GridLayoutGroup;
 
 public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
 {
@@ -15,7 +16,6 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
     private float attackRange;          // 공격 범위
     private float disengageRange;       // 공격 대상과의 거리가 이 범위를 벗어나면 공격 중지
     private bool isAttackingFlag;
-
 
     private GameObject projectilePrefab;
     private ProjectileData projectileData;
@@ -32,8 +32,6 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
     public event Action<bool> OnAttackStateChanged; // 공격 상태 변경 이벤트
     public event Action<IDamageable> OnAttackPerformed; // 공격 수행 이벤트
     
-
-
     public Transform LockedTargetTransform
         => (lockedTarget as MonoBehaviour)?.transform;
 
@@ -222,46 +220,18 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         lockedTarget = target;
         OnAttackPerformed?.Invoke(target);
 
-        Vector3 spawnPos = transform.position + Vector3.up * 1f;
-        Vector3 targetPos = (target as MonoBehaviour).transform.position + Vector3.up * 1.2f;
-        GameObject projectileObject = Instantiate(projectilePrefab, spawnPos, Quaternion.identity);
-
-        float fireAngle = 30f;
-        Vector3 velocity = CalculateVelocity(spawnPos, targetPos, fireAngle);
-
-        var rb = projectileObject.GetComponent<Rigidbody>();
-        rb.linearVelocity = velocity;
-
-        var projectile = projectileObject.GetComponent<Projectile>();
-
+        Vector3 firePoint = transform.position + Vector3.up * 1f;
+        var projGO = Instantiate(projectilePrefab, firePoint, Quaternion.identity);
+        var projectile = projGO.GetComponent<Projectile>();
         projectile.Initialize(
-            data: projectile.data,
-            owner: this.GetComponent<Entity>(),
-            damage: attackDamage
-        // 필요시 target, 혹은 team 등 추가
-        );
-        
+        //data: projectileData,                              // AttackComponent에 보관 중인 ProjectileData
+        owner: this.GetComponent<Entity>(),                // 투사체 소유자
+        damage: attackDamage,                              // 대미지
+        target: (target as MonoBehaviour).transform);        // 목표 Transform 전달
+
     }
-    // 타겟 위치 계산 함수
-    private Vector3 CalculateVelocity(Vector3 startPoint, Vector3 endPoint, float angle)
-    {
-        float gravity = Mathf.Abs(Physics.gravity.y);
-        float radianAngle = angle * Mathf.Deg2Rad;
-        float distance = Vector3.Distance(startPoint, endPoint);
-        float yOffset = startPoint.y - endPoint.y;
+    
 
-        float initialVelocity = Mathf.Sqrt(distance * gravity / Mathf.Sin(2 * radianAngle));
-        float Vy = initialVelocity * Mathf.Sin(radianAngle);
-        float Vz = initialVelocity * Mathf.Cos(radianAngle);
-
-        Vector3 velocity = new Vector3(0, Vy, Vz);
-
-        Vector3 direction = (endPoint - startPoint).normalized;
-        float angleBetweenObjects = Vector3.SignedAngle(Vector3.forward, direction, Vector3.up);
-        Vector3 finalVelocity = Quaternion.AngleAxis(angleBetweenObjects, Vector3.up) * velocity;
-
-        return finalVelocity;
-    }
     public bool IsAttacking()
         => Time.time < lastAttackTime + attackCooldown;
     public bool isMelee => attackType == AttackType.Melee;
