@@ -18,9 +18,9 @@ MonoBehaviour:
   attackCooldown: 1
   moveSpeed: 3
   entityScale: 0
-  detectionRadius: 25
+  detectionRadius: 30
   attackRange: 22
-  disengageRange: 30
+  disengageRange: 25
   attackPriority: 0
   attackableType: 0
   attackType: 1

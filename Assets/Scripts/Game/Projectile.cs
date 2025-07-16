@@ -11,6 +11,7 @@ public class Projectile : MonoBehaviour
     private Team team; // 소환자의 팀(직접 저장)
     private float timer;
     private float damage;
+    private float coreDamage;
 
     private Transform target;
 
@@ -20,11 +21,12 @@ public class Projectile : MonoBehaviour
         _rb.useGravity = true;
     }
 
-    public void Initialize(/*ProjectileData data, */ Entity owner, float damage, Transform target)
+    public void Initialize(Entity owner, float damage, float coreDamage, Transform target)
     {
         this.owner = owner;
         this.damage = damage;
         this.target = target;
+        this.coreDamage = coreDamage;
         timer = 0f;
 
         // 안전하게 Team 정보 받기
@@ -38,7 +40,6 @@ public class Projectile : MonoBehaviour
                        * data.speed + Vector3.up * data.verticalSpeed;
     }
 
-    // Update is called once per frame
     void Update()
     {
         timer += Time.deltaTime;
@@ -72,13 +73,25 @@ public class Projectile : MonoBehaviour
             if (e == null || e.GetComponent<TeamComponent>().Team == team)
                 continue;
 
-            var hp = e.GetComponent<HealthComponent>();
-            if (hp != null)
-                hp.TakeDamage(damage);
+            Collider[] explosionHits = Physics.OverlapSphere(
+            transform.position,
+            data.explosionRadius,
+            LayerMask.GetMask("Agent", "Tower", "Core"));
+
+            foreach (var ex in explosionHits)
+            {
+                var enemy = ex.GetComponent<Entity>();
+                if (enemy == null || enemy.GetComponent<TeamComponent>().Team == team)
+                    continue;
+
+                var hp = enemy.GetComponent<HealthComponent>();
+                if (hp != null)
+                    hp.TakeDamage(damage); // 필요하다면 falloff 로직 등 추가 가능
+            }
+
 
             Destroy(gameObject);
             break;
-
         }
     }
 }

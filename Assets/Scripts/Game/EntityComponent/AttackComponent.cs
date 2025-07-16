@@ -224,10 +224,11 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         var projGO = Instantiate(projectilePrefab, firePoint, Quaternion.identity);
         var projectile = projGO.GetComponent<Projectile>();
         projectile.Initialize(
-        //data: projectileData,                              // AttackComponent에 보관 중인 ProjectileData
-        owner: this.GetComponent<Entity>(),                // 투사체 소유자
-        damage: attackDamage,                              // 대미지
-        target: (target as MonoBehaviour).transform);        // 목표 Transform 전달
+        //data: projectileData,                         // AttackComponent에 보관 중인 ProjectileData
+        owner: this.GetComponent<Entity>(),             // 투사체 소유자
+        damage: attackDamage,                           // 대미지
+        coreDamage: attackCoreDamage,                   // 코어 공격력 
+        target: (target as MonoBehaviour).transform);   // 목표 Transform 전달
 
     }
     
