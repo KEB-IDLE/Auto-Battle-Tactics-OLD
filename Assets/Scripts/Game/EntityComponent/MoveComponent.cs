@@ -5,7 +5,7 @@ using System;
 
 
 
-public class MoveComponent : MonoBehaviour, IMoveNotifier
+public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
 {
     public event Action OnMove;
 
@@ -46,9 +46,13 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier
         {
             var mb = target as MonoBehaviour;
             _agent.SetDestination(mb.transform.position);
+            LookAtTarget(mb.transform.position);
         }
         else
+        {
             _agent.SetDestination(coreTransform.position);
+            LookAtTarget(coreTransform.position);
+        }
         if (!_isMoving)
         {
             _isMoving = true;
@@ -64,5 +68,17 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier
         _agent.autoBraking = false;
         _isMoving = false;
 
+    }
+
+    public void LookAtTarget(Vector3 pos)
+    {
+        Vector3 dir = (pos - transform.position).normalized;
+        if (dir.sqrMagnitude > 0.01f)
+        {
+            Quaternion lookRot = Quaternion.LookRotation(dir);
+            // 부드럽게 회전하려면 Slerp
+            transform.rotation = Quaternion.Slerp(
+                transform.rotation, lookRot, Time.deltaTime * 10f);
+        }
     }
 }

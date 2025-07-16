@@ -3,7 +3,7 @@ using UnityEngine;
 
 public interface IAttackNotifier
 {
-    event Action<IDamageable> OnAttackPerformed;
+    event Action<bool> OnAttackStateChanged;
 }
 
 public interface IMoveNotifier
