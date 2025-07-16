@@ -7,9 +7,4 @@ public static class APIEndpoints
 
     public const string Record = "/user/record";
     public const string MatchHistory = "/user/match/history";
-
-    public const string Champion = "/user/champion";
-    public const string ChampionUnlock = "/user/champion/unlock";
-
-    public const string Deck = "/user/deck";
 }

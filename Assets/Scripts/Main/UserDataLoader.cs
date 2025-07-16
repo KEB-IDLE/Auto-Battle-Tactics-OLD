@@ -9,8 +9,6 @@ public class UserDataLoader : MonoBehaviour
     {
         yield return LoadProfile();
         yield return LoadRecord();
-        yield return LoadChampions();
-        yield return LoadDecks();
         yield return LoadMatchHistory();
 
         if (uiManager != null)
@@ -19,7 +17,7 @@ public class UserDataLoader : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("ProfileIconChanger is not assigned!");
+
         }
     }
 
@@ -46,24 +44,6 @@ public class UserDataLoader : MonoBehaviour
         );
     }
 
-    IEnumerator LoadChampions()
-    {
-        yield return APIService.Instance.GetList<UserChampion>(
-            APIEndpoints.Champion,
-            res => GameManager.Instance.champions = res,
-            err => Debug.LogError("Champion load failed: " + err)
-        );
-    }
-
-    IEnumerator LoadDecks()
-    {
-        yield return APIService.Instance.GetList<UserDeck>(
-            APIEndpoints.Deck,
-            res => GameManager.Instance.decks = res,
-            err => Debug.LogError("Deck load failed: " + err)
-        );
-    }
-
     IEnumerator LoadMatchHistory()
     {
         yield return APIService.Instance.GetList<MatchHistory>(
@@ -85,35 +65,6 @@ public class UserRecord
     public int rank_point;
     public string tier;
     public int global_rank;
-}
-
-
-[System.Serializable]
-public class Champion
-{
-    public int id;
-    public string name;
-    public string type;
-    public byte cost;
-    public int base_hp;
-    public int base_attack;
-}
-
-[System.Serializable]
-public class UserChampion
-{
-    public int user_id;
-    public int champion_id;
-    public Champion Champion;
-}
-
-[System.Serializable]
-public class UserDeck
-{
-    public int id;
-    public int user_id;
-    public string deck_name;
-    public int[] champion_ids;
 }
 
 [System.Serializable]

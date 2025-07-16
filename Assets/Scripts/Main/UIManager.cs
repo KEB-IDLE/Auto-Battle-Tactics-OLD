@@ -10,11 +10,12 @@ public class UIManager : MonoBehaviour
 
     public TMP_Text nicknameText;
 
-    public Image profileIconImage;
+    public Image profileIcon;
     public Sprite[] profileIcons;
 
-    // public Image mainChampionImage;
-    // public Sprite[] championIcons;
+    // 3D로 구현해야함
+    public Image profileCharacter;
+    public Sprite[] profileCharacters;
 
     public TMP_Text levelText;
     // public TMP_Text expText;
@@ -32,22 +33,22 @@ public class UIManager : MonoBehaviour
         int iconId = profile.profile_icon_id;
         if (iconId >= 0 && iconId < profileIcons.Length)
         {
-            profileIconImage.sprite = profileIcons[iconId];
+            profileIcon.sprite = profileIcons[iconId];
         }
         else
         {
             Debug.LogWarning("Invalid profile icon ID");
         }
 
-        // int champId = profile.main_champion_id;
-        // if (champId >= 0 && champId < championIcons.Length)
-        // {
-        //     mainChampionImage.sprite = championIcons[champId];
-        // }
-        // else
-        // {
-        //     Debug.LogWarning("Invalid main champion ID");
-        // }
+        int charId = profile.profile_char_id;
+        if (charId >= 0 && charId < profileCharacters.Length)
+        {
+            profileCharacter.sprite = profileCharacters[charId];
+        }
+        else
+        {
+            Debug.LogWarning("Invalid main champion ID");
+        }
     }
 
     public void ChangeNickname(string newNickname)
@@ -57,9 +58,9 @@ public class UIManager : MonoBehaviour
 
     public void ChangeProfileIcon(int iconId)
     {
-        var req = new ProfileUpdateRequest { profile_icon_id = iconId };
+        var req = new ProfileIconUpdateRequest { profile_icon_id = iconId };
 
-        StartCoroutine(APIService.Instance.Put<ProfileUpdateRequest, UserProfile>(
+        StartCoroutine(APIService.Instance.Put<ProfileIconUpdateRequest, UserProfile>(
             APIEndpoints.Profile,
             req,
             res =>
@@ -74,11 +75,11 @@ public class UIManager : MonoBehaviour
         ));
     }
 
-    public void ChangeMainChampion(int champId)
+    public void ChangeProfileCharacter(int champId)
     {
-        var req = new MainChampionUpdateRequest { main_champion_id = champId };
+        var req = new ProfileCharacterUpdateRequest { profile_char_id = champId };
 
-        StartCoroutine(APIService.Instance.Put<MainChampionUpdateRequest, UserProfile>(
+        StartCoroutine(APIService.Instance.Put<ProfileCharacterUpdateRequest, UserProfile>(
             APIEndpoints.Profile,
             req,
             res =>
@@ -217,22 +218,22 @@ public class UserProfile
     public int user_id;
     public string nickname;
     public int profile_icon_id;
-    public int main_champion_id;
+    public int profile_char_id;
     public int level;
     public int exp;
     public int gold;
 }
 
 [System.Serializable]
-class ProfileUpdateRequest
+class ProfileIconUpdateRequest
 {
     public int profile_icon_id;
 }
 
 [System.Serializable]
-class MainChampionUpdateRequest
+class ProfileCharacterUpdateRequest
 {
-    public int main_champion_id;
+    public int profile_char_id;
 }
 
 [System.Serializable]
