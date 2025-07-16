@@ -1,15 +1,12 @@
 ﻿using TMPro;
 using UnityEngine;
-using UnityEngine.SocialPlatforms.Impl;
 using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
     public UserDataLoader userdataloader;
 
-
     public TMP_Text nicknameText;
-
     public Image profileIcon;
     public Sprite[] profileIcons;
 
@@ -18,7 +15,6 @@ public class UIManager : MonoBehaviour
     public Sprite[] profileCharacters;
 
     public TMP_Text levelText;
-    // public TMP_Text expText;
     public TMP_Text goldText;
 
     public void UpdateProfileUI()
@@ -27,45 +23,31 @@ public class UIManager : MonoBehaviour
 
         if (nicknameText != null) nicknameText.text = profile.nickname;
         if (levelText != null) levelText.text = $"Lv {profile.level}";
-        // if (expText != null) expText.text = $"EXP {profile.exp}";
         if (goldText != null) goldText.text = $"Gold {profile.gold}";
 
         int iconId = profile.profile_icon_id;
         if (iconId >= 0 && iconId < profileIcons.Length)
-        {
             profileIcon.sprite = profileIcons[iconId];
-        }
         else
-        {
             Debug.LogWarning("Invalid profile icon ID");
-        }
 
         int charId = profile.profile_char_id;
         if (charId >= 0 && charId < profileCharacters.Length)
-        {
             profileCharacter.sprite = profileCharacters[charId];
-        }
         else
-        {
             Debug.LogWarning("Invalid main champion ID");
-        }
-    }
-
-    public void ChangeNickname(string newNickname)
-    {
-        // 별도 요청 클래스 구현 필요 시 작성
     }
 
     public void ChangeProfileIcon(int iconId)
     {
         var req = new ProfileIconUpdateRequest { profile_icon_id = iconId };
 
-        StartCoroutine(APIService.Instance.Put<ProfileIconUpdateRequest, UserProfile>(
-            APIEndpoints.Profile,
+        StartCoroutine(APIService.Instance.Put<ProfileIconUpdateRequest, UserProfileResponse>(
+            APIEndpoints.ProfileIcon,
             req,
             res =>
             {
-                GameManager.Instance.profile = res;
+                GameManager.Instance.profile = res.data;
                 UpdateProfileUI();
             },
             err =>
@@ -75,16 +57,16 @@ public class UIManager : MonoBehaviour
         ));
     }
 
-    public void ChangeProfileCharacter(int champId)
+    public void ChangeProfileCharacter(int charId)
     {
-        var req = new ProfileCharacterUpdateRequest { profile_char_id = champId };
+        var req = new ProfileCharacterUpdateRequest { profile_char_id = charId };
 
-        StartCoroutine(APIService.Instance.Put<ProfileCharacterUpdateRequest, UserProfile>(
-            APIEndpoints.Profile,
+        StartCoroutine(APIService.Instance.Put<ProfileCharacterUpdateRequest, UserProfileResponse>(
+            APIEndpoints.ProfileCharacter,
             req,
             res =>
             {
-                GameManager.Instance.profile = res;
+                GameManager.Instance.profile = res.data;
                 UpdateProfileUI();
             },
             err =>
@@ -99,12 +81,12 @@ public class UIManager : MonoBehaviour
         var currentLevel = GameManager.Instance.profile.level;
         var req = new LevelUpdateRequest { level = currentLevel + deltaLevel };
 
-        StartCoroutine(APIService.Instance.Put<LevelUpdateRequest, UserProfile>(
-            APIEndpoints.Profile,
+        StartCoroutine(APIService.Instance.Put<LevelUpdateRequest, UserProfileResponse>(
+            APIEndpoints.ProfileLevel,
             req,
             res =>
             {
-                GameManager.Instance.profile = res;
+                GameManager.Instance.profile = res.data;
                 UpdateProfileUI();
             },
             err =>
@@ -119,12 +101,12 @@ public class UIManager : MonoBehaviour
         var currentExp = GameManager.Instance.profile.exp;
         var req = new ExpUpdateRequest { exp = currentExp + deltaExp };
 
-        StartCoroutine(APIService.Instance.Put<ExpUpdateRequest, UserProfile>(
-            APIEndpoints.Profile,
+        StartCoroutine(APIService.Instance.Put<ExpUpdateRequest, UserProfileResponse>(
+            APIEndpoints.ProfileExp,
             req,
             res =>
             {
-                GameManager.Instance.profile = res;
+                GameManager.Instance.profile = res.data;
                 UpdateProfileUI();
             },
             err =>
@@ -139,12 +121,12 @@ public class UIManager : MonoBehaviour
         var currentGold = GameManager.Instance.profile.gold;
         var req = new GoldUpdateRequest { gold = currentGold + deltaGold };
 
-        StartCoroutine(APIService.Instance.Put<GoldUpdateRequest, UserProfile>(
-            APIEndpoints.Profile,
+        StartCoroutine(APIService.Instance.Put<GoldUpdateRequest, UserProfileResponse>(
+            APIEndpoints.ProfileGold,
             req,
             res =>
             {
-                GameManager.Instance.profile = res;
+                GameManager.Instance.profile = res.data;
                 UpdateProfileUI();
             },
             err =>
@@ -154,12 +136,10 @@ public class UIManager : MonoBehaviour
         ));
     }
 
-    // 기록 갱신 함수
     public void UpdateUserRecord(int deltaMatch, int deltaWins, int deltaLosses, int deltaPoint)
     {
         var record = GameManager.Instance.record;
 
-        // 변화량을 기존 값에 반영
         int newMatchCount = record.rank_match_count + deltaMatch;
         int newWins = record.rank_wins + deltaWins;
         int newLosses = record.rank_losses + deltaLosses;
@@ -173,15 +153,13 @@ public class UIManager : MonoBehaviour
             rank_point = newPoint
         };
 
-        StartCoroutine(APIService.Instance.Put<UserRecordUpdateRequest, APIMessageResponse>(
+        StartCoroutine(APIService.Instance.Put<UserRecordUpdateRequest, UserRecordResponse>(
             APIEndpoints.Record,
             req,
             res =>
             {
-                StartCoroutine(userdataloader.LoadRecord());
-
-                // UI 갱신 - 함수 작성 필요
-                // UpdateRecordUI();
+                GameManager.Instance.record = res.data;
+                // UpdateRecordUI(); // 필요 시 UI 갱신
             },
             err =>
             {
@@ -190,38 +168,10 @@ public class UIManager : MonoBehaviour
         ));
     }
 
-    // 실험용
     public void RecordButton()
     {
-        UpdateUserRecord(1,1,0,10);
+        UpdateUserRecord(1, 1, 0, 10);
     }
-
-    [System.Serializable]
-    public class UserRecordUpdateRequest
-    {
-        public int rank_match_count;
-        public int rank_wins;
-        public int rank_losses;
-        public int rank_point;
-    }
-
-    [System.Serializable]
-    public class APIMessageResponse
-    {
-        public string message;
-    }
-}
-
-[System.Serializable]
-public class UserProfile
-{
-    public int user_id;
-    public string nickname;
-    public int profile_icon_id;
-    public int profile_char_id;
-    public int level;
-    public int exp;
-    public int gold;
 }
 
 [System.Serializable]
@@ -252,4 +202,54 @@ class ExpUpdateRequest
 class GoldUpdateRequest
 {
     public int gold;
+}
+
+[System.Serializable]
+public class UserRecordUpdateRequest
+{
+    public int rank_match_count;
+    public int rank_wins;
+    public int rank_losses;
+    public int rank_point;
+}
+
+[System.Serializable]
+public class UserProfileResponse
+{
+    public string message;
+    public bool success;
+    public UserProfile data;
+}
+
+[System.Serializable]
+public class UserRecordResponse
+{
+    public bool success;
+    public string message;
+    public UserRecord data;
+}
+
+[System.Serializable]
+public class UserProfile
+{
+    public int user_id;
+    public string nickname;
+    public int profile_icon_id;
+    public int profile_char_id;
+    public int level;
+    public int exp;
+    public int gold;
+}
+
+[System.Serializable]
+public class UserRecord
+{
+    public int user_id;
+    public string last_login_at;
+    public int rank_match_count;
+    public int rank_wins;
+    public int rank_losses;
+    public int rank_point;
+    public string tier;
+    public int global_rank;
 }

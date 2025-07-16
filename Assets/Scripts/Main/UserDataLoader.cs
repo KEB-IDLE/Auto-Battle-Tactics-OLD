@@ -55,19 +55,6 @@ public class UserDataLoader : MonoBehaviour
 }
 
 [System.Serializable]
-public class UserRecord
-{
-    public int user_id;
-    public string last_login_at;
-    public int rank_match_count;
-    public int rank_wins;
-    public int rank_losses;
-    public int rank_point;
-    public string tier;
-    public int global_rank;
-}
-
-[System.Serializable]
 public class MatchHistory
 {
     public int id;
