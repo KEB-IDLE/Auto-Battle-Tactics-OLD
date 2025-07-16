@@ -42,10 +42,7 @@ public class EntityData : ScriptableObject
     [Header("Projectile Info")]
     [Tooltip("발사체 프리팹")]
     public GameObject projectilePrefab;
-    [Tooltip("발사체 속도")]
-    public float projectileSpeed;
-    [Tooltip("발사체 생존 시간")]
-    public float projectileLifeTime;
+    public ProjectileData projectileData;
 
     [Header("Entity Prefab")]
     public GameObject entityPrefab; // 엔티티 프리팹
