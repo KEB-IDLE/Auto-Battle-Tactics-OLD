@@ -4,6 +4,7 @@ using UnityEngine;
 public class AnimationComponent : MonoBehaviour
 {
     private Animator _animator;
+    private AnimatorOverrideController _controller;
 
     IAttackNotifier  _attackSrc;
     IMoveNotifier    _moveSrc;
@@ -19,12 +20,23 @@ public class AnimationComponent : MonoBehaviour
 
     public void Initialize(EntityData data)
     {
-        _animator.runtimeAnimatorController = data.animatorController;
+        if (_controller == null)
+            _controller = new AnimatorOverrideController(data.animatorController);
+
+        _animator.runtimeAnimatorController = _controller;
+
+        if (data.attackClip != null)
+            _controller["Attack"] = data.attackClip;
+        if (data.runClip != null)
+            _controller["Run"] = data.runClip;
+        if (data.deathClip != null)
+            _controller["Die"] = data.deathClip;
+        if (data.idleClip != null)
+            _controller["Idle"] = data.idleClip;
     }
 
     public void Bind()
     {
-        //_animator.SetTrigger("Spawn");
         _attackSrc.OnAttackStateChanged += HandleAttack;
         _moveSrc.OnMove += HandleMove;
         _deathSrc.OnDeath += HandleDeath;

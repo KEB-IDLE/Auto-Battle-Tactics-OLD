@@ -3,8 +3,6 @@ using System.Linq;
 using UnityEngine.AI;
 using System;
 
-
-
 public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
 {
     public event Action OnMove;

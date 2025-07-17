@@ -1,8 +1,8 @@
 using System;
 using System.Collections;
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
-using static UnityEngine.UI.GridLayoutGroup;
+//using static UnityEngine.GraphicsBuffer;
+//using static UnityEngine.UI.GridLayoutGroup;
 
 public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
 {
