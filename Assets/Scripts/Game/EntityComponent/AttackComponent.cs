@@ -17,6 +17,8 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
     private float attackRange;          // 공격 범위
     private float disengageRange;       // 공격 대상과의 거리가 이 범위를 벗어나면 공격 중지
     private bool isAttackingFlag;
+    public Transform firePoint;
+
 
     private GameObject projectilePrefab;
     private ProjectileData projectileData;
@@ -58,6 +60,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         disengageRange = data.disengageRange;
         attackType = data.attackType;
         isAttackingFlag = false;
+        firePoint = transform.Find("FirePoint");
 
         if (attackType == AttackType.Melee)
         {
@@ -94,10 +97,18 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         var newTarget = DetectTarget();
 
         if (newTarget != null)
-            lockedTarget = newTarget;
+        {
+            bool visible = true;
+            if (firePoint != null)
+                visible = IsTargetVisible(firePoint, (newTarget as MonoBehaviour).transform);
+            if (visible)
+                lockedTarget = newTarget;
+            else
+                lockedTarget = null;
+        }
         // 2) 공격 조건 검사
         if (lockedTarget != null && CanAttack(lockedTarget) && !isAttackingFlag)
-            StartCoroutine(AttackRoutine(lockedTarget));
+                StartCoroutine(AttackRoutine(lockedTarget));
     }
 
     public IDamageable DetectTarget()
@@ -200,7 +211,6 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
     private void AttackMelee(IDamageable target)
     {
         lockedTarget = target;
-        //OnAttackStateChanged?.Invoke(target);
 
         if (lockedTarget == null || !lockedTarget.IsAlive())
             return;
@@ -216,11 +226,9 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
 
     private void AttackRanged(IDamageable target)
     {
-        lockedTarget = target;
-        //OnAttackStateChanged?.Invoke(target);
 
-        Vector3 firePoint = transform.position + Vector3.up * 1f;
-        var projGO = Instantiate(projectilePrefab, firePoint, Quaternion.identity);
+        lockedTarget = target;
+        var projGO = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
         var projectile = projGO.GetComponent<Projectile>();
         projectile.Initialize(
         owner: this.GetComponent<Entity>(),             // 투사체 소유자
@@ -229,11 +237,9 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         target: (target as MonoBehaviour).transform);   // 목표 Transform 전달
     }
 
-
     private void AttackMagic(IDamageable target)
     {
         lockedTarget = target;
-        //OnAttackPerformed?.Invoke(target);
 
         // 즉시 피해!
         if (lockedTarget != null && lockedTarget.IsAlive())
@@ -247,6 +253,25 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
 
             // 추가: 연출 효과, 파티클, 사운드 등 여기서 Instantiate
         }
+    }
+
+    private bool IsTargetVisible(Transform fireOrigin, Transform target)
+    {
+        Vector3 origin = fireOrigin.position;
+        Vector3 dest = target.position;
+        Vector3 dir = (dest - origin).normalized;
+        float dist = Vector3.Distance(origin, dest);
+
+        // "Obstacle" 등 장애물 레이어 포함!
+        int raycastMask = LayerMask.GetMask("Agent", "Tower", "Core", "Obstacle", "Structure");
+
+        if (Physics.Raycast(origin, dir, out RaycastHit hit, dist, raycastMask))
+        {
+            // Ray가 타겟을 정확히 맞췄을 때만 공격 가능
+            return hit.transform == target;
+        }
+        // 아무것도 안 맞으면 시야 막힘(비정상)
+        return false;
     }
 
 
