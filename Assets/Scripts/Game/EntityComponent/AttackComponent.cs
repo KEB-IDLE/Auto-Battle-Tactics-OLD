@@ -207,7 +207,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
 
         // “이 대상이 코어인가?” 체크
         var coreComp = (lockedTarget as MonoBehaviour)
-                          .GetComponent<CoreComponent>();
+                          .GetComponent<Core>();
         if (coreComp != null)
             lockedTarget.TakeDamage(attackCoreDamage);
         else
@@ -238,7 +238,8 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         // 즉시 피해!
         if (lockedTarget != null && lockedTarget.IsAlive())
         {
-            var coreComp = (lockedTarget as MonoBehaviour).GetComponent<CoreComponent>();
+            var coreComp = (lockedTarget as MonoBehaviour)
+                                .GetComponent<Core>();
             if (coreComp != null)
                 lockedTarget.TakeDamage(attackCoreDamage);
             else

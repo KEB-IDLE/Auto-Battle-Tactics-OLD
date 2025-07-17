@@ -89,7 +89,7 @@ public class Projectile : MonoBehaviour
                     continue;
 
                 var hp = enemy.GetComponent<HealthComponent>();
-                var coreComp = enemy.GetComponent<CoreComponent>();
+                var coreComp = enemy.GetComponent<Core>();
 
                 if (hp == null)
                     continue;

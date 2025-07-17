@@ -2,14 +2,18 @@ using UnityEngine;
 
 public class CoreComponent : MonoBehaviour
 {
-    [SerializeField] private ObjectData coreData;
-    private HealthComponent _health;
+    // 코어가 부서지면 실행..
 
-
-    void Awake()
+    private void Start()
     {
-        _health = GetComponent<HealthComponent>();
-        //_health.Initialize(coreData);
+        var hp = GetComponent<HealthComponent>();
+        hp.OnDeath += OnCoreDestroyed;
+    }
+
+    private void OnCoreDestroyed()
+    {
+        // 게임 승패 처리, 코어 전용 연출 등
+        Debug.Log("코어 파괴! 게임 종료 처리");
     }
 
 }

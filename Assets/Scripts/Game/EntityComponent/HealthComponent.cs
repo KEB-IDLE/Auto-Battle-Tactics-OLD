@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using UnityEditor.Rendering;
 using UnityEngine;
 
 public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
@@ -6,10 +8,15 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
 
     private float currentHP;
     public event Action OnDeath; // 죽음 이벤트
+    private float deathAnimDuration = 0.5f;
 
     public void Initialize(EntityData data) 
     {
         currentHP = data.maxHP;
+    }
+    public void Initialize(float hp)
+    {
+        currentHP = hp;
     }
 
     public bool IsAlive()
@@ -22,15 +29,14 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
         if (IsAlive())
         {
             currentHP -= damage; // 데미지를 받아 현재 체력 감소
-            if (!IsAlive()) Die();
+            if (!IsAlive()) DeathRoutine();
         }
     }
 
-    public void Die()
+    private IEnumerator DeathRoutine()
     {
-        if(IsAlive()) return;
         OnDeath?.Invoke(); // 죽음 이밴트 알림
-        return;
+        yield return new WaitForSeconds(deathAnimDuration);
+        Destroy(gameObject);
     }
-
 }

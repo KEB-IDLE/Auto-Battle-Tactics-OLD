@@ -15,5 +15,6 @@ public class TeamComponent : MonoBehaviour, ITeamProvider
 public enum Team
 {
     Red,
-    Blue
+    Blue,
+    Object
 }
