@@ -42,7 +42,7 @@ public class EntityData : ScriptableObject
     [Header("Projectile Info")]
     [Tooltip("발사체 프리팹")]
     public GameObject projectilePrefab;
-    public ProjectileData projectileData;
+    //public ProjectileData projectileData;
 
     [Header("Entity Prefab")]
     public GameObject entityPrefab; // 엔티티 프리팹
@@ -51,8 +51,15 @@ public class EntityData : ScriptableObject
     public GameObject summonEffectPrefab; // 소환 이펙트 프리팹
     [Tooltip("공격 이펙트")]
     public GameObject attackEffectPrefab; // 공격 이펙트 프리팹
+    [Tooltip("피격 이펙트")]
+    public GameObject takeDamageEffectPrefeb; // 공격 이펙트 프리팹
     [Tooltip("죽음 이펙트")]
     public GameObject deathEffectPrefab; // 죽음 이펙트 프리팹
+
+    [Tooltip("발사체 이동 이펙트")]
+    public GameObject projectileAttackingEffectPrefab;
+    
+
 
     [Header("Audio Settings")]
     public AudioClip summonSound; // 소환 사운드

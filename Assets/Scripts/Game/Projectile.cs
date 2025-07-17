@@ -1,8 +1,10 @@
 using TMPro.Examples;
 using UnityEngine;
+using System;
+
 
 [RequireComponent(typeof(Rigidbody))]
-public class Projectile : MonoBehaviour
+public class Projectile : MonoBehaviour, IEffectNotifier
 {
     private Rigidbody _rb;
     [SerializeField] private ProjectileData data;
@@ -15,6 +17,11 @@ public class Projectile : MonoBehaviour
 
     private Transform target;
 
+#pragma warning disable 67 // '이벤트 사용 안함' 경고 억제
+    public event Action<Transform> OnAttackEffect;
+    public event Action<Transform> OnTakeDamageEffect;
+    public event Action<Transform> OnDeathEffect;
+#pragma warning restore 67
     private void Awake()
     {
         _rb = GetComponent<Rigidbody>();
@@ -93,9 +100,13 @@ public class Projectile : MonoBehaviour
 
                 if (hp == null)
                     continue;
+                
+
 
                 hp.TakeDamage(coreComp != null ? coreDamage : damage);
             }
+            //여기에 타격 이펙트 추가
+            OnAttackEffect?.Invoke(this.transform);
             Destroy(gameObject);
             break;
         }
