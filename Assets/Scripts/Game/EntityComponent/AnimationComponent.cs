@@ -25,22 +25,32 @@ public class AnimationComponent : MonoBehaviour
     public void Bind()
     {
         //_animator.SetTrigger("Spawn");
-        _attackSrc.OnAttackPerformed += HandleAttack;
+        _attackSrc.OnAttackStateChanged += HandleAttack;
         _moveSrc.OnMove += HandleMove;
         _deathSrc.OnDeath += HandleDeath;
     }
 
     public void Unbind()
     {
-        _attackSrc.OnAttackPerformed -= HandleAttack;
+        _attackSrc.OnAttackStateChanged -= HandleAttack;
         _moveSrc.OnMove -= HandleMove;
         _deathSrc.OnDeath -= HandleDeath;
     }
 
-    void HandleAttack(IDamageable _)
+    void HandleAttack(bool isAttacking)
     {
-        _animator.SetTrigger("Attack");
+        if (isAttacking)
+        {
+            Debug.Log("attack Start!");
+            _animator.SetBool("Attack", true);
+        }
+        else
+        {
+            Debug.Log("attack End!");
+            _animator.SetBool("Attack", false);
+        }
     }
+            
 
     void HandleMove()
     {

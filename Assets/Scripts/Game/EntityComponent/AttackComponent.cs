@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 using static UnityEngine.UI.GridLayoutGroup;
 
 public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
@@ -21,6 +22,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
     private ProjectileData projectileData;
 
     private IDamageable lockedTarget;   // 현재 공격 대상
+    private IOrientable orientable;
     private ITeamProvider teamProvider; // 팀 정보 제공자
     private AttackType attackType;      // 유닛의 공격 유형
 
@@ -30,8 +32,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
     private LayerMask targetLayer;
 
     public event Action<bool> OnAttackStateChanged; // 공격 상태 변경 이벤트
-    public event Action<IDamageable> OnAttackPerformed; // 공격 수행 이벤트
-    
+
     public Transform LockedTargetTransform
         => (lockedTarget as MonoBehaviour)?.transform;
 
@@ -134,7 +135,6 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         float distance = Vector3.Distance(
             transform.position,
             (target as MonoBehaviour).transform.position);
-
         return distance <= attackRange;
     }
 
@@ -163,7 +163,6 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
     {
         isAttackingFlag = true;
         OnAttackStateChanged?.Invoke(true);
-        // 이동 정지 이벤트(외부 MoveComponent 구독)
         try
         {
             TryAttack(target);
@@ -172,6 +171,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
                    Vector3.Distance(transform.position,
                        (target as MonoBehaviour).transform.position) <= attackRange)
             {
+                orientable?.LookAtTarget((target as MonoBehaviour).transform.position);
                 yield return new WaitForSeconds(attackCooldown);
                 TryAttack(target);
             }
@@ -194,9 +194,14 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         }
     }
 
-    // animation cilp 중 실행할 함수
-    public void OnAttackHit()
+    // animation cilp 중 실행할 메서드
+    // 근접 공격 시
+
+    private void AttackMelee(IDamageable target)
     {
+        lockedTarget = target;
+        //OnAttackStateChanged?.Invoke(target);
+
         if (lockedTarget == null || !lockedTarget.IsAlive())
             return;
 
@@ -209,32 +214,26 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
             lockedTarget.TakeDamage(attackDamage);
     }
 
-    private void AttackMelee(IDamageable target)
-    {
-        lockedTarget = target;
-        OnAttackPerformed?.Invoke(target);
-    }
-
     private void AttackRanged(IDamageable target)
     {
         lockedTarget = target;
-        OnAttackPerformed?.Invoke(target);
+        //OnAttackStateChanged?.Invoke(target);
 
         Vector3 firePoint = transform.position + Vector3.up * 1f;
         var projGO = Instantiate(projectilePrefab, firePoint, Quaternion.identity);
         var projectile = projGO.GetComponent<Projectile>();
         projectile.Initialize(
-        //data: projectileData,                         // AttackComponent에 보관 중인 ProjectileData
         owner: this.GetComponent<Entity>(),             // 투사체 소유자
         damage: attackDamage,                           // 대미지
         coreDamage: attackCoreDamage,                   // 코어 공격력 
         target: (target as MonoBehaviour).transform);   // 목표 Transform 전달
-
     }
+
+
     private void AttackMagic(IDamageable target)
     {
         lockedTarget = target;
-        OnAttackPerformed?.Invoke(target);
+        //OnAttackPerformed?.Invoke(target);
 
         // 즉시 피해!
         if (lockedTarget != null && lockedTarget.IsAlive())

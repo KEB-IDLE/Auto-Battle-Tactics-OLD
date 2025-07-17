@@ -74,19 +74,27 @@ public class Projectile : MonoBehaviour
                 continue;
 
             Collider[] explosionHits = Physics.OverlapSphere(
-            transform.position,
-            data.explosionRadius,
-            LayerMask.GetMask("Agent", "Tower", "Core"));
+                transform.position,
+                data.explosionRadius,
+                LayerMask.GetMask("Agent", "Tower", "Core"));
 
             foreach (var ex in explosionHits)
             {
                 var enemy = ex.GetComponent<Entity>();
-                if (enemy == null || enemy.GetComponent<TeamComponent>().Team == team)
+                if (enemy == null)
+                    continue;
+
+                var teamComp = enemy.GetComponent<TeamComponent>();
+                if (teamComp == null || teamComp.Team == team)
                     continue;
 
                 var hp = enemy.GetComponent<HealthComponent>();
-                if (hp != null)
-                    hp.TakeDamage(damage); // 필요하다면 falloff 로직 등 추가 가능
+                var coreComp = enemy.GetComponent<CoreComponent>();
+
+                if (hp == null)
+                    continue;
+
+                hp.TakeDamage(coreComp != null ? coreDamage : damage);
             }
             Destroy(gameObject);
             break;
