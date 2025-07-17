@@ -12,6 +12,9 @@ public static class APIEndpoints
     public const string ProfileGold = "/user/profile/gold";
 
 
+    public const string ProfileIcons = "/user/profile/icons";
+
+
     public const string Record = "/user/record";
     public const string MatchHistory = "/user/match/history";
 }

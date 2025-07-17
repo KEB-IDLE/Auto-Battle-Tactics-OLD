@@ -10,12 +10,143 @@ public class UIManager : MonoBehaviour
     public Image profileIcon;
     public Sprite[] profileIcons;
 
-    // 3D로 구현해야함
-    public Image profileCharacter;
-    public Sprite[] profileCharacters;
+    public GameObject[] characterPrefabs; // 인스펙터에 3D 캐릭터 프리팹들 등록
+    private GameObject currentCharacterInstance; // 현재 소환된 캐릭터를 추적
 
     public TMP_Text levelText;
     public TMP_Text goldText;
+
+    public Button[] iconButtons;         // 아이콘 선택용 버튼 배열 (인스펙터에 1,2,3,4 버튼 드래그)
+    public Image[] iconImages;           // 버튼에 붙은 Image 컴포넌트 (흐림 처리용)
+    Color enabledColor = Color.white;
+    Color disabledColor = new Color(1f,1f,1f, 0.1f);  // 반투명 (흐릿함)
+
+
+    public void SpawnCharacter(int charId)
+    {
+        // charId는 1부터 시작 → 배열 인덱스는 0부터 시작
+        int prefabIndex = charId - 1;
+
+        // 경계 체크
+        if (prefabIndex < 0 || prefabIndex >= characterPrefabs.Length)
+        {
+            Debug.LogWarning("Invalid character ID: " + charId);
+            return;
+        }
+
+        // 기존 캐릭터 제거
+        if (currentCharacterInstance != null)
+        {
+            Destroy(currentCharacterInstance);
+        }
+
+        // 새로운 캐릭터 소환
+        GameObject prefab = characterPrefabs[prefabIndex];
+        currentCharacterInstance = Instantiate(prefab, Vector3.zero, Quaternion.identity);
+    }
+
+    public void ChangeProfileCharacter(int charId)
+    {
+        var req = new ProfileCharacterUpdateRequest { profile_char_id = charId };
+
+        StartCoroutine(APIService.Instance.Put<ProfileCharacterUpdateRequest, UserProfileResponse>(
+            APIEndpoints.ProfileCharacter,
+            req,
+            res =>
+            {
+                GameManager.Instance.profile = res.data;
+                UpdateProfileUI();
+
+                // UI 갱신 후 캐릭터 소환
+                SpawnCharacter(charId);
+            },
+            err =>
+            {
+                Debug.LogWarning("Main champion update failed: " + err);
+            }
+        ));
+    }
+
+    public void RefreshIconButtonVisuals()
+    {
+        var ownedIcons = GameManager.Instance.ownedProfileIcons;
+        int selectedIconId = GameManager.Instance.profile.profile_icon_id;
+
+        for (int i = 0; i < iconButtons.Length; i++)
+        {
+            int iconId = i + 1;
+
+            bool owned = ownedIcons.Contains(iconId);
+
+            // 흐림 처리
+            //iconImages[i].color = owned ? enabledColor : disabledColor;
+
+            if (owned)
+            {
+                iconImages[i].color = enabledColor;
+                Debug.Log($"[Icon {iconId}] Owned → 적용 색상: enabledColor = {enabledColor}");
+            }
+            else
+            {
+                iconImages[i].color = disabledColor;
+                Debug.Log($"[Icon {iconId}] Not Owned → 적용 색상: disabledColor = {disabledColor}");
+            }
+        }
+    }
+
+
+    public void OnIconButtonClicked(int iconId)
+    {
+        var ownedIcons = GameManager.Instance.ownedProfileIcons;
+
+        if (ownedIcons.Contains(iconId))
+        {
+            // 이미 소유 중 => 프로필 아이콘 변경 API 호출
+            ChangeProfileIcon(iconId);
+        }
+        else
+        {
+            // 소유하지 않은 아이콘 => 구매 API 호출
+            PurchaseProfileIcon(iconId);
+        }
+    }
+
+    // 아이콘 구매
+    public void PurchaseProfileIcon(int iconId)
+    {
+        var req = new IconPurchaseRequest { icon_id = iconId };
+
+        StartCoroutine(APIService.Instance.Post<IconPurchaseRequest, IconPurchaseResponse>(
+            APIEndpoints.ProfileIcons,
+            req,
+            res =>
+            {
+                if (res.success)
+                {
+                    Debug.Log($"Icon {iconId} purchased successfully.");
+
+                    // 골드 갱신
+                    GameManager.Instance.profile.gold = res.gold;
+
+                    // 아이콘 리스트에 추가 (중복 방지)
+                    if (!GameManager.Instance.ownedProfileIcons.Contains(iconId))
+                    {
+                        GameManager.Instance.ownedProfileIcons.Add(iconId);
+                    }
+
+                    UpdateProfileUI();
+                }
+                else
+                {
+                    Debug.LogWarning("Purchase failed: " + res.message);
+                }
+            },
+            err =>
+            {
+                Debug.LogError("Icon purchase error: " + err);
+            }
+        ));
+    }
 
     public void UpdateProfileUI()
     {
@@ -26,16 +157,16 @@ public class UIManager : MonoBehaviour
         if (goldText != null) goldText.text = $"Gold {profile.gold}";
 
         int iconId = profile.profile_icon_id;
-        if (iconId >= 0 && iconId < profileIcons.Length)
-            profileIcon.sprite = profileIcons[iconId];
+        int iconIndex = iconId - 1;
+
+        // 프로필 아이콘 이미지 설정
+        if (iconIndex >= 0 && iconIndex < profileIcons.Length)
+            profileIcon.sprite = profileIcons[iconIndex];
         else
             Debug.LogWarning("Invalid profile icon ID");
 
-        int charId = profile.profile_char_id;
-        if (charId >= 0 && charId < profileCharacters.Length)
-            profileCharacter.sprite = profileCharacters[charId];
-        else
-            Debug.LogWarning("Invalid main champion ID");
+        // 아이콘 버튼 상태 갱신
+        RefreshIconButtonVisuals();
     }
 
     public void ChangeProfileIcon(int iconId)
@@ -57,24 +188,7 @@ public class UIManager : MonoBehaviour
         ));
     }
 
-    public void ChangeProfileCharacter(int charId)
-    {
-        var req = new ProfileCharacterUpdateRequest { profile_char_id = charId };
 
-        StartCoroutine(APIService.Instance.Put<ProfileCharacterUpdateRequest, UserProfileResponse>(
-            APIEndpoints.ProfileCharacter,
-            req,
-            res =>
-            {
-                GameManager.Instance.profile = res.data;
-                UpdateProfileUI();
-            },
-            err =>
-            {
-                Debug.LogWarning("Main champion update failed: " + err);
-            }
-        ));
-    }
 
     public void ChangeLevel(int deltaLevel)
     {
@@ -172,6 +286,10 @@ public class UIManager : MonoBehaviour
     {
         UpdateUserRecord(1, 1, 0, 10);
     }
+
+
+
+
 }
 
 [System.Serializable]
@@ -252,4 +370,29 @@ public class UserRecord
     public int rank_point;
     public string tier;
     public int global_rank;
+}
+
+[System.Serializable]
+public class MatchHistory
+{
+    public int id;
+    public int user_id;
+    public int match_id;
+    public string result;
+    public string created_at;
+}
+
+
+[System.Serializable]
+public class IconPurchaseRequest
+{
+    public int icon_id;
+}
+
+[System.Serializable]
+public class IconPurchaseResponse
+{
+    public bool success;
+    public string message;
+    public int gold;
 }

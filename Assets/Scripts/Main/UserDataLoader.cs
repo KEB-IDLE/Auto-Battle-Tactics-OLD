@@ -1,5 +1,5 @@
-using UnityEngine;
 using System.Collections;
+using UnityEngine;
 
 public class UserDataLoader : MonoBehaviour
 {
@@ -8,16 +8,16 @@ public class UserDataLoader : MonoBehaviour
     public IEnumerator LoadAllUserDataCoroutine()
     {
         yield return LoadProfile();
+        yield return LoadOwnedIcons();  // 추가
         yield return LoadRecord();
         yield return LoadMatchHistory();
 
         if (uiManager != null)
         {
             uiManager.UpdateProfileUI();
-        }
-        else
-        {
+            //uiManager.UpdateOwnedIconsUI(); // 필요하면 UI 갱신 함수도 호출
 
+            uiManager.SpawnCharacter(GameManager.Instance.profile.profile_char_id);
         }
     }
 
@@ -32,6 +32,16 @@ public class UserDataLoader : MonoBehaviour
             APIEndpoints.Profile,
             res => GameManager.Instance.profile = res,
             err => Debug.LogError("Profile load failed: " + err)
+        );
+    }
+
+    //새로 추가한 유저가 소유한 아이콘 리스트 로드
+    IEnumerator LoadOwnedIcons()
+    {
+        yield return APIService.Instance.GetList<int>(  // int 리스트로 받는다고 가정 (icon_id 리스트)
+            APIEndpoints.ProfileIcons,
+            res => GameManager.Instance.ownedProfileIcons = res,
+            err => Debug.LogError("Owned icons load failed: " + err)
         );
     }
 
@@ -52,14 +62,4 @@ public class UserDataLoader : MonoBehaviour
             err => Debug.LogError("Match history load failed: " + err)
         );
     }
-}
-
-[System.Serializable]
-public class MatchHistory
-{
-    public int id;
-    public int user_id;
-    public int match_id;
-    public string result;
-    public string created_at;
 }
