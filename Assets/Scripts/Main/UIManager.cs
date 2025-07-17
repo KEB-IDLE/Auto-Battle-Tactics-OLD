@@ -21,6 +21,16 @@ public class UIManager : MonoBehaviour
     Color enabledColor = Color.white;
     Color disabledColor = new Color(1f,1f,1f, 0.1f);  // 반투명 (흐릿함)
 
+    // 내꺼
+    public TMP_Text rankMatchText;
+    public TMP_Text rankWinsText;
+    public TMP_Text rankPointText;
+    public TMP_Text globalRankText;
+
+    // 전체 랭킹
+    public TMP_Text[] rankTexts;        // 닉네임 + 점수 텍스트들 (1~5위)
+    public Image[] rankIcons;          // 프로필 아이콘 이미지들 (1~5위용)
+
 
     public void SpawnCharacter(int charId)
     {
@@ -169,6 +179,26 @@ public class UIManager : MonoBehaviour
         RefreshIconButtonVisuals();
     }
 
+    public void UpdateRecordUI()
+    {
+        var record = GameManager.Instance.record;
+
+        if (rankMatchText != null)
+            rankMatchText.text = $"Matches: {record.rank_match_count}";
+
+        if (rankWinsText != null)
+            rankWinsText.text = $"Wins: {record.rank_wins}";
+
+        if (rankPointText != null)
+            rankPointText.text = $"Points: {record.rank_point}";
+
+        if (globalRankText != null)
+            globalRankText.text = $"Global Rank: {record.global_rank}";
+
+    }
+
+
+
     public void ChangeProfileIcon(int iconId)
     {
         var req = new ProfileIconUpdateRequest { profile_icon_id = iconId };
@@ -273,7 +303,8 @@ public class UIManager : MonoBehaviour
             res =>
             {
                 GameManager.Instance.record = res.data;
-                // UpdateRecordUI(); // 필요 시 UI 갱신
+                
+                UpdateRecordUI(); // 필요 시 UI 갱신
             },
             err =>
             {
@@ -287,9 +318,58 @@ public class UIManager : MonoBehaviour
         UpdateUserRecord(1, 1, 0, 10);
     }
 
+    public void GetGlobalRanking()
+    {
+        StartCoroutine(APIService.Instance.Get<GlobalRankingResponse>(
+            APIEndpoints.GlobalRanking,
+            res =>
+            {
+                if (res.success)
+                {
+                    Debug.Log("Global Ranking Received:");
 
+                    UpdateGlobalRankingUI(res.data);
+                }
+                else
+                {
+                    Debug.LogWarning("Failed to fetch global ranking.");
+                }
+            },
+            err =>
+            {
+                Debug.LogError("Ranking API Error: " + err);
+            }
+        ));
+    }
 
+    public void UpdateGlobalRankingUI(GlobalRankEntry[] entries)
+    {
+        for (int i = 0; i < entries.Length; i++)
+        {
+            var entry = entries[i];
 
+            // 안전 체크
+            if (i >= rankTexts.Length || i >= rankIcons.Length)
+            {
+                Debug.LogWarning("랭킹 UI 배열이 부족합니다.");
+                continue;
+            }
+
+            // 텍스트 설정
+            rankTexts[i].text = $"{entry.nickname} ({entry.rank_point}pt)";
+
+            // 아이콘 설정
+            int iconIndex = entry.profile_icon_id - 1;
+            if (iconIndex >= 0 && iconIndex < profileIcons.Length)
+            {
+                rankIcons[i].sprite = profileIcons[iconIndex];
+            }
+            else
+            {
+                Debug.LogWarning($"잘못된 아이콘 ID: {entry.profile_icon_id}");
+            }
+        }
+    }
 }
 
 [System.Serializable]
@@ -395,4 +475,19 @@ public class IconPurchaseResponse
     public bool success;
     public string message;
     public int gold;
+}
+
+[System.Serializable]
+public class GlobalRankEntry
+{
+    public string nickname;
+    public int profile_icon_id;
+    public int rank_point;
+}
+
+[System.Serializable]
+public class GlobalRankingResponse
+{
+    public bool success;
+    public GlobalRankEntry[] data;
 }

@@ -15,7 +15,9 @@ public class UserDataLoader : MonoBehaviour
         if (uiManager != null)
         {
             uiManager.UpdateProfileUI();
-            //uiManager.UpdateOwnedIconsUI(); // 필요하면 UI 갱신 함수도 호출
+            uiManager.UpdateRecordUI();
+
+            uiManager.GetGlobalRanking();
 
             uiManager.SpawnCharacter(GameManager.Instance.profile.profile_char_id);
         }

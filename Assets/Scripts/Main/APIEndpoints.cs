@@ -17,4 +17,6 @@ public static class APIEndpoints
 
     public const string Record = "/user/record";
     public const string MatchHistory = "/user/match/history";
+
+    public const string GlobalRanking = "/user/ranking/global";
 }
