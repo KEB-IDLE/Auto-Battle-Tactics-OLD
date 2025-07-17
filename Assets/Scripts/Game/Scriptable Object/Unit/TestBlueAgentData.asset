@@ -33,7 +33,7 @@ MonoBehaviour:
   summonSound: {fileID: 0}
   attackSound: {fileID: 0}
   deathSound: {fileID: 0}
-  animatorController: {fileID: 0}
+  animatorController: {fileID: 9100000, guid: 978dfb3f95c533c4aa9742b18291eb77, type: 2}
   attackClip: {fileID: 0}
   runClip: {fileID: 0}
   deathClip: {fileID: 0}

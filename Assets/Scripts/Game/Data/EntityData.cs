@@ -55,9 +55,9 @@ public class EntityData : ScriptableObject
     public GameObject deathEffectPrefab; // 죽음 이펙트 프리팹
 
     [Header("Audio Settings")]
-    public AudioBehaviour summonSound; // 소환 사운드
-    public AudioBehaviour attackSound; // 공격 사운드
-    public AudioBehaviour deathSound;  // 죽음 사운드
+    public AudioClip summonSound; // 소환 사운드
+    public AudioClip attackSound; // 공격 사운드
+    public AudioClip deathSound;  // 죽음 사운드
 
     [Header("Animation Settings")]
     [Tooltip("이 엔티티 전용 AnimatorController (기본 컨트롤러를 Override 하는 용도)")]
