@@ -4,7 +4,6 @@ using UnityEngine;
 public class EntityData : ScriptableObject
 {
     [Header("Entity Information")]
-    //public string entityName;   
     [Tooltip("최대 체력 설정")]
     public float maxHP;
     [Tooltip("유닛 대상 공격력")]
@@ -20,11 +19,11 @@ public class EntityData : ScriptableObject
 
     [Header("Target Detection")]
     [Tooltip("공격 인지 범위")]
-    public float detectionRadius;   // 공격 대상 인지 범위
+    public float detectionRadius;
     [Tooltip("실제 공격 가능 범위")]
-    public float attackRange;       // 공격 가능 범위
+    public float attackRange;       
     [Tooltip("타겟을 해제하는 임계 거리")]
-    public float disengageRange;    // 어그로 푸는 한계 거리
+    public float disengageRange;
     public enum AttackPriority
     {
         AllUnits,    // Agent, Tower, Core
@@ -42,7 +41,7 @@ public class EntityData : ScriptableObject
     [Header("Projectile Info")]
     [Tooltip("발사체 프리팹")]
     public GameObject projectilePrefab;
-    public ProjectileData projectileData;
+    //public ProjectileData projectileData;
 
     [Header("Entity Prefab")]
     public GameObject entityPrefab; // 엔티티 프리팹
@@ -51,8 +50,15 @@ public class EntityData : ScriptableObject
     public GameObject summonEffectPrefab; // 소환 이펙트 프리팹
     [Tooltip("공격 이펙트")]
     public GameObject attackEffectPrefab; // 공격 이펙트 프리팹
+    [Tooltip("피격 이펙트")]
+    public GameObject takeDamageEffectPrefeb; // 공격 이펙트 프리팹
     [Tooltip("죽음 이펙트")]
     public GameObject deathEffectPrefab; // 죽음 이펙트 프리팹
+
+    [Tooltip("발사체 이동 이펙트")]
+    public GameObject projectileAttackingEffectPrefab;
+    
+
 
     [Header("Audio Settings")]
     public AudioClip summonSound; // 소환 사운드

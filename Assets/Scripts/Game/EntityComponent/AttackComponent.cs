@@ -4,7 +4,7 @@ using UnityEngine;
 //using static UnityEngine.GraphicsBuffer;
 //using static UnityEngine.UI.GridLayoutGroup;
 
-public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
+public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEffectNotifier
 {
     // Ony for Gizmo test
     private EntityData _entityData; // EntityData를 통해 초기화할 수 있도록
@@ -21,7 +21,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
 
 
     private GameObject projectilePrefab;
-    private ProjectileData projectileData;
+    //private ProjectileData projectileData;
 
     private IDamageable lockedTarget;   // 현재 공격 대상
     private IOrientable orientable;
@@ -33,7 +33,14 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
     private LayerMask coreOnlyMask;
     private LayerMask targetLayer;
 
-    public event Action<bool> OnAttackStateChanged; // 공격 상태 변경 이벤트
+
+
+#pragma warning disable 67
+    public event Action<bool> OnAttackStateChanged;
+    public event Action<Transform> OnAttackEffect;
+    public event Action<Transform> OnTakeDamageEffect;
+    public event Action<Transform> OnDeathEffect;
+#pragma warning restore 67
 
     public Transform LockedTargetTransform
         => (lockedTarget as MonoBehaviour)?.transform;
@@ -63,14 +70,10 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         firePoint = transform.Find("FirePoint");
 
         if (attackType == AttackType.Melee)
-        {
             projectilePrefab = null;
-        }
         else
-        {
             projectilePrefab = data.projectilePrefab;
-            //projectileData = data.projectileData;
-        }
+
         
         lastAttackTime = 0f;
 
@@ -211,13 +214,14 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
     private void AttackMelee(IDamageable target)
     {
         lockedTarget = target;
-
         if (lockedTarget == null || !lockedTarget.IsAlive())
             return;
-
-        // “이 대상이 코어인가?” 체크
         var coreComp = (lockedTarget as MonoBehaviour)
                           .GetComponent<Core>();
+
+        //여기에 타격 이펙트 추가
+        OnAttackEffect?.Invoke(firePoint);
+
         if (coreComp != null)
             lockedTarget.TakeDamage(attackCoreDamage);
         else

@@ -8,6 +8,7 @@ using UnityEngine.AI;
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(TeamComponent))]
+[RequireComponent(typeof(EffectComponent))]
 public class Entity : MonoBehaviour
 {
     
@@ -18,6 +19,7 @@ public class Entity : MonoBehaviour
     private MoveComponent _move;
     private TeamComponent _team;
     private AnimationComponent _animation;
+    private EffectComponent _effect;
 
     public virtual void Awake()
     {
@@ -26,6 +28,7 @@ public class Entity : MonoBehaviour
         _move = GetComponent<MoveComponent>();
         _team = GetComponent<TeamComponent>();
         _animation = GetComponent<AnimationComponent>();
+        _effect = GetComponent<EffectComponent>();
 
         if (entityData == null)
         {
@@ -40,6 +43,8 @@ public class Entity : MonoBehaviour
         _attack.Initialize(entityData);
         _move.Initialize(entityData);
         _animation.Initialize(entityData);
+        _effect.Initialize(entityData);
         _animation.Bind();
+        _effect.Bind();
     }
 }

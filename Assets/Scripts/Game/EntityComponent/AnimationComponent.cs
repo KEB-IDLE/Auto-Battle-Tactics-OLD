@@ -30,28 +30,20 @@ public class AnimationComponent : MonoBehaviour
             _controller = new AnimatorOverrideController(data.animatorController);
         _animator.runtimeAnimatorController = _controller;
 
-        try
-        {
-            if (data.attackClip != null)
-                _controller["Attack"] = data.attackClip;
-            if (data.runClip != null)
-                _controller["Run"] = data.runClip;
-            if (data.deathClip != null)
-                _controller["Die"] = data.deathClip;
-            if (data.idleClip != null)
-                _controller["Idle"] = data.idleClip;
-
-            if (data.summonSound != null)
-                this.summonSound = data.summonSound;
-            if (data.attackSound != null)
-                this.attackSound = data.attackSound;
-            if (data.deathSound != null)
-                this.deathSound = data.deathSound;
-        }
-        catch
-        {
-            Debug.LogError("Clip / Sound 설정이 되어있지 않음");
-        }
+        if (data.attackClip != null)
+            _controller["Attack"] = data.attackClip;
+        if (data.runClip != null)
+            _controller["Run"] = data.runClip;
+        if (data.deathClip != null)
+            _controller["Die"] = data.deathClip;
+        if (data.idleClip != null)
+            _controller["Idle"] = data.idleClip;
+        if (data.summonSound != null)
+            this.summonSound = data.summonSound;
+        if (data.attackSound != null)
+            this.attackSound = data.attackSound;
+        if (data.deathSound != null)
+            this.deathSound = data.deathSound;
     }
 
     public void Bind()

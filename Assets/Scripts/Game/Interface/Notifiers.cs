@@ -15,3 +15,10 @@ public interface IDeathNotifier
 {
     event Action OnDeath;
 }
+
+public interface IEffectNotifier
+{
+    event Action<Transform> OnAttackEffect;
+    event Action<Transform> OnTakeDamageEffect;
+    event Action<Transform> OnDeathEffect;
+}

@@ -1,8 +1,10 @@
 using UnityEngine;
 
-[RequireComponent(typeof(TeamComponent))]
-[RequireComponent(typeof(HealthComponent))]
+[RequireComponent (typeof(TeamComponent))]
+[RequireComponent (typeof(HealthComponent))]
 [RequireComponent (typeof(CoreComponent))]
+//[RequireComponent (typeof(Animator))]
+//[RequireComponent (typeof(AnimationComponent))]
 public class Core : MonoBehaviour
 {
     
@@ -22,6 +24,7 @@ public class Core : MonoBehaviour
     private void Start()
     {
         _health.Initialize(maxHP);
+        //07.18에 해야할 일..
     }
 
     // Update is called once per frame
