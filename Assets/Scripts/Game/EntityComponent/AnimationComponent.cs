@@ -52,7 +52,6 @@ public class AnimationComponent : MonoBehaviour
         
     }
 
-
     public void Bind()
     {
         _attackSrc.OnAttackStateChanged += HandleAttack;

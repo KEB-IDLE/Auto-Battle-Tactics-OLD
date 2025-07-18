@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5392a4193bcc6744d98c42f9be10bc66, type: 3}
   m_Name: ArrowData
   m_EditorClassIdentifier: 
-  speed: 7
-  verticalSpeed: 7
+  speed: 10
+  verticalSpeed: 5
   lifeTime: 3
   detectionRadius: 0.2
   explosionRadius: 5

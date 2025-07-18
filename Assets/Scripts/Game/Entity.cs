@@ -14,7 +14,11 @@ public class Entity : MonoBehaviour
 {
 
     [Header("Scriptable Object")]
+<<<<<<< HEAD
     [Tooltip("Asset > Script > Game > ScriptableObject > Unit/Projectile ì„ íƒ í›„ ì›í•˜ëŠ” ë°ì´í„° ì‚½ìž…")]
+=======
+    [Tooltip("Asset > Script > Game > ScriptableObject > Unit/Projectile ¼±ÅÃ ÈÄ ¿øÇÏ´Â µ¥ÀÌÅÍ »ðÀÔ")]
+>>>>>>> aaf1d00e3d080ef1c53cdeddc65fc6d773072373
     [SerializeField] private EntityData entityData;
 
     private HealthComponent _health; 
