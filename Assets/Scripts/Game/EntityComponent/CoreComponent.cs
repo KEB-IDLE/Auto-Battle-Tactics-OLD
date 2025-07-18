@@ -3,7 +3,6 @@ using UnityEngine;
 public class CoreComponent : MonoBehaviour
 {
     // 코어가 부서지면 실행..
-
     private void Start()
     {
         var hp = GetComponent<HealthComponent>();

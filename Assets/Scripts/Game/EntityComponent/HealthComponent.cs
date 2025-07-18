@@ -41,7 +41,6 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier, IEffe
             if (!IsAlive()) DeathRoutine();
         }
     }
-
     private IEnumerator DeathRoutine()
     {
         OnDeath?.Invoke(); // Á×À½ ÀÌ¹êÆ® ¾Ë¸²

@@ -11,7 +11,9 @@ using UnityEngine.AI;
 [RequireComponent(typeof(EffectComponent))]
 public class Entity : MonoBehaviour
 {
-    
+
+    [Header("Scriptable Object")]
+    [Tooltip("Asset > Script > Game > ScriptableObject > Unit/Projectile 선택 후 원하는 데이터 삽입")]
     [SerializeField] private EntityData entityData;
 
     private HealthComponent _health; 

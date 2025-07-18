@@ -46,6 +46,12 @@ public class AnimationComponent : MonoBehaviour
             this.deathSound = data.deathSound;
     }
 
+    public void Initialize(Core core)
+    {
+        
+    }
+
+
     public void Bind()
     {
         _attackSrc.OnAttackStateChanged += HandleAttack;
