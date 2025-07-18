@@ -89,18 +89,7 @@ public class UIManager : MonoBehaviour
             bool owned = ownedIcons.Contains(iconId);
 
             // 흐림 처리
-            //iconImages[i].color = owned ? enabledColor : disabledColor;
-
-            if (owned)
-            {
-                iconImages[i].color = enabledColor;
-                Debug.Log($"[Icon {iconId}] Owned → 적용 색상: enabledColor = {enabledColor}");
-            }
-            else
-            {
-                iconImages[i].color = disabledColor;
-                Debug.Log($"[Icon {iconId}] Not Owned → 적용 색상: disabledColor = {disabledColor}");
-            }
+            iconImages[i].color = owned ? enabledColor : disabledColor;
         }
     }
 
@@ -304,7 +293,8 @@ public class UIManager : MonoBehaviour
             {
                 GameManager.Instance.record = res.data;
                 
-                UpdateRecordUI(); // 필요 시 UI 갱신
+                UpdateRecordUI(); // UI 갱신
+                GetGlobalRanking(); // 글로벌 랭킹 갱신
             },
             err =>
             {
@@ -316,6 +306,7 @@ public class UIManager : MonoBehaviour
     public void RecordButton()
     {
         UpdateUserRecord(1, 1, 0, 10);
+        
     }
 
     public void GetGlobalRanking()
@@ -344,7 +335,7 @@ public class UIManager : MonoBehaviour
 
     public void UpdateGlobalRankingUI(GlobalRankEntry[] entries)
     {
-        for (int i = 0; i < entries.Length; i++)
+        for (int i = 0; i < 5; i++)
         {
             var entry = entries[i];
 

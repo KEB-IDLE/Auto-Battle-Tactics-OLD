@@ -10,7 +10,7 @@ public class UserDataLoader : MonoBehaviour
         yield return LoadProfile();
         yield return LoadOwnedIcons();  // Ãß°¡
         yield return LoadRecord();
-        yield return LoadMatchHistory();
+        //yield return LoadMatchHistory();
 
         if (uiManager != null)
         {
@@ -56,12 +56,12 @@ public class UserDataLoader : MonoBehaviour
         );
     }
 
-    IEnumerator LoadMatchHistory()
-    {
-        yield return APIService.Instance.GetList<MatchHistory>(
-            APIEndpoints.MatchHistory,
-            res => GameManager.Instance.matchHistory = res,
-            err => Debug.LogError("Match history load failed: " + err)
-        );
-    }
+    //IEnumerator LoadMatchHistory()
+    //{
+    //    yield return APIService.Instance.GetList<MatchHistory>(
+    //        APIEndpoints.MatchHistory,
+    //        res => GameManager.Instance.matchHistory = res,
+    //        err => Debug.LogError("Match history load failed: " + err)
+    //    );
+    //}
 }
