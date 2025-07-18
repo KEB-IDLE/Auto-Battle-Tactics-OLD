@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿/*
+using System.Collections;
 using System.Security.Cryptography;
 using TMPro;
 using UnityEngine;
@@ -134,3 +135,4 @@ public class ResponseData
     public bool success;
     public string message;
 }
+*/

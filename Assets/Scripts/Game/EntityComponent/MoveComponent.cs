@@ -60,7 +60,7 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
 
     public void Initialize(EntityData data)
     {
-        moveSpeed = data.moveSpeed; // ÀÌµ¿ ¼Óµµ ÃÊ±âÈ­
+        moveSpeed = data.moveSpeed; // ï¿½Ìµï¿½ ï¿½Óµï¿½ ï¿½Ê±ï¿½È­
         _agent.speed = moveSpeed;
         _agent.acceleration = moveSpeed;
         _agent.autoBraking = false;
@@ -74,7 +74,7 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
         if (dir.sqrMagnitude > 0.01f)
         {
             Quaternion lookRot = Quaternion.LookRotation(dir);
-            // ºÎµå·´°Ô È¸ÀüÇÏ·Á¸é Slerp
+            // ï¿½Îµå·´ï¿½ï¿½ È¸ï¿½ï¿½ï¿½Ï·ï¿½ï¿½ï¿½ Slerp
             transform.rotation = Quaternion.Slerp(
                 transform.rotation, lookRot, Time.deltaTime * 10f);
         }

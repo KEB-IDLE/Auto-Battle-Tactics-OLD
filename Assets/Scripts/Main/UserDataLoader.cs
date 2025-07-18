@@ -1,3 +1,4 @@
+/*
 using System.Collections;
 using UnityEngine;
 
@@ -8,7 +9,7 @@ public class UserDataLoader : MonoBehaviour
     public IEnumerator LoadAllUserDataCoroutine()
     {
         yield return LoadProfile();
-        yield return LoadOwnedIcons();  // Ãß°¡
+        yield return LoadOwnedIcons();  // ï¿½ß°ï¿½
         yield return LoadRecord();
         yield return LoadMatchHistory();
 
@@ -37,10 +38,10 @@ public class UserDataLoader : MonoBehaviour
         );
     }
 
-    //»õ·Î Ãß°¡ÇÑ À¯Àú°¡ ¼ÒÀ¯ÇÑ ¾ÆÀÌÄÜ ¸®½ºÆ® ·Îµå
+    //ï¿½ï¿½ï¿½ï¿½ ï¿½ß°ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Æ® ï¿½Îµï¿½
     IEnumerator LoadOwnedIcons()
     {
-        yield return APIService.Instance.GetList<int>(  // int ¸®½ºÆ®·Î ¹Þ´Â´Ù°í °¡Á¤ (icon_id ¸®½ºÆ®)
+        yield return APIService.Instance.GetList<int>(  // int ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½Þ´Â´Ù°ï¿½ ï¿½ï¿½ï¿½ï¿½ (icon_id ï¿½ï¿½ï¿½ï¿½Æ®)
             APIEndpoints.ProfileIcons,
             res => GameManager.Instance.ownedProfileIcons = res,
             err => Debug.LogError("Owned icons load failed: " + err)
@@ -65,3 +66,4 @@ public class UserDataLoader : MonoBehaviour
         );
     }
 }
+*/

@@ -1,4 +1,5 @@
-﻿using TMPro;
+﻿/*
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -491,3 +492,4 @@ public class GlobalRankingResponse
     public bool success;
     public GlobalRankEntry[] data;
 }
+*/

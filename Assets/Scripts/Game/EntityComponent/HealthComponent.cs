@@ -1,3 +1,4 @@
+/*
 using System;
 using System.Collections;
 using UnityEditor.Rendering;
@@ -9,7 +10,7 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier, IEffe
     private float currentHP;
     
     private float deathAnimDuration = 0.5f;
-    public event Action OnDeath; // Á×À½ ÀÌº¥Æ®
+    public event Action OnDeath; // ì£½ìŒ ì´ë²¤íŠ¸
 
 #pragma warning disable 67
     public event Action<Transform> OnAttackEffect;
@@ -28,23 +29,78 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier, IEffe
 
     public bool IsAlive()
     {
-        return currentHP > 0; // ÇöÀç Ã¼·ÂÀÌ 0º¸´Ù Å©¸é »ì¾ÆÀÖÀ½
+        return currentHP > 0; // í˜„ì¬ ì²´ë ¥ì´ 0ë³´ë‹¤ í¬ë©´ ì‚´ì•„ìˆìŒ
     }
 
     public void TakeDamage(float damage)
     {
         if (IsAlive())
         {
-            // ¿©±â¿¡ ÇÇ°İ ÀÌÆåÆ® Ãß°¡ÇÏ±â.
+            // ì—¬ê¸°ì— í”¼ê²© ì´í™íŠ¸ ì¶”ê°€í•˜ê¸°.
             OnTakeDamageEffect?.Invoke(this.transform);
-            currentHP -= damage; // µ¥¹ÌÁö¸¦ ¹Ş¾Æ ÇöÀç Ã¼·Â °¨¼Ò
+            currentHP -= damage; // ë°ë¯¸ì§€ë¥¼ ë°›ì•„ í˜„ì¬ ì²´ë ¥ ê°ì†Œ
             if (!IsAlive()) DeathRoutine();
         }
     }
-
     private IEnumerator DeathRoutine()
     {
-        OnDeath?.Invoke(); // Á×À½ ÀÌ¹êÆ® ¾Ë¸²
+        OnDeath?.Invoke(); // ì£½ìŒ ì´ë°´íŠ¸ ì•Œë¦¼
+        OnDeathEffect?.Invoke(this.transform);
+        yield return new WaitForSeconds(deathAnimDuration);
+        Destroy(gameObject);
+    }
+}
+*/
+
+using System;
+using System.Collections;
+#if UNITY_EDITOR
+using UnityEditor.Rendering;
+#endif
+using UnityEngine;
+
+public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier, IEffectNotifier
+{
+
+    private float currentHP;
+    public float CurrentHp => currentHP;
+
+    private float deathAnimDuration = 0.5f;
+    public event Action OnDeath; // ì£½ìŒ ì´ë²¤íŠ¸
+
+#pragma warning disable 67
+    public event Action<Transform> OnAttackEffect;
+    public event Action<Transform> OnTakeDamageEffect;
+    public event Action<Transform> OnDeathEffect;
+#pragma warning restore 67
+
+    public void Initialize(EntityData data)
+    {
+        currentHP = data.maxHP;
+    }
+    public void Initialize(float hp)
+    {
+        currentHP = hp;
+    }
+
+    public bool IsAlive()
+    {
+        return currentHP > 0; // í˜„ì¬ ì²´ë ¥ì´ 0ë³´ë‹¤ í¬ë©´ ì‚´ì•„ìˆìŒ
+    }
+
+    public void TakeDamage(float damage)
+    {
+        if (IsAlive())
+        {
+            // ì—¬ê¸°ì— í”¼ê²© ì´í™íŠ¸ ì¶”ê°€í•˜ê¸°.
+            OnTakeDamageEffect?.Invoke(this.transform);
+            currentHP -= damage; // ë°ë¯¸ì§€ë¥¼ ë°›ì•„ í˜„ì¬ ì²´ë ¥ ê°ì†Œ
+            if (!IsAlive()) DeathRoutine();
+        }
+    }
+    private IEnumerator DeathRoutine()
+    {
+        OnDeath?.Invoke(); // ì£½ìŒ ì´ë°´íŠ¸ ì•Œë¦¼
         OnDeathEffect?.Invoke(this.transform);
         yield return new WaitForSeconds(deathAnimDuration);
         Destroy(gameObject);

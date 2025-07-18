@@ -47,7 +47,7 @@ public class EffectComponent : MonoBehaviour
 
     void PlayAttackEffect(Transform origin)
     {
-        // ÆÄÆ¼Å¬/»ç¿îµå µî ½ÇÇà
+        // ï¿½ï¿½Æ¼Å¬/ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         if (attackEffect != null && origin != null)
             Instantiate(attackEffect, transform.position, Quaternion.identity);
     }
