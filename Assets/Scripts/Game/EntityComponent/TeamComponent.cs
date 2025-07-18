@@ -1,4 +1,4 @@
-/*
+
 using System;
 using UnityEngine;
 
@@ -19,9 +19,10 @@ public enum Team
     Blue,
     Object
 }
-*/
 
 
+// network
+/* 
 using System;
 using UnityEngine;
 
@@ -42,3 +43,4 @@ public enum Team
     Blue,
     Object
 }
+*/

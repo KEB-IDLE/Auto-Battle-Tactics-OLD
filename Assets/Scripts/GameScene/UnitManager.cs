@@ -1,4 +1,5 @@
 // ✅ UnitManager.cs
+/*
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -127,3 +128,5 @@ public class UnitManager : MonoBehaviour
         }
     }
 } // 메시지 클래스들은 UnitNetwork.cs에만 존재하도록 유지
+
+*/

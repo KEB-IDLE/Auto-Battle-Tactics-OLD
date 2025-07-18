@@ -1,4 +1,4 @@
-/*
+
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -12,13 +12,6 @@ using UnityEngine.AI;
 [RequireComponent(typeof(EffectComponent))]
 public class Entity : MonoBehaviour
 {
-
-    [Header("Scriptable Object")]
-<<<<<<< HEAD
-    [Tooltip("Asset > Script > Game > ScriptableObject > Unit/Projectile ì„ íƒ í›„ ì›í•˜ëŠ” ë°ì´í„° ì‚½ì…")]
-=======
-    [Tooltip("Asset > Script > Game > ScriptableObject > Unit/Projectile ¼±ÅÃ ÈÄ ¿øÇÏ´Â µ¥ÀÌÅÍ »ğÀÔ")]
->>>>>>> aaf1d00e3d080ef1c53cdeddc65fc6d773072373
     [SerializeField] private EntityData entityData;
 
     private HealthComponent _health; 
@@ -39,7 +32,7 @@ public class Entity : MonoBehaviour
 
         if (entityData == null)
         {
-            Debug.LogError($"{name}ì— EntityDataê°€ í• ë‹¹ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤!");
+            Debug.LogError($"{name}??EntityDataê°€ ? ë‹¹?˜ì? ?Šì•˜?µë‹ˆ??");
             return;
         }
     }
@@ -54,8 +47,16 @@ public class Entity : MonoBehaviour
         _animation.Bind();
         _effect.Bind();
     }
+
+    public void SetData(EntityData data)
+    {
+        entityData = data;
+        // µ¥ÀÌÅÍ¿¡ ¸Â´Â ÃÊ±âÈ­ µî ¼öÇà
+    }
+
 }
-*/
+
+/* network
 
 using UnityEngine;
 using UnityEngine.AI;
@@ -97,7 +98,7 @@ public class Entity : MonoBehaviour
 
         if (entityData == null)
         {
-            Debug.LogError($"{name}ì— EntityDataê°€ í• ë‹¹ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤!");
+            Debug.LogError($"{name}??EntityDataê°€ ? ë‹¹?˜ì? ?Šì•˜?µë‹ˆ??");
             return;
         }
     }
@@ -118,3 +119,4 @@ public class Entity : MonoBehaviour
         UnitId = id;
     }
 }
+*/

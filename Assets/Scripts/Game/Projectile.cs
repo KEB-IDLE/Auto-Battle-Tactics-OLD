@@ -7,6 +7,9 @@ using System;
 public class Projectile : MonoBehaviour, IEffectNotifier
 {
     private Rigidbody _rb;
+
+    [Header("Projectile Scriptable Object를 할당하세요.")]
+    [Tooltip("Asset > Scripts > Game > ScriptableObject > Unit 선택 후 원하는 데이터 삽입")]
     [SerializeField] private ProjectileData data;
 
     private Entity owner;
@@ -100,8 +103,6 @@ public class Projectile : MonoBehaviour, IEffectNotifier
 
                 if (hp == null)
                     continue;
-                
-
 
                 hp.TakeDamage(coreComp != null ? coreDamage : damage);
             }

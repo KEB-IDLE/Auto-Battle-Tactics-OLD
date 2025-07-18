@@ -1,129 +1,34 @@
-/*using UnityEngine;
-
-[CreateAssetMenu(fileName = "EntityData", menuName = "Scriptable Objects/EntityData")]
-public class EntityData : ScriptableObject
-{
-    [Header("Entity Information")]
-    [Tooltip("ìµœëŒ€ ì²´ë ¥ ì„¤ì •")]
-    public float maxHP;
-    [Tooltip("ìœ ë‹› ëŒ€ìƒ ê³µê²©ë ¥")]
-    public float attackDamage;
-    [Tooltip("ì½”ì–´ ëŒ€ìƒ ê³µê²©ë ¥")]
-    public float attackCoreDamage;
-    [Tooltip("ì¬ê³µê²©ê¹Œì§€ ëŒ€ê¸°ì‹œê°„")]
-    public float attackCooldown;
-    [Tooltip("ì´ë™ ì†ë„")]
-    public float moveSpeed;
-    [Tooltip("ê°œì²´ í¬ê¸°")]
-    public EntityScale entityScale; 
-
-    [Header("Target Detection")]
-    [Tooltip("ê³µê²© ì¸ì§€ ë²”ìœ„")]
-    public float detectionRadius;
-    [Tooltip("ì‹¤ì œ ê³µê²© ê°€ëŠ¥ ë²”ìœ„")]
-    public float attackRange;       
-    [Tooltip("íƒ€ê²Ÿì„ í•´ì œí•˜ëŠ” ì„ê³„ ê±°ë¦¬")]
-    public float disengageRange;
-    public enum AttackPriority
-    {
-        AllUnits,    // Agent, Tower, Core
-        TowersOnly,  // Tower, Core
-        CoreOnly     // Core
-    }
-    [Tooltip("ê³µê²© ëŒ€ìƒì´ Agent, Tower, Core ì¤‘ ì–´ë–¤ íƒ€ì…ì¸ì§€ ì„¤ì •")]
-    public AttackPriority attackPriority; // ê³µê²© ìš°ì„ ìˆœìœ„
-    [Tooltip("ê³µì¤‘ ê³µê²© ê°€ëŠ¥ ì—¬ë¶€ ì²´í¬")]
-    public AttackableType attackableType; // ê³µê²© ê°€ëŠ¥ íƒ€ì…
-
-    [Tooltip("ìœ ë‹›ì˜ ê³µê²© ë°©ì‹ (ê·¼ê±°ë¦¬ = Melee, ì›ê±°ë¦¬ = Ranged etc..)")]
-    public AttackType attackType;
-
-    [Header("Projectile Info")]
-    [Tooltip("ë°œì‚¬ì²´ í”„ë¦¬íŒ¹")]
-    public GameObject projectilePrefab;
-    //public ProjectileData projectileData;
-
-    [Header("Entity Prefab")]
-    public GameObject entityPrefab; // ì—”í‹°í‹° í”„ë¦¬íŒ¹
-
-    [Tooltip("ì†Œí™˜ ì´í™íŠ¸")]
-    public GameObject summonEffectPrefab; // ì†Œí™˜ ì´í™íŠ¸ í”„ë¦¬íŒ¹
-    [Tooltip("ê³µê²© ì´í™íŠ¸")]
-    public GameObject attackEffectPrefab; // ê³µê²© ì´í™íŠ¸ í”„ë¦¬íŒ¹
-    [Tooltip("í”¼ê²© ì´í™íŠ¸")]
-    public GameObject takeDamageEffectPrefeb; // ê³µê²© ì´í™íŠ¸ í”„ë¦¬íŒ¹
-    [Tooltip("ì£½ìŒ ì´í™íŠ¸")]
-    public GameObject deathEffectPrefab; // ì£½ìŒ ì´í™íŠ¸ í”„ë¦¬íŒ¹
-
-    [Tooltip("ë°œì‚¬ì²´ ì´ë™ ì´í™íŠ¸")]
-    public GameObject projectileAttackingEffectPrefab;
-    
-
-
-    [Header("Audio Settings")]
-    public AudioClip summonSound; // ì†Œí™˜ ì‚¬ìš´ë“œ
-    public AudioClip attackSound; // ê³µê²© ì‚¬ìš´ë“œ
-    public AudioClip deathSound;  // ì£½ìŒ ì‚¬ìš´ë“œ
-
-    [Header("Animation Settings")]
-    [Tooltip("ì´ ì—”í‹°í‹° ì „ìš© AnimatorController (ê¸°ë³¸ ì»¨íŠ¸ë¡¤ëŸ¬ë¥¼ Override í•˜ëŠ” ìš©ë„)")]
-    public RuntimeAnimatorController animatorController;
-    [Tooltip("ê³µê²© ì• ë‹ˆë©”ì´ì…˜ í´ë¦½")]
-    public AnimationClip attackClip;
-    [Tooltip("ì´ë™ ì• ë‹ˆë©”ì´ì…˜ í´ë¦½")]
-    public AnimationClip runClip;
-    [Tooltip("ì£½ìŒ ì• ë‹ˆë©”ì´ì…˜ í´ë¦½")]
-    public AnimationClip deathClip;
-    [Tooltip("ëŒ€ê¸° ì• ë‹ˆë©”ì´ì…˜ í´ë¦½")]
-    public AnimationClip idleClip;
-
-}
-public enum AttackableType
-{
-    GroundOnly,
-    Both
-}
-public enum EntityScale 
-{
-    Small,
-    Medium,
-    Large
-}
-public enum AttackType
-{
-    Melee,
-    Ranged,
-    Magic
-}
-*/
-
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "EntityData", menuName = "Scriptable Objects/EntityData")]
 public class EntityData : ScriptableObject
 {
     [Header("Entity Information")]
-    [Tooltip("ìµœëŒ€ ì²´ë ¥ ì„¤ì •")]
+
+    [Tooltip("ÀÌ¸§ ¼³Á¤")]
+    public string entityName;
+    [Tooltip("ÃÖ´ë Ã¼·Â ¼³Á¤")]
     public float maxHP;
-    [Tooltip("ìœ ë‹› ëŒ€ìƒ ê³µê²©ë ¥")]
+    [Tooltip("À¯´Ö ´ë»ó °ø°İ·Â")]
     public float attackDamage;
-    [Tooltip("ì½”ì–´ ëŒ€ìƒ ê³µê²©ë ¥")]
+    [Tooltip("ÄÚ¾î ´ë»ó °ø°İ·Â")]
     public float attackCoreDamage;
-    [Tooltip("ì¬ê³µê²©ê¹Œì§€ ëŒ€ê¸°ì‹œê°„")]
+    [Tooltip("Àç°ø°İ±îÁö ´ë±â½Ã°£")]
     public float attackCooldown;
-    [Tooltip("ì´ë™ ì†ë„")]
+    [Tooltip("ÀÌµ¿ ¼Óµµ")]
     public float moveSpeed;
-    [Tooltip("ê°œì²´ í¬ê¸°")]
+    [Tooltip("°³Ã¼ Å©±â")]
     public EntityScale entityScale;
-    [Header("Unit Type")]
+    [Header("Layer ¼³Á¤")]
+    [Tooltip("7: Human, 8:Mutant 9: Tower, 10: Core, 11: Projectile, 12: Structure, 13: Obstacle")]
     public int Layer;
 
     [Header("Target Detection")]
-    [Tooltip("ê³µê²© ì¸ì§€ ë²”ìœ„")]
+    [Tooltip("°ø°İ ÀÎÁö ¹üÀ§")]
     public float detectionRadius;
-    [Tooltip("ì‹¤ì œ ê³µê²© ê°€ëŠ¥ ë²”ìœ„")]
+    [Tooltip("½ÇÁ¦ °ø°İ °¡´É ¹üÀ§")]
     public float attackRange;
-    [Tooltip("íƒ€ê²Ÿì„ í•´ì œí•˜ëŠ” ì„ê³„ ê±°ë¦¬")]
+    [Tooltip("Å¸°ÙÀ» ÇØÁ¦ÇÏ´Â ÀÓ°è °Å¸®")]
     public float disengageRange;
     public enum AttackPriority
     {
@@ -131,52 +36,49 @@ public class EntityData : ScriptableObject
         TowersOnly,  // Tower, Core
         CoreOnly     // Core
     }
-    [Tooltip("ê³µê²© ëŒ€ìƒì´ Agent, Tower, Core ì¤‘ ì–´ë–¤ íƒ€ì…ì¸ì§€ ì„¤ì •")]
-    public AttackPriority attackPriority; // ê³µê²© ìš°ì„ ìˆœìœ„
-    [Tooltip("ê³µì¤‘ ê³µê²© ê°€ëŠ¥ ì—¬ë¶€ ì²´í¬")]
-    public AttackableType attackableType; // ê³µê²© ê°€ëŠ¥ íƒ€ì…
+    [Tooltip("°ø°İ ´ë»óÀÌ Agent, Tower, Core Áß ¾î¶² Å¸ÀÔÀÎÁö ¼³Á¤")]
+    public AttackPriority attackPriority; // °ø°İ ¿ì¼±¼øÀ§
+    [Tooltip("°øÁß °ø°İ °¡´É ¿©ºÎ Ã¼Å©")]
+    public AttackableType attackableType; // °ø°İ °¡´É Å¸ÀÔ
 
-    [Tooltip("ìœ ë‹›ì˜ ê³µê²© ë°©ì‹ (ê·¼ê±°ë¦¬ = Melee, ì›ê±°ë¦¬ = Ranged etc..)")]
+    [Tooltip("À¯´ÖÀÇ °ø°İ ¹æ½Ä (±Ù°Å¸® = Melee, ¿ø°Å¸® = Ranged etc..)")]
     public AttackType attackType;
 
-    [Header("Projectile Info")]
-    [Tooltip("ë°œì‚¬ì²´ í”„ë¦¬íŒ¹")]
-    public GameObject projectilePrefab;
-    //public ProjectileData projectileData;
-
     [Header("Entity Prefab")]
-    public GameObject entityPrefab; // ì—”í‹°í‹° í”„ë¦¬íŒ¹
+    public GameObject entityPrefab; // ¿£Æ¼Æ¼ ÇÁ¸®ÆÕ
 
+    [Header("Projectile Info")]
+    [Tooltip("¹ß»çÃ¼ ÇÁ¸®ÆÕ")]
+    public GameObject projectilePrefab;
 
-    [Tooltip("ì†Œí™˜ ì´í™íŠ¸")]
-    public GameObject summonEffectPrefab; // ì†Œí™˜ ì´í™íŠ¸ í”„ë¦¬íŒ¹
-    [Tooltip("ê³µê²© ì´í™íŠ¸")]
-    public GameObject attackEffectPrefab; // ê³µê²© ì´í™íŠ¸ í”„ë¦¬íŒ¹
-    [Tooltip("í”¼ê²© ì´í™íŠ¸")]
-    public GameObject takeDamageEffectPrefeb; // ê³µê²© ì´í™íŠ¸ í”„ë¦¬íŒ¹
-    [Tooltip("ì£½ìŒ ì´í™íŠ¸")]
-    public GameObject deathEffectPrefab; // ì£½ìŒ ì´í™íŠ¸ í”„ë¦¬íŒ¹
+    [Header("Effect Prefab")]
+    [Tooltip("¼ÒÈ¯ ÀÌÆåÆ®")]
+    public GameObject summonEffectPrefab; // ¼ÒÈ¯ ÀÌÆåÆ® ÇÁ¸®ÆÕ
+    [Tooltip("°ø°İ ÀÌÆåÆ®")]
+    public GameObject attackEffectPrefab; // °ø°İ ÀÌÆåÆ® ÇÁ¸®ÆÕ
+    [Tooltip("ÇÇ°İ ÀÌÆåÆ®")]
+    public GameObject takeDamageEffectPrefeb; // °ø°İ ÀÌÆåÆ® ÇÁ¸®ÆÕ
+    [Tooltip("Á×À½ ÀÌÆåÆ®")]
+    public GameObject deathEffectPrefab; // Á×À½ ÀÌÆåÆ® ÇÁ¸®ÆÕ
 
-    [Tooltip("ë°œì‚¬ì²´ ì´ë™ ì´í™íŠ¸")]
+    [Tooltip("¹ß»çÃ¼ ÀÌµ¿ ÀÌÆåÆ®")]
     public GameObject projectileAttackingEffectPrefab;
 
-
-
     [Header("Audio Settings")]
-    public AudioClip summonSound; // ì†Œí™˜ ì‚¬ìš´ë“œ
-    public AudioClip attackSound; // ê³µê²© ì‚¬ìš´ë“œ
-    public AudioClip deathSound;  // ì£½ìŒ ì‚¬ìš´ë“œ
+    public AudioClip summonSound; // ¼ÒÈ¯ »ç¿îµå
+    public AudioClip attackSound; // °ø°İ »ç¿îµå
+    public AudioClip deathSound;  // Á×À½ »ç¿îµå
 
     [Header("Animation Settings")]
-    [Tooltip("ì´ ì—”í‹°í‹° ì „ìš© AnimatorController (ê¸°ë³¸ ì»¨íŠ¸ë¡¤ëŸ¬ë¥¼ Override í•˜ëŠ” ìš©ë„)")]
+    [Tooltip("ÀÌ ¿£Æ¼Æ¼ Àü¿ë AnimatorController (±âº» ÄÁÆ®·Ñ·¯¸¦ Override ÇÏ´Â ¿ëµµ)")]
     public RuntimeAnimatorController animatorController;
-    [Tooltip("ê³µê²© ì• ë‹ˆë©”ì´ì…˜ í´ë¦½")]
+    [Tooltip("°ø°İ ¾Ö´Ï¸ŞÀÌ¼Ç Å¬¸³")]
     public AnimationClip attackClip;
-    [Tooltip("ì´ë™ ì• ë‹ˆë©”ì´ì…˜ í´ë¦½")]
+    [Tooltip("ÀÌµ¿ ¾Ö´Ï¸ŞÀÌ¼Ç Å¬¸³")]
     public AnimationClip runClip;
-    [Tooltip("ì£½ìŒ ì• ë‹ˆë©”ì´ì…˜ í´ë¦½")]
+    [Tooltip("Á×À½ ¾Ö´Ï¸ŞÀÌ¼Ç Å¬¸³")]
     public AnimationClip deathClip;
-    [Tooltip("ëŒ€ê¸° ì• ë‹ˆë©”ì´ì…˜ í´ë¦½")]
+    [Tooltip("´ë±â ¾Ö´Ï¸ŞÀÌ¼Ç Å¬¸³")]
     public AnimationClip idleClip;
 
 }

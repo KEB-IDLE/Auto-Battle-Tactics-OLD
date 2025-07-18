@@ -1,4 +1,4 @@
-/*
+
 using System;
 using System.Collections;
 using UnityEditor.Rendering;
@@ -50,8 +50,11 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier, IEffe
         Destroy(gameObject);
     }
 }
-*/
 
+
+
+//network
+/*
 using System;
 using System.Collections;
 #if UNITY_EDITOR
@@ -106,3 +109,4 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier, IEffe
         Destroy(gameObject);
     }
 }
+*/

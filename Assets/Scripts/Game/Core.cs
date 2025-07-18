@@ -26,12 +26,4 @@ public class Core : MonoBehaviour
         _health.Initialize(maxHP);
         //07.18에 해야할 일..
     }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
-    
 }
