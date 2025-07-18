@@ -4,7 +4,7 @@ public class CoreRegistry : MonoBehaviour
 {
     public static CoreRegistry Instance { get; private set; }
 
-    [Header("씬에서 드래그: 아군 코어, 적군 코어")]
+    [Header("씬에서 드래그: RedCore, BlueCore")]
     [SerializeField] private Transform redCoreTransform;
     [SerializeField] private Transform blueCoreTransform;
 

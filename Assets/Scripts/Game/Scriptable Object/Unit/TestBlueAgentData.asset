@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a7c9c71710beb0479729de009243f0b, type: 3}
   m_Name: TestBlueAgentData
   m_EditorClassIdentifier: 
-  maxHP: 5
+  maxHP: 10
   attackDamage: 3
   attackCoreDamage: 2
   attackCooldown: 1
@@ -25,11 +25,12 @@ MonoBehaviour:
   attackableType: 0
   attackType: 1
   projectilePrefab: {fileID: 3287624786238722518, guid: 0c144b528e01b334baa60edbf77d3be1, type: 3}
-  projectileData: {fileID: 11400000, guid: f2e3b5539a867db4bafcb177d7daa5bf, type: 2}
   entityPrefab: {fileID: 0}
   summonEffectPrefab: {fileID: 0}
   attackEffectPrefab: {fileID: 0}
+  takeDamageEffectPrefeb: {fileID: 0}
   deathEffectPrefab: {fileID: 0}
+  projectileAttackingEffectPrefab: {fileID: 0}
   summonSound: {fileID: 0}
   attackSound: {fileID: 0}
   deathSound: {fileID: 0}
