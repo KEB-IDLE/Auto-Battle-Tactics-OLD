@@ -4,7 +4,6 @@ using UnityEngine;
 public class EntityData : ScriptableObject
 {
     [Header("Entity Information")]
-    //public string entityName;   
     [Tooltip("최대 체력 설정")]
     public float maxHP;
     [Tooltip("유닛 대상 공격력")]
@@ -20,11 +19,11 @@ public class EntityData : ScriptableObject
 
     [Header("Target Detection")]
     [Tooltip("공격 인지 범위")]
-    public float detectionRadius;   // 공격 대상 인지 범위
+    public float detectionRadius;
     [Tooltip("실제 공격 가능 범위")]
-    public float attackRange;       // 공격 가능 범위
+    public float attackRange;       
     [Tooltip("타겟을 해제하는 임계 거리")]
-    public float disengageRange;    // 어그로 푸는 한계 거리
+    public float disengageRange;
     public enum AttackPriority
     {
         AllUnits,    // Agent, Tower, Core
