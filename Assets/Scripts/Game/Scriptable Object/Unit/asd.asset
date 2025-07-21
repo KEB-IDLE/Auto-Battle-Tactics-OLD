@@ -10,25 +10,24 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3a7c9c71710beb0479729de009243f0b, type: 3}
-  m_Name: TestBlueAgentData
+  m_Name: asd
   m_EditorClassIdentifier: 
-  entityName: gg
-  maxHP: 10
-  attackDamage: 3
-  attackCoreDamage: 2
-  attackCooldown: 1
-  moveSpeed: 3
+  entityName: asdadadadasd
+  maxHP: 0
+  attackDamage: 0
+  attackCoreDamage: 0
+  attackCooldown: 0
+  moveSpeed: 0
   entityScale: 0
   Layer: 0
-  detectionRadius: 30
-  attackRange: 22
-  disengageRange: 25
+  detectionRadius: 0
+  attackRange: 0
+  disengageRange: 0
   attackPriority: 0
   attackableType: 0
   attackType: 1
   entityPrefab: {fileID: 2072007499466549899, guid: 47dda803451f46f43b7e3477fb984bc6, type: 3}
   projectilePrefab: {fileID: 3287624786238722518, guid: 0c144b528e01b334baa60edbf77d3be1, type: 3}
-  projectilePoolName: Arrow
   summonEffectPrefab: {fileID: 0}
   attackEffectPrefab: {fileID: 0}
   takeDamageEffectPrefeb: {fileID: 0}
@@ -37,7 +36,7 @@ MonoBehaviour:
   summonSound: {fileID: 0}
   attackSound: {fileID: 0}
   deathSound: {fileID: 0}
-  animatorController: {fileID: 9100000, guid: 978dfb3f95c533c4aa9742b18291eb77, type: 2}
+  animatorController: {fileID: 0}
   attackClip: {fileID: 0}
   runClip: {fileID: 0}
   deathClip: {fileID: 0}

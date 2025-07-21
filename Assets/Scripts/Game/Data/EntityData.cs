@@ -50,6 +50,8 @@ public class EntityData : ScriptableObject
     [Header("Projectile Info")]
     [Tooltip("발사체 프리팹")]
     public GameObject projectilePrefab;
+    [Tooltip("오브젝트 풀에 자동으로 연결합니다.")]
+    public string projectilePoolName;
 
     [Header("Effect Prefab")]
     [Tooltip("소환 이펙트")]

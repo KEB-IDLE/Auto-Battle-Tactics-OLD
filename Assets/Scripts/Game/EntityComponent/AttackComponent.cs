@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 //using static UnityEngine.GraphicsBuffer;
 //using static UnityEngine.UI.GridLayoutGroup;
@@ -21,7 +22,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
 
 
     private GameObject projectilePrefab;
-    //private ProjectileData projectileData;
+    private string projectilePoolName;
 
     private IDamageable lockedTarget;   // 현재 공격 대상
     private IOrientable orientable;
@@ -32,7 +33,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
     private LayerMask towerOnlyMask;
     private LayerMask coreOnlyMask;
     private LayerMask targetLayer;
-
+    
 
 
 #pragma warning disable 67
@@ -68,6 +69,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
         attackType = data.attackType;
         isAttackingFlag = false;
         firePoint = transform.Find("FirePoint");
+        projectilePoolName = data.projectilePoolName;
 
         if (attackType == AttackType.Melee)
             projectilePrefab = null;
@@ -230,15 +232,24 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
 
     private void AttackRanged(IDamageable target)
     {
-
         lockedTarget = target;
-        var projGO = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
-        var projectile = projGO.GetComponent<Projectile>();
+        var pool = ProjectilePoolManager.Instance.GetPool(projectilePoolName);
+        if(pool == null)
+        {
+            Debug.LogError("[AttackComponent] ProjectilePool을 찾지 못했습니다!");
+            return;
+        }
+
+        var projectile = pool.GetProjectile();
+        projectile.transform.position = firePoint.position;
+        projectile.transform.rotation = Quaternion.identity;
+        projectile.SetPool(pool);
         projectile.Initialize(
-        owner: this.GetComponent<Entity>(),             // 투사체 소유자
-        damage: attackDamage,                           // 대미지
-        coreDamage: attackCoreDamage,                   // 코어 공격력 
-        target: (target as MonoBehaviour).transform);   // 목표 Transform 전달
+            owner: this.GetComponent<Entity>(),
+            damage: attackDamage,
+            coreDamage: attackCoreDamage,
+            target: (target as MonoBehaviour).transform
+            );
     }
 
     private void AttackMagic(IDamageable target)
