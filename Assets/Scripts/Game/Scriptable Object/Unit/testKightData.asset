@@ -16,7 +16,7 @@ MonoBehaviour:
   maxHP: 5
   attackDamage: 5
   attackCoreDamage: 5
-  attackCooldown: 1
+  attackImpactRatio: 0.1228
   moveSpeed: 5
   entityScale: 0
   Layer: 14
@@ -24,7 +24,6 @@ MonoBehaviour:
   attackRange: 2
   disengageRange: 5
   attackPriority: 0
-  attackableType: 0
   attackType: 0
   entityPrefab: {fileID: 1415375744480942332, guid: 2d32587978d83214989e3051ff51a1cb, type: 3}
   projectilePrefab: {fileID: 0}
