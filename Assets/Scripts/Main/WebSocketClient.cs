@@ -21,7 +21,7 @@ public class WebSocketClient : MonoBehaviour
     void Start()
     {
         playerId = Guid.NewGuid().ToString();
-        Debug.Log("[Start] 생성된 playerId: " + playerId);
+        Debug.Log("[Start] playerId: " + playerId);
 
         predictedPosition = Vector3.zero;
         GameObject me = Instantiate(playerPrefab, predictedPosition, Quaternion.identity);
@@ -33,24 +33,31 @@ public class WebSocketClient : MonoBehaviour
         rb.isKinematic = true;
         rigidbodies[playerId] = rb;
 
-        Debug.Log("[Start] 내 플레이어 오브젝트 생성 완료");
-
         StartCoroutine(ConnectCoroutine());
     }
 
     IEnumerator ConnectCoroutine()
     {
+        Debug.Log("[ConnectCoroutine] 시작");
+
         websocket = new WebSocket("ws://localhost:8080");
 
-        websocket.OnOpen += () => Debug.Log("✅ WebSocket connected");
+        websocket.OnOpen += () => {
+            Debug.Log("✅ WebSocket connected (이벤트)");
+
+            sendPositionCoroutine = StartCoroutine(SendPositionLoop());
+            Debug.Log("[OnOpen] sendPositionCoroutine 시작");
+        };
+
         websocket.OnError += (e) => Debug.LogError("❌ WebSocket error: " + e);
         websocket.OnClose += (e) => Debug.LogWarning("⚠️ WebSocket closed");
 
         websocket.OnMessage += (bytes) =>
         {
             string message = Encoding.UTF8.GetString(bytes);
-            PositionsMessage data = JsonUtility.FromJson<PositionsMessage>(message);
+            Debug.Log("[OnMessage] 수신된 메시지: " + message);
 
+            PositionsMessage data = JsonUtility.FromJson<PositionsMessage>(message);
             if (data.type != "positions" || data.players == null) return;
 
             foreach (var p in data.players)
@@ -66,11 +73,19 @@ public class WebSocketClient : MonoBehaviour
                     rb.isKinematic = true;
                     rigidbodies[p.id] = rb;
 
-                    Debug.Log($"[WebSocket] 새 플레이어 생성: {p.id}");
+                    Debug.Log("[OnMessage] 새 플레이어 생성: " + p.id);
                 }
 
                 Vector3 newPos = new Vector3(p.x, p.y, p.z);
-                rigidbodies[p.id].MovePosition(newPos);
+
+                if (rigidbodies.TryGetValue(p.id, out Rigidbody rbToMove))
+                {
+                    rbToMove.MovePosition(newPos);
+                }
+                else
+                {
+                    players[p.id].transform.position = newPos;
+                }
 
                 if (p.id == playerId)
                 {
@@ -80,17 +95,21 @@ public class WebSocketClient : MonoBehaviour
         };
 
         var connectTask = websocket.Connect();
-        while (!connectTask.IsCompleted)
-            yield return null;
+
+        // 연결 완료까지 기다리기
+        yield return new WaitUntil(() => connectTask.IsCompleted);
 
         if (connectTask.IsFaulted)
         {
-            Debug.LogError("WebSocket 연결 실패: " + connectTask.Exception);
+            Debug.LogError("[ConnectCoroutine] WebSocket 연결 실패: " + connectTask.Exception);
             yield break;
         }
 
-        sendPositionCoroutine = StartCoroutine(SendPositionLoop());
+        Debug.Log("[ConnectCoroutine] WebSocket 연결 성공");
     }
+
+
+
 
     void Update()
     {
@@ -112,26 +131,32 @@ public class WebSocketClient : MonoBehaviour
         float h = Input.GetAxis("Horizontal");
         float v = Input.GetAxis("Vertical");
 
-        Vector3 direction = new Vector3(h, 0, v);
-        if (direction != Vector3.zero)
+        Vector3 dir = new Vector3(h, 0, v);
+
+        if (dir != Vector3.zero)
         {
-            predictedPosition += direction * moveSpeed * Time.deltaTime;
+            predictedPosition += dir * moveSpeed * Time.deltaTime;
         }
     }
 
     IEnumerator SendPositionLoop()
     {
+        Debug.Log("[SendPositionLoop] 시작됨");
+        
         while (true)
         {
             SendPredictedPosition();
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSeconds(0.01f);
         }
     }
 
     async void SendPredictedPosition()
     {
         if (websocket.State != WebSocketState.Open)
+        {
+            Debug.LogWarning("[Send] WebSocket이 열려있지 않음");
             return;
+        }
 
         var data = new PositionMessage
         {
@@ -143,6 +168,8 @@ public class WebSocketClient : MonoBehaviour
         };
 
         string json = JsonUtility.ToJson(data);
+        Debug.Log("[Send] 위치 보냄: " + json);
+
         await websocket.SendText(json);
     }
 

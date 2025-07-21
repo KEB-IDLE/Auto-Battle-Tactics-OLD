@@ -20,7 +20,6 @@ public class UIManager : MonoBehaviour
     public TMP_Text levelText;
     public TMP_Text goldText;
 
-    public Button[] iconButtons;         // 아이콘 선택용 버튼 배열 (인스펙터에 1,2,3,4 버튼 드래그)
     public Image[] iconImages;           // 버튼에 붙은 Image 컴포넌트 (흐림 처리용)
     Color enabledColor = Color.white;
     Color disabledColor = new Color(1f, 1f, 1f, 0.1f);  // 반투명 (흐릿함)
@@ -142,7 +141,7 @@ public class UIManager : MonoBehaviour
         var ownedIcons = GameManager.Instance.ownedProfileIcons;
         int selectedIconId = GameManager.Instance.profile.profile_icon_id;
 
-        for (int i = 0; i < iconButtons.Length; i++)
+        for (int i = 0; i < profileIcons.Length; i++)
         {
             int iconId = i + 1;
 
@@ -157,9 +156,11 @@ public class UIManager : MonoBehaviour
     public void OnIconButtonClicked(int iconId)
     {
         var ownedIcons = GameManager.Instance.ownedProfileIcons;
-
+        Debug.Log("1");
         if (ownedIcons.Contains(iconId))
         {
+            Debug.Log("2");
+
             // 이미 소유 중 => 프로필 아이콘 변경 API 호출
             ChangeProfileIcon(iconId);
         }
