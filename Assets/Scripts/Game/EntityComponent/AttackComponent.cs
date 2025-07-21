@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 //using static UnityEngine.GraphicsBuffer;
 //using static UnityEngine.UI.GridLayoutGroup;
@@ -9,30 +10,32 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
     // Ony for Gizmo test
     private EntityData _entityData; // EntityData를 통해 초기화할 수 있도록
     
-    private float attackDamage;         // 대미지
-    private float attackCoreDamage;     // 코어 공격 대미지
-    private float attackCooldown;       // 재공격까지 대기시간
-    private float lastAttackTime;       // 마지막 공격 시간
-    private float detectionRadius;      // 공격 대상 인지 범위
-    private float attackRange;          // 공격 범위
-    private float disengageRange;       // 공격 대상과의 거리가 이 범위를 벗어나면 공격 중지
+    private float attackDamage;
+    private float attackCoreDamage;
+    private float attackImpactRatio;
+    private float attackCooldown;
+    private float attackAnimLength;
+    //private float lastAttackTime;
+    private float detectionRadius;
+    private float attackRange;
+    private float disengageRange;
     private bool isAttackingFlag;
     public Transform firePoint;
 
 
-    private GameObject projectilePrefab;
-    //private ProjectileData projectileData;
+    //private GameObject projectilePrefab;
+    private string projectilePoolName;
 
-    private IDamageable lockedTarget;   // 현재 공격 대상
+    private IDamageable lockedTarget;
     private IOrientable orientable;
-    private ITeamProvider teamProvider; // 팀 정보 제공자
-    private AttackType attackType;      // 유닛의 공격 유형
+    private ITeamProvider teamProvider;
+    private AttackType attackType;
 
     private LayerMask allUnitMask;
     private LayerMask towerOnlyMask;
     private LayerMask coreOnlyMask;
     private LayerMask targetLayer;
-
+    
 
 
 #pragma warning disable 67
@@ -61,21 +64,16 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
         _entityData = data;
         attackDamage = data.attackDamage;
         attackCoreDamage = data.attackCoreDamage;
-        attackCooldown = data.attackCooldown;
+        attackAnimLength = data.attackClip.length;
+        attackCooldown = attackAnimLength;
+        attackImpactRatio = data.attackImpactRatio;
         detectionRadius = data.detectionRadius;
         attackRange = data.attackRange;
         disengageRange = data.disengageRange;
         attackType = data.attackType;
         isAttackingFlag = false;
         firePoint = transform.Find("FirePoint");
-
-        if (attackType == AttackType.Melee)
-            projectilePrefab = null;
-        else
-            projectilePrefab = data.projectilePrefab;
-
-        
-        lastAttackTime = 0f;
+        projectilePoolName = data.projectilePoolName;
 
         allUnitMask = LayerMask.GetMask("Agent", "Tower", "Core");
         towerOnlyMask = LayerMask.GetMask("Tower", "Core");
@@ -109,7 +107,6 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
             else
                 lockedTarget = null;
         }
-        // 2) 공격 조건 검사
         if (lockedTarget != null && CanAttack(lockedTarget) && !isAttackingFlag)
                 StartCoroutine(AttackRoutine(lockedTarget));
     }
@@ -155,7 +152,6 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
     private void TryAttack(IDamageable target)
     {
         if (!CanAttack(target)) return;
-        lastAttackTime = Time.time;
         switch (attackType)
         {
             case AttackType.Melee:
@@ -177,39 +173,41 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
     {
         isAttackingFlag = true;
         OnAttackStateChanged?.Invoke(true);
+
+        float impactDelay = attackAnimLength * attackImpactRatio;
+
         try
         {
-            TryAttack(target);
-            // 사거리 이탈 또는 대상 사망 전까지, 자동으로 재공격
             while (target.IsAlive() &&
                    Vector3.Distance(transform.position,
                        (target as MonoBehaviour).transform.position) <= attackRange)
             {
-                orientable?.LookAtTarget((target as MonoBehaviour).transform.position);
-                yield return new WaitForSeconds(attackCooldown);
+                LookAtTarget(target);
+                yield return new WaitForSeconds(impactDelay);
                 TryAttack(target);
+                yield return new WaitForSeconds(attackCooldown - impactDelay);
             }
 
-            // 공격 종료 이벤트
             OnAttackStateChanged?.Invoke(false);
 
-            // 범위 벗어나면 타겟 초기화
             if (!target.IsAlive() ||
                 Vector3.Distance(transform.position,
                     (target as MonoBehaviour).transform.position) > disengageRange)
             {
                 lockedTarget = null;
             }
-        } 
+        }
         finally
         {
             isAttackingFlag = false;
             Debug.Log($"[AttackRoutine END]");
         }
+
+
+
     }
 
-    // animation cilp 중 실행할 메서드
-    // 근접 공격 시
+
 
     private void AttackMelee(IDamageable target)
     {
@@ -219,8 +217,9 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
         var coreComp = (lockedTarget as MonoBehaviour)
                           .GetComponent<Core>();
 
-        //여기에 타격 이펙트 추가
         OnAttackEffect?.Invoke(firePoint);
+
+        Debug.Log("attack!!!!!!");
 
         if (coreComp != null)
             lockedTarget.TakeDamage(attackCoreDamage);
@@ -230,22 +229,31 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
 
     private void AttackRanged(IDamageable target)
     {
-
         lockedTarget = target;
-        var projGO = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
-        var projectile = projGO.GetComponent<Projectile>();
+        var pool = ProjectilePoolManager.Instance.GetPool(projectilePoolName);
+        if(pool == null)
+        {
+            Debug.LogError("[AttackComponent] ProjectilePool을 찾지 못했습니다!");
+            return;
+        }
+
+        var projectile = pool.GetProjectile();
+        projectile.transform.position = firePoint.position;
+        projectile.transform.rotation = Quaternion.identity;
+        projectile.SetPool(pool);
         projectile.Initialize(
-        owner: this.GetComponent<Entity>(),             // 투사체 소유자
-        damage: attackDamage,                           // 대미지
-        coreDamage: attackCoreDamage,                   // 코어 공격력 
-        target: (target as MonoBehaviour).transform);   // 목표 Transform 전달
+            owner: this.GetComponent<Entity>(),
+            damage: attackDamage,
+            coreDamage: attackCoreDamage,
+            target: (target as MonoBehaviour).transform
+            );
     }
 
     private void AttackMagic(IDamageable target)
     {
         lockedTarget = target;
 
-        // 즉시 피해!
+        // attack 
         if (lockedTarget != null && lockedTarget.IsAlive())
         {
             var coreComp = (lockedTarget as MonoBehaviour)
@@ -266,7 +274,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
         Vector3 dir = (dest - origin).normalized;
         float dist = Vector3.Distance(origin, dest);
 
-        // "Obstacle" 등 장애물 레이어 포함!
+        // "Obstacle" layer..
         int raycastMask = LayerMask.GetMask("Agent", "Tower", "Core", "Obstacle", "Structure");
 
         if (Physics.Raycast(origin, dir, out RaycastHit hit, dist, raycastMask))
@@ -278,9 +286,21 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
         return false;
     }
 
-
     public bool IsAttacking()
-        => Time.time < lastAttackTime + attackCooldown;
+    {
+        return isAttackingFlag;
+    }
+    private void LookAtTarget(IDamageable target)
+    {
+        var mb = target as MonoBehaviour;
+        if (mb != null)
+        {
+            Vector3 targetPos = mb.transform.position;
+            targetPos.y = transform.position.y; // y 고정(수평 회전)
+            transform.LookAt(targetPos);
+        }
+    }
+
     public bool isMelee => attackType == AttackType.Melee;
     public bool isRanged => attackType == AttackType.Ranged;
     public bool isMagic => attackType == AttackType.Magic;
@@ -290,15 +310,15 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
     {
         if (_entityData == null) return;
 
-        // 감지 반경(detectionRadius)
+        // detectionRadius
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, _entityData.detectionRadius);
 
-        // 공격 반경(attackRange)
+        // attackRange
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, _entityData.attackRange);
 
-        // 해제 반경(disengageRange)
+        // disengageRange
         Gizmos.color = Color.cyan;
         Gizmos.DrawWireSphere(transform.position, _entityData.disengageRange);
     }

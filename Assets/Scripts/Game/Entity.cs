@@ -16,23 +16,23 @@ public class Entity : MonoBehaviour
 
     private HealthComponent _health; 
     private AttackComponent _attack;
-    private MoveComponent _move;
-    private TeamComponent _team;
+    private MoveComponent   _move;
+    private TeamComponent   _team;
     private AnimationComponent _animation;
     private EffectComponent _effect;
 
     public virtual void Awake()
     {
-        _health = GetComponent<HealthComponent>();
-        _attack = GetComponent<AttackComponent>();
-        _move = GetComponent<MoveComponent>();
-        _team = GetComponent<TeamComponent>();
+        _health =   GetComponent<HealthComponent>();
+        _attack =   GetComponent<AttackComponent>();
+        _move =     GetComponent<MoveComponent>();
+        _team =     GetComponent<TeamComponent>();
         _animation = GetComponent<AnimationComponent>();
-        _effect = GetComponent<EffectComponent>();
+        _effect =   GetComponent<EffectComponent>();
 
         if (entityData == null)
         {
-            Debug.LogError($"{name}??EntityDataê°€ ? ë‹¹?˜ì? ?Šì•˜?µë‹ˆ??");
+            Debug.LogError($"{name} EntityData is null!");
             return;
         }
     }
@@ -51,7 +51,6 @@ public class Entity : MonoBehaviour
     public void SetData(EntityData data)
     {
         entityData = data;
-        // µ¥ÀÌÅÍ¿¡ ¸Â´Â ÃÊ±âÈ­ µî ¼öÇà
     }
 
 }
@@ -75,9 +74,9 @@ public class Entity : MonoBehaviour
 
     [SerializeField] private EntityData entityData;
 
-    private HealthComponent _health;
-    private AttackComponent _attack;
-    private MoveComponent _move;
+    private HealthComponent     _health;
+    private AttackComponent     _attack;
+    private MoveComponent       _move;
     private PositionComponent _position;
     private TeamComponent _team;
     private AnimationComponent _animation;

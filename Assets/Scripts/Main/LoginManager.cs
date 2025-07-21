@@ -1,7 +1,4 @@
-﻿/*
-using System.Collections;
-using System.Security.Cryptography;
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -135,4 +132,3 @@ public class ResponseData
     public bool success;
     public string message;
 }
-*/

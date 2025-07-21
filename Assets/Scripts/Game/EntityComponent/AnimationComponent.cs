@@ -1,4 +1,5 @@
 
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 [RequireComponent(typeof(Animator))]
@@ -28,7 +29,11 @@ public class AnimationComponent : MonoBehaviour
     public void Initialize(EntityData data)
     {
         if (_controller == null)
+        {
             _controller = new AnimatorOverrideController(data.animatorController);
+            Debug.Log("ssssssssssssssssssssssssssssssss");
+        }
+           
         _animator.runtimeAnimatorController = _controller;
 
         if (data.attackClip != null)
@@ -47,9 +52,19 @@ public class AnimationComponent : MonoBehaviour
             this.deathSound = data.deathSound;
     }
 
-    public void Initialize(Core core)
-    {
+    //public void Initialize(Core core)
+    //{
         
+    //}
+
+    void Update()
+    {
+        if (_animator != null)
+        {
+            var clipInfo = _animator.GetCurrentAnimatorClipInfo(0);
+            if (clipInfo.Length > 0)
+                Debug.Log("현재 재생 중인 애니메이션: " + clipInfo[0].clip.name);
+        }
     }
 
     public void Bind()

@@ -1,4 +1,3 @@
-/*
 public static class APIEndpoints
 {
     public const string Register = "/auth/register";
@@ -12,13 +11,14 @@ public static class APIEndpoints
     public const string ProfileExp = "/user/profile/exp";
     public const string ProfileGold = "/user/profile/gold";
 
-
-    public const string ProfileIcons = "/user/profile/icons";
-
+    public const string ProfileIcons = "/user/icons";
 
     public const string Record = "/user/record";
-    public const string MatchHistory = "/user/match/history";
 
-    public const string GlobalRanking = "/user/ranking/global";
+    public const string GlobalRanking = "/ranking/global";
+
+    public const string MatchJoin = "/match/join";
+    public const string MatchStatus = "/match/status";
+
+    //public const string MatchHistory = "/user/match/history";
 }
-*/

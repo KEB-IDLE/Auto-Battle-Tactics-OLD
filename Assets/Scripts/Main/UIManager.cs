@@ -1,6 +1,9 @@
-﻿/*
+
+using System.Collections;
+using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
@@ -20,7 +23,7 @@ public class UIManager : MonoBehaviour
     public Button[] iconButtons;         // 아이콘 선택용 버튼 배열 (인스펙터에 1,2,3,4 버튼 드래그)
     public Image[] iconImages;           // 버튼에 붙은 Image 컴포넌트 (흐림 처리용)
     Color enabledColor = Color.white;
-    Color disabledColor = new Color(1f,1f,1f, 0.1f);  // 반투명 (흐릿함)
+    Color disabledColor = new Color(1f, 1f, 1f, 0.1f);  // 반투명 (흐릿함)
 
     // 내꺼
     public TMP_Text rankMatchText;
@@ -31,6 +34,62 @@ public class UIManager : MonoBehaviour
     // 전체 랭킹
     public TMP_Text[] rankTexts;        // 닉네임 + 점수 텍스트들 (1~5위)
     public Image[] rankIcons;          // 프로필 아이콘 이미지들 (1~5위용)
+
+
+    public void OnClickJoinMatch()
+    {
+        StartCoroutine(MatchService.Instance.JoinMatchQueue(
+            () =>
+            {
+                Debug.Log("큐 등록 완료, 매칭 대기 시작...");
+                StartCoroutine(PollMatchStatus());
+            },
+            err =>
+            {
+                Debug.LogWarning("큐 등록 실패: " + err);
+            }
+        ));
+    }
+
+    private IEnumerator PollMatchStatus()
+    {
+        float pollInterval = 2f;
+        float timeout = 30f;
+        float elapsed = 0f;
+
+        while (elapsed < timeout)
+        {
+            bool waiting = true;
+
+            yield return MatchService.Instance.CheckMatchStatus(
+                opponentId =>
+                {
+                    Debug.Log("매칭 성공! 상대: " + opponentId);
+                    GameManager.Instance.opponentId = opponentId;
+                    SceneManager.LoadScene(2);
+                    waiting = false;
+                },
+                () =>
+                {
+                    Debug.Log("아직 매칭되지 않음...");
+                },
+                err =>
+                {
+                    Debug.LogWarning("매칭 상태 확인 중 오류: " + err);
+                }
+            );
+
+            if (!waiting) yield break;
+
+            yield return new WaitForSeconds(pollInterval);
+            elapsed += pollInterval;
+        }
+
+        Debug.LogWarning("⏰ 매칭 시간 초과");
+        // TODO: 매칭 실패 UI 띄우기 등 처리
+    }
+
+
 
 
     public void SpawnCharacter(int charId)
@@ -90,18 +149,7 @@ public class UIManager : MonoBehaviour
             bool owned = ownedIcons.Contains(iconId);
 
             // 흐림 처리
-            //iconImages[i].color = owned ? enabledColor : disabledColor;
-
-            if (owned)
-            {
-                iconImages[i].color = enabledColor;
-                Debug.Log($"[Icon {iconId}] Owned → 적용 색상: enabledColor = {enabledColor}");
-            }
-            else
-            {
-                iconImages[i].color = disabledColor;
-                Debug.Log($"[Icon {iconId}] Not Owned → 적용 색상: disabledColor = {disabledColor}");
-            }
+            iconImages[i].color = owned ? enabledColor : disabledColor;
         }
     }
 
@@ -304,8 +352,9 @@ public class UIManager : MonoBehaviour
             res =>
             {
                 GameManager.Instance.record = res.data;
-                
-                UpdateRecordUI(); // 필요 시 UI 갱신
+
+                UpdateRecordUI(); // UI 갱신
+                GetGlobalRanking(); // 글로벌 랭킹 갱신
             },
             err =>
             {
@@ -317,6 +366,7 @@ public class UIManager : MonoBehaviour
     public void RecordButton()
     {
         UpdateUserRecord(1, 1, 0, 10);
+
     }
 
     public void GetGlobalRanking()
@@ -345,7 +395,7 @@ public class UIManager : MonoBehaviour
 
     public void UpdateGlobalRankingUI(GlobalRankEntry[] entries)
     {
-        for (int i = 0; i < entries.Length; i++)
+        for (int i = 0; i < 5; i++)
         {
             var entry = entries[i];
 
@@ -491,5 +541,5 @@ public class GlobalRankingResponse
 {
     public bool success;
     public GlobalRankEntry[] data;
+
 }
-*/

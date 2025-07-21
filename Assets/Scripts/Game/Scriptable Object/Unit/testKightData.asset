@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a7c9c71710beb0479729de009243f0b, type: 3}
+  m_Name: testKightData
+  m_EditorClassIdentifier: 
+  entityName: testKnight
+  maxHP: 5
+  attackDamage: 5
+  attackCoreDamage: 5
+  attackCooldown: 1
+  moveSpeed: 5
+  entityScale: 0
+  Layer: 14
+  detectionRadius: 20
+  attackRange: 2
+  disengageRange: 5
+  attackPriority: 0
+  attackableType: 0
+  attackType: 0
+  entityPrefab: {fileID: 1415375744480942332, guid: 2d32587978d83214989e3051ff51a1cb, type: 3}
+  projectilePrefab: {fileID: 0}
+  projectilePoolName: 
+  summonEffectPrefab: {fileID: 0}
+  attackEffectPrefab: {fileID: 0}
+  takeDamageEffectPrefeb: {fileID: 0}
+  deathEffectPrefab: {fileID: 0}
+  projectileAttackingEffectPrefab: {fileID: 0}
+  summonSound: {fileID: 0}
+  attackSound: {fileID: 0}
+  deathSound: {fileID: 0}
+  animatorController: {fileID: 9100000, guid: 978dfb3f95c533c4aa9742b18291eb77, type: 2}
+  attackClip: {fileID: 7400000, guid: 33bd65223d28b1c4cb76a7bebb02a099, type: 3}
+  runClip: {fileID: 7400000, guid: 3e26d22a6afd2244a9c4ecaf6b9adf6e, type: 3}
+  deathClip: {fileID: 7400000, guid: a2734260adfadb94ca2629af8af3c3bf, type: 3}
+  idleClip: {fileID: 7400000, guid: ee2d211244aad6943b091b16a3d94a27, type: 3}

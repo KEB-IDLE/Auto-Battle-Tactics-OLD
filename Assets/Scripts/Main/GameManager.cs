@@ -1,5 +1,4 @@
-﻿/*
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SocialPlatforms.Impl;
 
@@ -16,7 +15,7 @@ public class GameManager : MonoBehaviour
 
     public string accessToken;  // JWT 토큰
 
-
+    public string opponentId;
 
     private void Awake()
     {
@@ -31,4 +30,3 @@ public class GameManager : MonoBehaviour
         }
     }
 }
-*/

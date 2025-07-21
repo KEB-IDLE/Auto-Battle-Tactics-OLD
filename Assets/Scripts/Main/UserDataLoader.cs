@@ -1,4 +1,3 @@
-/*
 using System.Collections;
 using UnityEngine;
 
@@ -9,9 +8,9 @@ public class UserDataLoader : MonoBehaviour
     public IEnumerator LoadAllUserDataCoroutine()
     {
         yield return LoadProfile();
-        yield return LoadOwnedIcons();  // �߰�
+        yield return LoadOwnedIcons();
         yield return LoadRecord();
-        yield return LoadMatchHistory();
+        //yield return LoadMatchHistory();
 
         if (uiManager != null)
         {
@@ -38,10 +37,9 @@ public class UserDataLoader : MonoBehaviour
         );
     }
 
-    //���� �߰��� ������ ������ ������ ����Ʈ �ε�
     IEnumerator LoadOwnedIcons()
     {
-        yield return APIService.Instance.GetList<int>(  // int ����Ʈ�� �޴´ٰ� ���� (icon_id ����Ʈ)
+        yield return APIService.Instance.GetList<int>(
             APIEndpoints.ProfileIcons,
             res => GameManager.Instance.ownedProfileIcons = res,
             err => Debug.LogError("Owned icons load failed: " + err)
@@ -57,13 +55,12 @@ public class UserDataLoader : MonoBehaviour
         );
     }
 
-    IEnumerator LoadMatchHistory()
-    {
-        yield return APIService.Instance.GetList<MatchHistory>(
-            APIEndpoints.MatchHistory,
-            res => GameManager.Instance.matchHistory = res,
-            err => Debug.LogError("Match history load failed: " + err)
-        );
-    }
+    //IEnumerator LoadMatchHistory()
+    //{
+    //    yield return APIService.Instance.GetList<MatchHistory>(
+    //        APIEndpoints.MatchHistory,
+    //        res => GameManager.Instance.matchHistory = res,
+    //        err => Debug.LogError("Match history load failed: " + err)
+    //    );
+    //}
 }
-*/
