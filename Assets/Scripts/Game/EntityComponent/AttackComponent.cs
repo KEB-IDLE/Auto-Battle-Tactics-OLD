@@ -12,8 +12,10 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
     
     private float attackDamage;
     private float attackCoreDamage;
+    private float attackImpactRatio;
     private float attackCooldown;
-    private float lastAttackTime;
+    private float attackAnimLength;
+    //private float lastAttackTime;
     private float detectionRadius;
     private float attackRange;
     private float disengageRange;
@@ -21,7 +23,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
     public Transform firePoint;
 
 
-    private GameObject projectilePrefab;
+    //private GameObject projectilePrefab;
     private string projectilePoolName;
 
     private IDamageable lockedTarget;
@@ -62,7 +64,9 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
         _entityData = data;
         attackDamage = data.attackDamage;
         attackCoreDamage = data.attackCoreDamage;
-        attackCooldown = data.attackCooldown;
+        attackAnimLength = data.attackClip.length;
+        attackCooldown = attackAnimLength;
+        attackImpactRatio = data.attackImpactRatio;
         detectionRadius = data.detectionRadius;
         attackRange = data.attackRange;
         disengageRange = data.disengageRange;
@@ -71,13 +75,13 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
         firePoint = transform.Find("FirePoint");
         projectilePoolName = data.projectilePoolName;
 
-        if (attackType == AttackType.Melee)
-            projectilePrefab = null;
-        else
-            projectilePrefab = data.projectilePrefab;
+        //if (attackType == AttackType.Melee)
+        //    projectilePrefab = null;
+        //else
+        //    projectilePrefab = data.projectilePrefab;
 
         
-        lastAttackTime = 0f;
+        //lastAttackTime = 0f;
 
         allUnitMask = LayerMask.GetMask("Agent", "Tower", "Core");
         towerOnlyMask = LayerMask.GetMask("Tower", "Core");
@@ -156,7 +160,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
     private void TryAttack(IDamageable target)
     {
         if (!CanAttack(target)) return;
-        lastAttackTime = Time.time;
+        //lastAttackTime = Time.time;
         switch (attackType)
         {
             case AttackType.Melee:
@@ -178,20 +182,26 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
     {
         isAttackingFlag = true;
         OnAttackStateChanged?.Invoke(true);
+
+        float impactDelay = attackAnimLength * attackImpactRatio;
+
         try
         {
+            LookAtTarget(target);
+            yield return new WaitForSeconds(impactDelay);
             TryAttack(target);
+            yield return new WaitForSeconds(attackCooldown - impactDelay);
             while (target.IsAlive() &&
                    Vector3.Distance(transform.position,
                        (target as MonoBehaviour).transform.position) <= attackRange)
             {
-                orientable?.LookAtTarget((target as MonoBehaviour).transform.position);
-                yield return new WaitForSeconds(attackCooldown);
+                LookAtTarget(target);
+                yield return new WaitForSeconds(impactDelay);
                 TryAttack(target);
+                yield return new WaitForSeconds(attackCooldown - impactDelay);
             }
 
             OnAttackStateChanged?.Invoke(false);
-
 
             if (!target.IsAlive() ||
                 Vector3.Distance(transform.position,
@@ -218,6 +228,8 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
                           .GetComponent<Core>();
 
         OnAttackEffect?.Invoke(firePoint);
+
+        Debug.Log("attack!!!!!!");
 
         if (coreComp != null)
             lockedTarget.TakeDamage(attackCoreDamage);
@@ -284,9 +296,21 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
         return false;
     }
 
-
     public bool IsAttacking()
-        => Time.time < lastAttackTime + attackCooldown;
+    {
+        return isAttackingFlag;
+    }
+    private void LookAtTarget(IDamageable target)
+    {
+        var mb = target as MonoBehaviour;
+        if (mb != null)
+        {
+            Vector3 targetPos = mb.transform.position;
+            targetPos.y = transform.position.y; // y 고정(수평 회전)
+            transform.LookAt(targetPos);
+        }
+    }
+
     public bool isMelee => attackType == AttackType.Melee;
     public bool isRanged => attackType == AttackType.Ranged;
     public bool isMagic => attackType == AttackType.Magic;

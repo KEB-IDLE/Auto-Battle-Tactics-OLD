@@ -13,8 +13,11 @@ public class EntityData : ScriptableObject
     public float attackDamage;
     [Tooltip("Attack damage to core")]
     public float attackCoreDamage;
-    [Tooltip("Attack cooldown (seconds)")]
-    public float attackCooldown;
+    //[Tooltip("Attack cooldown (seconds)")]
+    //public float attackCooldown;
+    [Tooltip("Attack Impact Delay (seconds)")]
+    public float attackImpactRatio;
+
     [Tooltip("Move speed")]
     public float moveSpeed;
     [Tooltip("Entity scale")]

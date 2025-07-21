@@ -1,3 +1,4 @@
+
 using System.Collections;
 using System.Linq;
 using TMPro;
@@ -22,7 +23,7 @@ public class UIManager : MonoBehaviour
     public Button[] iconButtons;         // 아이콘 선택용 버튼 배열 (인스펙터에 1,2,3,4 버튼 드래그)
     public Image[] iconImages;           // 버튼에 붙은 Image 컴포넌트 (흐림 처리용)
     Color enabledColor = Color.white;
-    Color disabledColor = new Color(1f,1f,1f, 0.1f);  // 반투명 (흐릿함)
+    Color disabledColor = new Color(1f, 1f, 1f, 0.1f);  // 반투명 (흐릿함)
 
     // 내꺼
     public TMP_Text rankMatchText;
@@ -351,7 +352,7 @@ public class UIManager : MonoBehaviour
             res =>
             {
                 GameManager.Instance.record = res.data;
-                
+
                 UpdateRecordUI(); // UI 갱신
                 GetGlobalRanking(); // 글로벌 랭킹 갱신
             },
@@ -365,7 +366,7 @@ public class UIManager : MonoBehaviour
     public void RecordButton()
     {
         UpdateUserRecord(1, 1, 0, 10);
-        
+
     }
 
     public void GetGlobalRanking()
@@ -540,4 +541,5 @@ public class GlobalRankingResponse
 {
     public bool success;
     public GlobalRankEntry[] data;
+
 }

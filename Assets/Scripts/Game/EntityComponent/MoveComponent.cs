@@ -49,7 +49,6 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
         else
         {
             _agent.SetDestination(coreTransform.position);
-            LookAtTarget(coreTransform.position);
         }
         if (!_isMoving)
         {
