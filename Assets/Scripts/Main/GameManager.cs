@@ -1,5 +1,4 @@
-﻿/*
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SocialPlatforms.Impl;
 
@@ -31,4 +30,3 @@ public class GameManager : MonoBehaviour
         }
     }
 }
-*/

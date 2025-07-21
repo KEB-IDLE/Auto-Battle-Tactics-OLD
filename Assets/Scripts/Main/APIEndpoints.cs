@@ -1,4 +1,3 @@
-/*
 public static class APIEndpoints
 {
     public const string Register = "/auth/register";
@@ -23,4 +22,3 @@ public static class APIEndpoints
 
     //public const string MatchHistory = "/user/match/history";
 }
-*/
