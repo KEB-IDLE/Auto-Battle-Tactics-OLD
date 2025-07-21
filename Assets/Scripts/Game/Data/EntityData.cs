@@ -13,8 +13,6 @@ public class EntityData : ScriptableObject
     public float attackDamage;
     [Tooltip("Attack damage to core")]
     public float attackCoreDamage;
-    //[Tooltip("Attack cooldown (seconds)")]
-    //public float attackCooldown;
     [Tooltip("Attack Impact Delay (seconds)")]
     public float attackImpactRatio;
 
@@ -42,8 +40,8 @@ public class EntityData : ScriptableObject
     }
     [Tooltip("Attack target type (Agent, Tower, Core)")]
     public AttackPriority attackPriority;
-    [Tooltip("Can attack air units or not")]
-    public AttackableType attackableType;
+    //[Tooltip("Can attack air units or not")]
+    //public AttackableType attackableType;
 
     [Tooltip("Attack type (Melee, Ranged, Magic)")]
     public AttackType attackType;
