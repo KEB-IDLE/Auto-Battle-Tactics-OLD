@@ -28,7 +28,6 @@ public class ProjectilePool : MonoBehaviour
         }
         else
         {
-            // 필요시 풀을 확장 (Optional)
             var obj = Instantiate(projectilePrefab, transform);
             return obj;
         }

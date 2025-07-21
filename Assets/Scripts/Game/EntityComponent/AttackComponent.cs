@@ -10,13 +10,13 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
     // Ony for Gizmo test
     private EntityData _entityData; // EntityData를 통해 초기화할 수 있도록
     
-    private float attackDamage;         // 대미지
-    private float attackCoreDamage;     // 코어 공격 대미지
-    private float attackCooldown;       // 재공격까지 대기시간
-    private float lastAttackTime;       // 마지막 공격 시간
-    private float detectionRadius;      // 공격 대상 인지 범위
-    private float attackRange;          // 공격 범위
-    private float disengageRange;       // 공격 대상과의 거리가 이 범위를 벗어나면 공격 중지
+    private float attackDamage;
+    private float attackCoreDamage;
+    private float attackCooldown;
+    private float lastAttackTime;
+    private float detectionRadius;
+    private float attackRange;
+    private float disengageRange;
     private bool isAttackingFlag;
     public Transform firePoint;
 
@@ -24,10 +24,10 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
     private GameObject projectilePrefab;
     private string projectilePoolName;
 
-    private IDamageable lockedTarget;   // 현재 공격 대상
+    private IDamageable lockedTarget;
     private IOrientable orientable;
-    private ITeamProvider teamProvider; // 팀 정보 제공자
-    private AttackType attackType;      // 유닛의 공격 유형
+    private ITeamProvider teamProvider;
+    private AttackType attackType;
 
     private LayerMask allUnitMask;
     private LayerMask towerOnlyMask;
@@ -111,7 +111,6 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
             else
                 lockedTarget = null;
         }
-        // 2) 공격 조건 검사
         if (lockedTarget != null && CanAttack(lockedTarget) && !isAttackingFlag)
                 StartCoroutine(AttackRoutine(lockedTarget));
     }
@@ -182,7 +181,6 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
         try
         {
             TryAttack(target);
-            // 사거리 이탈 또는 대상 사망 전까지, 자동으로 재공격
             while (target.IsAlive() &&
                    Vector3.Distance(transform.position,
                        (target as MonoBehaviour).transform.position) <= attackRange)
@@ -192,10 +190,9 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
                 TryAttack(target);
             }
 
-            // 공격 종료 이벤트
             OnAttackStateChanged?.Invoke(false);
 
-            // 범위 벗어나면 타겟 초기화
+
             if (!target.IsAlive() ||
                 Vector3.Distance(transform.position,
                     (target as MonoBehaviour).transform.position) > disengageRange)
@@ -210,8 +207,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
         }
     }
 
-    // animation cilp 중 실행할 메서드
-    // 근접 공격 시
+
 
     private void AttackMelee(IDamageable target)
     {
@@ -221,7 +217,6 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
         var coreComp = (lockedTarget as MonoBehaviour)
                           .GetComponent<Core>();
 
-        //여기에 타격 이펙트 추가
         OnAttackEffect?.Invoke(firePoint);
 
         if (coreComp != null)
@@ -256,7 +251,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
     {
         lockedTarget = target;
 
-        // 즉시 피해!
+        // attack 
         if (lockedTarget != null && lockedTarget.IsAlive())
         {
             var coreComp = (lockedTarget as MonoBehaviour)
@@ -277,7 +272,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
         Vector3 dir = (dest - origin).normalized;
         float dist = Vector3.Distance(origin, dest);
 
-        // "Obstacle" 등 장애물 레이어 포함!
+        // "Obstacle" layer..
         int raycastMask = LayerMask.GetMask("Agent", "Tower", "Core", "Obstacle", "Structure");
 
         if (Physics.Raycast(origin, dir, out RaycastHit hit, dist, raycastMask))
@@ -301,15 +296,15 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
     {
         if (_entityData == null) return;
 
-        // 감지 반경(detectionRadius)
+        // detectionRadius
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, _entityData.detectionRadius);
 
-        // 공격 반경(attackRange)
+        // attackRange
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, _entityData.attackRange);
 
-        // 해제 반경(disengageRange)
+        // disengageRange
         Gizmos.color = Color.cyan;
         Gizmos.DrawWireSphere(transform.position, _entityData.disengageRange);
     }

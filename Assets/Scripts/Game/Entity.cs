@@ -51,7 +51,6 @@ public class Entity : MonoBehaviour
     public void SetData(EntityData data)
     {
         entityData = data;
-        // 데이터에 맞는 초기화 등 수행
     }
 
 }

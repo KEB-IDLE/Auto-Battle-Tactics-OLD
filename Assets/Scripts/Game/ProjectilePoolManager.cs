@@ -8,7 +8,7 @@ public class ProjectilePoolManager : MonoBehaviour
     [System.Serializable]
     public class PoolInfo
     {
-        public string poolName;           // 예: "Arrow", "Fireball"
+        public string poolName;           // ex: "Arrow", "Fireball"
         public ProjectilePool pool;
     }
 
@@ -20,7 +20,7 @@ public class ProjectilePoolManager : MonoBehaviour
         if (Instance == null) Instance = this;
         else { Destroy(gameObject); return; }
 
-        // Dictionary로 빠른 검색
+
         poolDict = new Dictionary<string, ProjectilePool>();
         foreach (var p in pools)
         {

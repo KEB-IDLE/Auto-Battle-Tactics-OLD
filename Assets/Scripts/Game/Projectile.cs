@@ -124,7 +124,7 @@ public class Projectile : MonoBehaviour, IEffectNotifier
         if (_pool != null)
             _pool.ReturnProjectile(this);
         else
-            Destroy(gameObject); // 풀 없을 때 백업용
+            Destroy(gameObject);
     }
 
 
@@ -134,11 +134,11 @@ public class Projectile : MonoBehaviour, IEffectNotifier
     {
         if (data == null) return;
 
-        // 감지 반경(detectionRadius)
+        // detectionRadius
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, data.detectionRadius);
 
-        // 공격 반경(attackRange)
+        // attackRange
         Gizmos.color = Color.brown;
         Gizmos.DrawWireSphere(transform.position, data.explosionRadius);
     }
