@@ -29,10 +29,8 @@ public class AnimationComponent : MonoBehaviour
     public void Initialize(EntityData data)
     {
         if (_controller == null)
-        {
             _controller = new AnimatorOverrideController(data.animatorController);
-            Debug.Log("ssssssssssssssssssssssssssssssss");
-        }
+        
            
         _animator.runtimeAnimatorController = _controller;
 
