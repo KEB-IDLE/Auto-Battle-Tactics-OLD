@@ -40,7 +40,8 @@ public class Projectile : MonoBehaviour, IEffectNotifier
         this.target = target;
         this.coreDamage = coreDamage;
         timer = 0f;
-
+        _rb.linearVelocity = Vector3.zero;
+        _rb.angularVelocity = Vector3.zero;
         // 안전하게 Team 정보 받기
         var teamComponent = owner.GetComponent<TeamComponent>();
         if (teamComponent != null)

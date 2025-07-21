@@ -38,6 +38,7 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier, IEffe
             // 여기에 피격 이펙트 추가하기.
             OnTakeDamageEffect?.Invoke(this.transform);
             currentHP -= damage; // 데미지를 받아 현재 체력 감소
+            Debug.Log(currentHP);
             if (!IsAlive()) DeathRoutine();
         }
     }
