@@ -1,5 +1,8 @@
-﻿using TMPro;
+﻿using System.Collections;
+using System.Linq;
+using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
@@ -30,6 +33,62 @@ public class UIManager : MonoBehaviour
     // 전체 랭킹
     public TMP_Text[] rankTexts;        // 닉네임 + 점수 텍스트들 (1~5위)
     public Image[] rankIcons;          // 프로필 아이콘 이미지들 (1~5위용)
+
+
+    public void OnClickJoinMatch()
+    {
+        StartCoroutine(MatchService.Instance.JoinMatchQueue(
+            () =>
+            {
+                Debug.Log("큐 등록 완료, 매칭 대기 시작...");
+                StartCoroutine(PollMatchStatus());
+            },
+            err =>
+            {
+                Debug.LogWarning("큐 등록 실패: " + err);
+            }
+        ));
+    }
+
+    private IEnumerator PollMatchStatus()
+    {
+        float pollInterval = 2f;
+        float timeout = 30f;
+        float elapsed = 0f;
+
+        while (elapsed < timeout)
+        {
+            bool waiting = true;
+
+            yield return MatchService.Instance.CheckMatchStatus(
+                opponentId =>
+                {
+                    Debug.Log("매칭 성공! 상대: " + opponentId);
+                    GameManager.Instance.opponentId = opponentId;
+                    SceneManager.LoadScene(2);
+                    waiting = false;
+                },
+                () =>
+                {
+                    Debug.Log("아직 매칭되지 않음...");
+                },
+                err =>
+                {
+                    Debug.LogWarning("매칭 상태 확인 중 오류: " + err);
+                }
+            );
+
+            if (!waiting) yield break;
+
+            yield return new WaitForSeconds(pollInterval);
+            elapsed += pollInterval;
+        }
+
+        Debug.LogWarning("⏰ 매칭 시간 초과");
+        // TODO: 매칭 실패 UI 띄우기 등 처리
+    }
+
+
 
 
     public void SpawnCharacter(int charId)

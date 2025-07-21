@@ -15,7 +15,7 @@ public class GameManager : MonoBehaviour
 
     public string accessToken;  // JWT 토큰
 
-
+    public string opponentId;
 
     private void Awake()
     {

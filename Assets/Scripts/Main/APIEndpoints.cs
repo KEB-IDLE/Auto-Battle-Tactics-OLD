@@ -17,5 +17,8 @@ public static class APIEndpoints
 
     public const string GlobalRanking = "/ranking/global";
 
+    public const string MatchJoin = "/match/join";
+    public const string MatchStatus = "/match/status";
+
     //public const string MatchHistory = "/user/match/history";
 }
