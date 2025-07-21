@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 //using static UnityEngine.GraphicsBuffer;
 //using static UnityEngine.UI.GridLayoutGroup;
@@ -7,32 +8,32 @@ using UnityEngine;
 public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEffectNotifier
 {
     // Ony for Gizmo test
-    private EntityData _entityData; // EntityData¸¦ ÅëÇØ ÃÊ±âÈ­ÇÒ ¼ö ÀÖµµ·Ï
+    private EntityData _entityData; // EntityDataë¥¼ í†µí•´ ì´ˆê¸°í™”í•  ìˆ˜ ìˆë„ë¡
     
-    private float attackDamage;         // ´ë¹ÌÁö
-    private float attackCoreDamage;     // ÄÚ¾î °ø°İ ´ë¹ÌÁö
-    private float attackCooldown;       // Àç°ø°İ±îÁö ´ë±â½Ã°£
-    private float lastAttackTime;       // ¸¶Áö¸· °ø°İ ½Ã°£
-    private float detectionRadius;      // °ø°İ ´ë»ó ÀÎÁö ¹üÀ§
-    private float attackRange;          // °ø°İ ¹üÀ§
-    private float disengageRange;       // °ø°İ ´ë»ó°úÀÇ °Å¸®°¡ ÀÌ ¹üÀ§¸¦ ¹ş¾î³ª¸é °ø°İ ÁßÁö
+    private float attackDamage;
+    private float attackCoreDamage;
+    private float attackCooldown;
+    private float lastAttackTime;
+    private float detectionRadius;
+    private float attackRange;
+    private float disengageRange;
     private bool isAttackingFlag;
     public Transform firePoint;
 
 
     private GameObject projectilePrefab;
-    //private ProjectileData projectileData;
+    private string projectilePoolName;
 
-    private IDamageable lockedTarget;   // ÇöÀç °ø°İ ´ë»ó
+    private IDamageable lockedTarget;
     private IOrientable orientable;
-    private ITeamProvider teamProvider; // ÆÀ Á¤º¸ Á¦°øÀÚ
-    private AttackType attackType;      // À¯´ÖÀÇ °ø°İ À¯Çü
+    private ITeamProvider teamProvider;
+    private AttackType attackType;
 
     private LayerMask allUnitMask;
     private LayerMask towerOnlyMask;
     private LayerMask coreOnlyMask;
     private LayerMask targetLayer;
-
+    
 
 
 #pragma warning disable 67
@@ -51,7 +52,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
         teamProvider = GetComponent<ITeamProvider>();
         if (teamProvider == null)
         {
-            Debug.LogError($"{name}¿¡ ITeamProvider(TeamComponent)°¡ ÇÒ´çµÇÁö ¾Ê¾Ò½À´Ï´Ù!");
+            Debug.LogError($"{name}ì— ITeamProvider(TeamComponent)ê°€ í• ë‹¹ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤!");
         }
     }
 
@@ -68,6 +69,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
         attackType = data.attackType;
         isAttackingFlag = false;
         firePoint = transform.Find("FirePoint");
+        projectilePoolName = data.projectilePoolName;
 
         if (attackType == AttackType.Melee)
             projectilePrefab = null;
@@ -109,7 +111,6 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
             else
                 lockedTarget = null;
         }
-        // 2) °ø°İ Á¶°Ç °Ë»ç
         if (lockedTarget != null && CanAttack(lockedTarget) && !isAttackingFlag)
                 StartCoroutine(AttackRoutine(lockedTarget));
     }
@@ -168,7 +169,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
                 AttackMagic(target);
                 break;
             default:
-                Debug.LogWarning("Áö¿øÇÏÁö ¾Ê´Â °ø°İ Å¸ÀÔ");
+                Debug.LogWarning("ì§€ì›í•˜ì§€ ì•ŠëŠ” ê³µê²© íƒ€ì…");
                 break;
         }
     }
@@ -180,7 +181,6 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
         try
         {
             TryAttack(target);
-            // »ç°Å¸® ÀÌÅ» ¶Ç´Â ´ë»ó »ç¸Á Àü±îÁö, ÀÚµ¿À¸·Î Àç°ø°İ
             while (target.IsAlive() &&
                    Vector3.Distance(transform.position,
                        (target as MonoBehaviour).transform.position) <= attackRange)
@@ -190,10 +190,9 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
                 TryAttack(target);
             }
 
-            // °ø°İ Á¾·á ÀÌº¥Æ®
             OnAttackStateChanged?.Invoke(false);
 
-            // ¹üÀ§ ¹ş¾î³ª¸é Å¸°Ù ÃÊ±âÈ­
+
             if (!target.IsAlive() ||
                 Vector3.Distance(transform.position,
                     (target as MonoBehaviour).transform.position) > disengageRange)
@@ -208,8 +207,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
         }
     }
 
-    // animation cilp Áß ½ÇÇàÇÒ ¸Ş¼­µå
-    // ±ÙÁ¢ °ø°İ ½Ã
+
 
     private void AttackMelee(IDamageable target)
     {
@@ -219,7 +217,6 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
         var coreComp = (lockedTarget as MonoBehaviour)
                           .GetComponent<Core>();
 
-        //¿©±â¿¡ Å¸°İ ÀÌÆåÆ® Ãß°¡
         OnAttackEffect?.Invoke(firePoint);
 
         if (coreComp != null)
@@ -230,22 +227,31 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
 
     private void AttackRanged(IDamageable target)
     {
-
         lockedTarget = target;
-        var projGO = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
-        var projectile = projGO.GetComponent<Projectile>();
+        var pool = ProjectilePoolManager.Instance.GetPool(projectilePoolName);
+        if(pool == null)
+        {
+            Debug.LogError("[AttackComponent] ProjectilePoolì„ ì°¾ì§€ ëª»í–ˆìŠµë‹ˆë‹¤!");
+            return;
+        }
+
+        var projectile = pool.GetProjectile();
+        projectile.transform.position = firePoint.position;
+        projectile.transform.rotation = Quaternion.identity;
+        projectile.SetPool(pool);
         projectile.Initialize(
-        owner: this.GetComponent<Entity>(),             // Åõ»çÃ¼ ¼ÒÀ¯ÀÚ
-        damage: attackDamage,                           // ´ë¹ÌÁö
-        coreDamage: attackCoreDamage,                   // ÄÚ¾î °ø°İ·Â 
-        target: (target as MonoBehaviour).transform);   // ¸ñÇ¥ Transform Àü´Ş
+            owner: this.GetComponent<Entity>(),
+            damage: attackDamage,
+            coreDamage: attackCoreDamage,
+            target: (target as MonoBehaviour).transform
+            );
     }
 
     private void AttackMagic(IDamageable target)
     {
         lockedTarget = target;
 
-        // Áï½Ã ÇÇÇØ!
+        // attack 
         if (lockedTarget != null && lockedTarget.IsAlive())
         {
             var coreComp = (lockedTarget as MonoBehaviour)
@@ -255,7 +261,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
             else
                 lockedTarget.TakeDamage(attackDamage);
 
-            // Ãß°¡: ¿¬Ãâ È¿°ú, ÆÄÆ¼Å¬, »ç¿îµå µî ¿©±â¼­ Instantiate
+            // ì¶”ê°€: ì—°ì¶œ íš¨ê³¼, íŒŒí‹°í´, ì‚¬ìš´ë“œ ë“± ì—¬ê¸°ì„œ Instantiate
         }
     }
 
@@ -266,15 +272,15 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
         Vector3 dir = (dest - origin).normalized;
         float dist = Vector3.Distance(origin, dest);
 
-        // "Obstacle" µî Àå¾Ö¹° ·¹ÀÌ¾î Æ÷ÇÔ!
+        // "Obstacle" layer..
         int raycastMask = LayerMask.GetMask("Agent", "Tower", "Core", "Obstacle", "Structure");
 
         if (Physics.Raycast(origin, dir, out RaycastHit hit, dist, raycastMask))
         {
-            // Ray°¡ Å¸°ÙÀ» Á¤È®È÷ ¸ÂÃèÀ» ¶§¸¸ °ø°İ °¡´É
+            // Rayê°€ íƒ€ê²Ÿì„ ì •í™•íˆ ë§ì·„ì„ ë•Œë§Œ ê³µê²© ê°€ëŠ¥
             return hit.transform == target;
         }
-        // ¾Æ¹«°Íµµ ¾È ¸ÂÀ¸¸é ½Ã¾ß ¸·Èû(ºñÁ¤»ó)
+        // ì•„ë¬´ê²ƒë„ ì•ˆ ë§ìœ¼ë©´ ì‹œì•¼ ë§‰í˜(ë¹„ì •ìƒ)
         return false;
     }
 
@@ -290,15 +296,15 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
     {
         if (_entityData == null) return;
 
-        // °¨Áö ¹İ°æ(detectionRadius)
+        // detectionRadius
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, _entityData.detectionRadius);
 
-        // °ø°İ ¹İ°æ(attackRange)
+        // attackRange
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, _entityData.attackRange);
 
-        // ÇØÁ¦ ¹İ°æ(disengageRange)
+        // disengageRange
         Gizmos.color = Color.cyan;
         Gizmos.DrawWireSphere(transform.position, _entityData.disengageRange);
     }

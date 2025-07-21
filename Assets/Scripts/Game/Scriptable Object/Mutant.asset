@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 826a7d254cca7e547ab90347db98c1b9, type: 3}
+  m_Name: Mutant
+  m_EditorClassIdentifier: 
+  maxHP: 150
+  attackDamage: 25
+  attackCoreDamage: 1
+  attackCooldown: 1
+  moveSpeed: 1
+  entityScale: 0
+  Layer: 8
+  detectionRadius: 0
+  attackRange: 2
+  disengageRange: 0
+  attackPriority: 0
+  attackableType: 0
+  attackType: 0
+  projectilePrefab: {fileID: 0}
+  projectileSpeed: 0
+  projectileLifeTime: 0
+  entityPrefab: {fileID: 2517410286468318621, guid: 78d9919cafa3f1743a98fae3c29dc7d0, type: 3}
+  summonEffectPrefab: {fileID: 0}
+  attackEffectPrefab: {fileID: 0}
+  deathEffectPrefab: {fileID: 0}
+  summonSound: {fileID: 0}
+  attackSound: {fileID: 0}
+  deathSound: {fileID: 0}
+  animatorController: {fileID: 9100000, guid: 306d5c6d85612d14686df5de60c906cc, type: 2}
+  attackClip: {fileID: -203655887218126122, guid: 4eb5482d5f651464ab61836f90f3195d, type: 3}
+  runClip: {fileID: -203655887218126122, guid: ca3026efeddd0eb4596ba4a997482da4, type: 3}
+  deathClip: {fileID: -203655887218126122, guid: eebdf31217f4aa046996724c1c3444d5, type: 3}
+  idleClip: {fileID: -203655887218126122, guid: b739f25c88d2b904fb95ee758fa27dd4, type: 3}

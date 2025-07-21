@@ -2,8 +2,7 @@ using UnityEngine;
 
 public class CoreComponent : MonoBehaviour
 {
-    // ÄÚ¾î°¡ ºÎ¼­Áö¸é ½ÇÇà..
-
+    // ì½”ì–´ê°€ ë¶€ì„œì§€ë©´ ì‹¤í–‰..
     private void Start()
     {
         var hp = GetComponent<HealthComponent>();
@@ -12,8 +11,8 @@ public class CoreComponent : MonoBehaviour
 
     private void OnCoreDestroyed()
     {
-        // °ÔÀÓ ½ÂÆÐ Ã³¸®, ÄÚ¾î Àü¿ë ¿¬Ãâ µî
-        Debug.Log("ÄÚ¾î ÆÄ±«! °ÔÀÓ Á¾·á Ã³¸®");
+        // ê²Œìž„ ìŠ¹íŒ¨ ì²˜ë¦¬, ì½”ì–´ ì „ìš© ì—°ì¶œ ë“±
+        Debug.Log("ì½”ì–´ íŒŒê´´! ê²Œìž„ ì¢…ë£Œ ì²˜ë¦¬");
     }
 
 }

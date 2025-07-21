@@ -60,7 +60,7 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
 
     public void Initialize(EntityData data)
     {
-        moveSpeed = data.moveSpeed; // 이동 속도 초기화
+        moveSpeed = data.moveSpeed;
         _agent.speed = moveSpeed;
         _agent.acceleration = moveSpeed;
         _agent.autoBraking = false;
@@ -74,7 +74,6 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
         if (dir.sqrMagnitude > 0.01f)
         {
             Quaternion lookRot = Quaternion.LookRotation(dir);
-            // 부드럽게 회전하려면 Slerp
             transform.rotation = Quaternion.Slerp(
                 transform.rotation, lookRot, Time.deltaTime * 10f);
         }

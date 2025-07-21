@@ -1,5 +1,9 @@
+<<<<<<< HEAD
 ﻿using System.Collections;
 using System.Linq;
+=======
+﻿/*
+>>>>>>> 4bc682c1cf7c7f40b252c20734a2dba9bf429b0f
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -541,3 +545,4 @@ public class GlobalRankingResponse
     public bool success;
     public GlobalRankEntry[] data;
 }
+*/

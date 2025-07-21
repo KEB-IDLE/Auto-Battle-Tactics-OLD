@@ -12,8 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5392a4193bcc6744d98c42f9be10bc66, type: 3}
   m_Name: ArrowData
   m_EditorClassIdentifier: 
-  speed: 7
-  verticalSpeed: 7
+  projectilePrefab: {fileID: 3287624786238722518, guid: 0c144b528e01b334baa60edbf77d3be1, type: 3}
+  speed: 10
+  verticalSpeed: 5
   lifeTime: 3
   detectionRadius: 0.2
   explosionRadius: 5

@@ -7,9 +7,14 @@ using System;
 public class Projectile : MonoBehaviour, IEffectNotifier
 {
     private Rigidbody _rb;
+    private ProjectilePool _pool;
+
+
+    [Header("Projectile Scriptable Object를 할당하세요.")]
+    [Tooltip("Asset > Scripts > Game > ScriptableObject > Unit 선택 후 원하는 데이터 삽입")]
     [SerializeField] private ProjectileData data;
 
-    private Entity owner;
+    //private Entity owner;
     private Team team; // 소환자의 팀(직접 저장)
     private float timer;
     private float damage;
@@ -30,7 +35,7 @@ public class Projectile : MonoBehaviour, IEffectNotifier
 
     public void Initialize(Entity owner, float damage, float coreDamage, Transform target)
     {
-        this.owner = owner;
+        //this.owner = owner;
         this.damage = damage;
         this.target = target;
         this.coreDamage = coreDamage;
@@ -52,7 +57,7 @@ public class Projectile : MonoBehaviour, IEffectNotifier
         timer += Time.deltaTime;
         if(timer > data.lifeTime || target == null /*lifeTime*/)
         {
-            Destroy(gameObject);
+            ReturnToPool();
             return;
         }
         Move();
@@ -100,28 +105,40 @@ public class Projectile : MonoBehaviour, IEffectNotifier
 
                 if (hp == null)
                     continue;
-                
-
 
                 hp.TakeDamage(coreComp != null ? coreDamage : damage);
             }
             //여기에 타격 이펙트 추가
             OnAttackEffect?.Invoke(this.transform);
-            Destroy(gameObject);
+            ReturnToPool();
             break;
         }
     }
+    public void SetPool(ProjectilePool pool)
+    {
+        _pool = pool;
+    }
+
+    private void ReturnToPool()
+    {
+        if (_pool != null)
+            _pool.ReturnProjectile(this);
+        else
+            Destroy(gameObject);
+    }
+
+
 
 #if UNITY_EDITOR
     private void OnDrawGizmosSelected()
     {
         if (data == null) return;
 
-        // 감지 반경(detectionRadius)
+        // detectionRadius
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, data.detectionRadius);
 
-        // 공격 반경(attackRange)
+        // attackRange
         Gizmos.color = Color.brown;
         Gizmos.DrawWireSphere(transform.position, data.explosionRadius);
     }

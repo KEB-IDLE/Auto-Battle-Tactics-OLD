@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a7c9c71710beb0479729de009243f0b, type: 3}
   m_Name: CoreData
   m_EditorClassIdentifier: 
-  maxHP: 10
+  entityName: asd
+  maxHP: 15
   attackDamage: 0
   attackCoreDamage: 0
   attackCooldown: 0
@@ -25,11 +26,11 @@ MonoBehaviour:
   attackableType: 0
   attackType: 0
   projectilePrefab: {fileID: 0}
-  projectileData: {fileID: 0}
-  entityPrefab: {fileID: 0}
   summonEffectPrefab: {fileID: 0}
   attackEffectPrefab: {fileID: 0}
+  takeDamageEffectPrefeb: {fileID: 0}
   deathEffectPrefab: {fileID: 0}
+  projectileAttackingEffectPrefab: {fileID: 0}
   summonSound: {fileID: 0}
   attackSound: {fileID: 0}
   deathSound: {fileID: 0}
