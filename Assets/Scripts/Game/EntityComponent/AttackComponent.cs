@@ -75,14 +75,6 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
         firePoint = transform.Find("FirePoint");
         projectilePoolName = data.projectilePoolName;
 
-        //if (attackType == AttackType.Melee)
-        //    projectilePrefab = null;
-        //else
-        //    projectilePrefab = data.projectilePrefab;
-
-        
-        //lastAttackTime = 0f;
-
         allUnitMask = LayerMask.GetMask("Agent", "Tower", "Core");
         towerOnlyMask = LayerMask.GetMask("Tower", "Core");
         coreOnlyMask = LayerMask.GetMask("Core");
@@ -160,7 +152,6 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
     private void TryAttack(IDamageable target)
     {
         if (!CanAttack(target)) return;
-        //lastAttackTime = Time.time;
         switch (attackType)
         {
             case AttackType.Melee:
@@ -187,10 +178,6 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
 
         try
         {
-            LookAtTarget(target);
-            yield return new WaitForSeconds(impactDelay);
-            TryAttack(target);
-            yield return new WaitForSeconds(attackCooldown - impactDelay);
             while (target.IsAlive() &&
                    Vector3.Distance(transform.position,
                        (target as MonoBehaviour).transform.position) <= attackRange)
@@ -209,12 +196,15 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
             {
                 lockedTarget = null;
             }
-        } 
+        }
         finally
         {
             isAttackingFlag = false;
             Debug.Log($"[AttackRoutine END]");
         }
+
+
+
     }
 
 
