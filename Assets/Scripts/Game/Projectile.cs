@@ -8,7 +8,7 @@ public class Projectile : MonoBehaviour, IEffectNotifier
 {
     private Rigidbody _rb;
     private ProjectilePool _pool;
-
+    private GameObject flightEffectInstance;
 
     [Header("Projectile Scriptable Object를 할당하세요.")]
     [Tooltip("Asset > Scripts > Game > ScriptableObject > Unit 선택 후 원하는 데이터 삽입")]
@@ -26,6 +26,7 @@ public class Projectile : MonoBehaviour, IEffectNotifier
     public event Action<Transform> OnAttackEffect;
     public event Action<Transform> OnTakeDamageEffect;
     public event Action<Transform> OnDeathEffect;
+    public event Action<Transform> OnProjectileAttackingEffect;
 #pragma warning restore 67
     private void Awake()
     {
@@ -33,16 +34,27 @@ public class Projectile : MonoBehaviour, IEffectNotifier
         _rb.useGravity = true;
     }
 
+
     public void Initialize(Entity owner, float damage, float coreDamage, Transform target)
     {
-        //this.owner = owner;
+        
         this.damage = damage;
         this.target = target;
         this.coreDamage = coreDamage;
         timer = 0f;
         _rb.linearVelocity = Vector3.zero;
         _rb.angularVelocity = Vector3.zero;
-        // 안전하게 Team 정보 받기
+
+        if (data.projectileAttackingEffectPrefab != null)
+        {
+            var pool = EffectPoolManager.Instance.GetPool(data.projectileAttackingEffectPrefab.name);
+            if (pool != null)
+            {
+                flightEffectInstance = pool.GetEffect(transform.position, Quaternion.identity);
+                flightEffectInstance.transform.SetParent(transform);
+            }
+        }
+
         var teamComponent = owner.GetComponent<TeamComponent>();
         if (teamComponent != null)
             this.team = teamComponent.Team;
@@ -67,6 +79,7 @@ public class Projectile : MonoBehaviour, IEffectNotifier
 
     protected virtual void Move()
     {
+        // 여기에 projecileAttackingEffect 활성화
         Vector3 dir = (target.position - transform.position).normalized;
         transform.position += dir * data.speed * Time.deltaTime;
         transform.forward = dir;

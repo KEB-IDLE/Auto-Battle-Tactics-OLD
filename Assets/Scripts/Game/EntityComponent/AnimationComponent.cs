@@ -55,16 +55,6 @@ public class AnimationComponent : MonoBehaviour
         
     //}
 
-    void Update()
-    {
-        if (_animator != null)
-        {
-            var clipInfo = _animator.GetCurrentAnimatorClipInfo(0);
-            if (clipInfo.Length > 0)
-                Debug.Log("현재 재생 중인 애니메이션: " + clipInfo[0].clip.name);
-        }
-    }
-
     public void Bind()
     {
         _attackSrc.OnAttackStateChanged += HandleAttack;

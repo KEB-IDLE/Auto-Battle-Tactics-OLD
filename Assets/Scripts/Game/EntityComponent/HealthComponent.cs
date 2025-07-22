@@ -15,6 +15,7 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier, IEffe
     public event Action<Transform> OnAttackEffect;
     public event Action<Transform> OnTakeDamageEffect;
     public event Action<Transform> OnDeathEffect;
+    public event Action<Transform> OnProjectileAttackingEffect;
 #pragma warning restore 67
 
     public void Initialize(EntityData data) 

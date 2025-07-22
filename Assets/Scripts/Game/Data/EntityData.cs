@@ -22,7 +22,7 @@ public class EntityData : ScriptableObject
     public EntityScale entityScale;
 
     [Header("Layer")]
-    [Tooltip("Layer: 7=Human, 8=Mutant, 9=Tower, 10=Core, 11=Projectile, 12=Structure, 13=Obstacle")]
+    [Tooltip("Layer: 7=Human, 8=Mutant, 9=Tower, 10=Core, 11=Projectile, 12=Structure, 13=Obstacle, 14=Agent")]
     public int Layer;
 
     [Header("Target Detection")]
@@ -64,8 +64,8 @@ public class EntityData : ScriptableObject
     public GameObject takeDamageEffectPrefeb;
     [Tooltip("Death effect prefab")]
     public GameObject deathEffectPrefab;
-    [Tooltip("Projectile move effect prefab")]
-    public GameObject projectileAttackingEffectPrefab;
+    //[Tooltip("Projectile move effect prefab")]
+    //public GameObject projectileAttackingEffectPrefab;
 
     [Header("Audio Settings")]
     public AudioClip summonSound;

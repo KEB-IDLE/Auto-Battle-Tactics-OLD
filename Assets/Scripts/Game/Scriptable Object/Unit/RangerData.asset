@@ -32,7 +32,6 @@ MonoBehaviour:
   attackEffectPrefab: {fileID: 0}
   takeDamageEffectPrefeb: {fileID: 0}
   deathEffectPrefab: {fileID: 0}
-  projectileAttackingEffectPrefab: {fileID: 0}
   summonSound: {fileID: 0}
   attackSound: {fileID: 0}
   deathSound: {fileID: 0}

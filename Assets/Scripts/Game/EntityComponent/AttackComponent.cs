@@ -15,13 +15,13 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
     private float attackImpactRatio;
     private float attackCooldown;
     private float attackAnimLength;
-    //private float lastAttackTime;
     private float detectionRadius;
     private float attackRange;
     private float disengageRange;
     private bool isAttackingFlag;
     public Transform firePoint;
 
+    [SerializeField] private float magicRadius = 2.0f; // 인스펙터에서 반경 지정 가능
 
     //private GameObject projectilePrefab;
     private string projectilePoolName;
@@ -35,14 +35,13 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
     private LayerMask towerOnlyMask;
     private LayerMask coreOnlyMask;
     private LayerMask targetLayer;
-    
-
 
 #pragma warning disable 67
     public event Action<bool> OnAttackStateChanged;
     public event Action<Transform> OnAttackEffect;
     public event Action<Transform> OnTakeDamageEffect;
     public event Action<Transform> OnDeathEffect;
+    public event Action<Transform> OnProjectileAttackingEffect;
 #pragma warning restore 67
 
     public Transform LockedTargetTransform
@@ -204,17 +203,16 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
         }
     }
 
-
-
     private void AttackMelee(IDamageable target)
     {
         lockedTarget = target;
         if (lockedTarget == null || !lockedTarget.IsAlive())
             return;
+
+        OnAttackEffect?.Invoke(transform);
+
         var coreComp = (lockedTarget as MonoBehaviour)
                           .GetComponent<Core>();
-
-        OnAttackEffect?.Invoke(firePoint);
 
         Debug.Log("attack!!!!!!");
 
@@ -230,7 +228,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
         var pool = ProjectilePoolManager.Instance.GetPool(projectilePoolName);
         if(pool == null)
         {
-            Debug.LogError("[AttackComponent] ProjectilePool을 찾지 못했습니다!");
+            Debug.LogError("[AttackComponent] ProjectilePool is null");
             return;
         }
 
@@ -244,23 +242,31 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
             coreDamage: attackCoreDamage,
             target: (target as MonoBehaviour).transform
             );
+
+        OnAttackEffect?.Invoke(firePoint);
     }
 
     private void AttackMagic(IDamageable target)
     {
-        lockedTarget = target;
+        if (target == null || !target.IsAlive())
+            return;
 
-        // attack 
-        if (lockedTarget != null && lockedTarget.IsAlive())
+        Vector3 center = (target as MonoBehaviour).transform.position;
+        Collider[] hits = Physics.OverlapSphere(center, magicRadius, targetLayer);
+
+        OnAttackEffect?.Invoke((target as MonoBehaviour).transform);
+
+        foreach (var col in hits)
         {
-            var coreComp = (lockedTarget as MonoBehaviour)
-                                .GetComponent<Core>();
-            if (coreComp != null)
-                lockedTarget.TakeDamage(attackCoreDamage);
-            else
-                lockedTarget.TakeDamage(attackDamage);
-
-            // 추가: 연출 효과, 파티클, 사운드 등 여기서 Instantiate
+            var dmg = col.GetComponent<IDamageable>();
+            if (dmg != null && dmg.IsAlive())
+            {
+                var coreComp = (dmg as MonoBehaviour).GetComponent<Core>();
+                if (coreComp != null)
+                    dmg.TakeDamage(attackCoreDamage);
+                else
+                    dmg.TakeDamage(attackDamage);
+            }
         }
     }
 
@@ -322,3 +328,5 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
 #endif
 
 }
+
+
