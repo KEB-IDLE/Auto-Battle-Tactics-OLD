@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.AI;
 
+
 [RequireComponent(typeof(AnimationComponent))]
 [RequireComponent(typeof(HealthComponent))]
 [RequireComponent(typeof(AttackComponent))]
@@ -44,13 +45,33 @@ public class Entity : MonoBehaviour
         _move.Initialize(entityData);
         _animation.Initialize(entityData);
         _effect.Initialize(entityData);
-        _animation.Bind();
-        _effect.Bind();
+        BindEvent();
     }
 
     public void SetData(EntityData data)
     {
         entityData = data;
+    }
+
+    public void BindEvent()
+    {
+        _attack.OnAttackStateChanged += _animation.HandleAttack;
+        _move.OnMove += _animation.HandleMove;
+        _health.OnDeath += _animation.HandleDeath;
+        _attack.OnAttackEffect += _effect.PlayAttackEffect;
+        _health.OnTakeDamageEffect += _effect.PlayTakeDamageEffect;
+        _health.OnDeathEffect += _effect.PlayDeathEffect;
+
+    }
+
+    public void UnbindEvent()
+    {
+        _attack.OnAttackStateChanged -= _animation.HandleAttack;
+        _move.OnMove -= _animation.HandleMove;
+        _health.OnDeath -= _animation.HandleDeath;
+        _attack.OnAttackEffect -= _effect.PlayAttackEffect;
+        _health.OnTakeDamageEffect -= _effect.PlayTakeDamageEffect;
+        _health.OnDeathEffect -= _effect.PlayDeathEffect;
     }
 
 }

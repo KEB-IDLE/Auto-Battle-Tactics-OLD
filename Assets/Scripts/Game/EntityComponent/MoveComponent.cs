@@ -44,7 +44,9 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
         {
             var mb = target as MonoBehaviour;
             _agent.SetDestination(mb.transform.position);
-            LookAtTarget(mb.transform.position);
+            //LookAtTarget(mb.transform.position);
+
+            LookAtTarget(target);
         }
         else
         {
@@ -67,14 +69,25 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
 
     }
 
-    public void LookAtTarget(Vector3 pos)
+    //public void LookAtTarget(Vector3 pos)
+    //{
+    //    Vector3 dir = (pos - transform.position).normalized;
+    //    if (dir.sqrMagnitude > 0.01f)
+    //    {
+    //        Quaternion lookRot = Quaternion.LookRotation(dir);
+    //        transform.rotation = Quaternion.Slerp(
+    //            transform.rotation, lookRot, Time.deltaTime * 10f);
+    //    }
+    //}
+
+    public void LookAtTarget(IDamageable target)
     {
-        Vector3 dir = (pos - transform.position).normalized;
-        if (dir.sqrMagnitude > 0.01f)
+        var mb = target as MonoBehaviour;
+        if (mb != null)
         {
-            Quaternion lookRot = Quaternion.LookRotation(dir);
-            transform.rotation = Quaternion.Slerp(
-                transform.rotation, lookRot, Time.deltaTime * 10f);
+            Vector3 targetPos = mb.transform.position;
+            targetPos.y = transform.position.y; // y 고정(수평 회전)
+            transform.LookAt(targetPos);
         }
     }
 }

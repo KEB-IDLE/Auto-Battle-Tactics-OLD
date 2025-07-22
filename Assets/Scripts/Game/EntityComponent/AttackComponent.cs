@@ -27,10 +27,9 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
     private string projectilePoolName;
 
     private IDamageable lockedTarget;
-    private IOrientable orientable;
     private ITeamProvider teamProvider;
     private AttackType attackType;
-
+    private IOrientable _orientable;
     private LayerMask allUnitMask;
     private LayerMask towerOnlyMask;
     private LayerMask coreOnlyMask;
@@ -50,11 +49,10 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
 
     private void Awake()
     {
+        _orientable = GetComponent<IOrientable>();
         teamProvider = GetComponent<ITeamProvider>();
         if (teamProvider == null)
-        {
             Debug.LogError($"{name}에 ITeamProvider(TeamComponent)가 할당되지 않았습니다!");
-        }
     }
 
     public void Initialize(EntityData data)
@@ -172,16 +170,16 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
     {
         isAttackingFlag = true;
         OnAttackStateChanged?.Invoke(true);
-
         float impactDelay = attackAnimLength * attackImpactRatio;
-
+        
         try
         {
             while (target.IsAlive() &&
                    Vector3.Distance(transform.position,
                        (target as MonoBehaviour).transform.position) <= attackRange)
             {
-                LookAtTarget(target);
+                _orientable.LookAtTarget(target);
+                //LookAtTarget(target);
                 yield return new WaitForSeconds(impactDelay);
                 TryAttack(target);
                 yield return new WaitForSeconds(attackCooldown - impactDelay);
@@ -243,7 +241,11 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
             target: (target as MonoBehaviour).transform
             );
 
-        OnAttackEffect?.Invoke(firePoint);
+
+        if (OnAttackEffect == null)
+            Debug.Log("OnAttackEffect is null");
+        else
+            OnAttackEffect?.Invoke(firePoint);
     }
 
     private void AttackMagic(IDamageable target)
@@ -293,16 +295,16 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
     {
         return isAttackingFlag;
     }
-    private void LookAtTarget(IDamageable target)
-    {
-        var mb = target as MonoBehaviour;
-        if (mb != null)
-        {
-            Vector3 targetPos = mb.transform.position;
-            targetPos.y = transform.position.y; // y 고정(수평 회전)
-            transform.LookAt(targetPos);
-        }
-    }
+    //private void LookAtTarget(IDamageable target)
+    //{
+    //    var mb = target as MonoBehaviour;
+    //    if (mb != null)
+    //    {
+    //        Vector3 targetPos = mb.transform.position;
+    //        targetPos.y = transform.position.y; // y 고정(수평 회전)
+    //        transform.LookAt(targetPos);
+    //    }
+    //}
 
     public bool isMelee => attackType == AttackType.Melee;
     public bool isRanged => attackType == AttackType.Ranged;

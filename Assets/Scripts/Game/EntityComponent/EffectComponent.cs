@@ -30,56 +30,31 @@ public class EffectComponent : MonoBehaviour
             this.deathEffect = data.deathEffectPrefab;
     }
 
-    public void Bind()
+
+    public void PlayAttackEffect(Transform origin)
     {
-        _notifier.OnAttackEffect += PlayAttackEffect;
-        _notifier.OnTakeDamageEffect += PlayTakeDamageEffect;
-        _notifier.OnDeathEffect += PlayDeathEffect;
+        PlayEffect(attackEffect, origin, "attackEffect");
     }
 
-    public void Unbind()
+    public void PlayTakeDamageEffect(Transform origin)
     {
-        _notifier.OnAttackEffect -= PlayAttackEffect;
-        _notifier.OnTakeDamageEffect -= PlayTakeDamageEffect;
-        _notifier.OnDeathEffect -= PlayDeathEffect;
+        PlayEffect(takeDamageEffect, origin, "takeDamageEffect");
     }
 
-    void PlayAttackEffect(Transform origin)
+    public void PlayDeathEffect(Transform origin)
     {
-        if (attackEffect != null && origin != null)
+        PlayEffect(deathEffect, origin, "deathEffect");
+    }
+
+    private void PlayEffect(GameObject effectPrefab, Transform origin, string effectType)
+    {
+        if (effectPrefab != null && origin != null)
         {
-            Debug.Log("1111111111111");
-            var pool = EffectPoolManager.Instance.GetPool(attackEffect.name);
+            var pool = EffectPoolManager.Instance.GetPool(effectPrefab.name);
             if (pool != null)
                 pool.GetEffect(origin.position, Quaternion.identity);
             else
-                Debug.LogWarning("[EffectComponent] No pool for effect: " + attackEffect.name);
+                Debug.LogWarning($"[EffectComponent] No pool for {effectType}: {effectPrefab.name}");
         }
     }
-    void PlayTakeDamageEffect(Transform origin)
-    {
-        Debug.Log("2222222222222");
-        if (takeDamageEffect != null && origin != null)
-        {
-            var pool = EffectPoolManager.Instance.GetPool(takeDamageEffect.name);
-            if (pool != null)
-                pool.GetEffect(origin.position, Quaternion.identity);
-            else
-                Debug.LogWarning("[EffectComponent] No pool for effect: " + takeDamageEffect.name);
-        }
-    }
-    void PlayDeathEffect(Transform origin)
-    {
-        Debug.Log("33333333333333");
-        if (deathEffect != null && origin != null)
-        {
-            var pool = EffectPoolManager.Instance.GetPool(deathEffect.name);
-            if (pool != null)
-                pool.GetEffect(origin.position, Quaternion.identity);
-            else
-                Debug.LogWarning("[EffectComponent] No pool for effect: " + deathEffect.name);
-        }
-        Unbind();
-    }
-
 }

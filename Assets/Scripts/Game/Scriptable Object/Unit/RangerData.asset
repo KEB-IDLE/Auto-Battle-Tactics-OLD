@@ -29,7 +29,7 @@ MonoBehaviour:
   projectilePrefab: {fileID: 3287624786238722518, guid: 0c144b528e01b334baa60edbf77d3be1, type: 3}
   projectilePoolName: Arrow
   summonEffectPrefab: {fileID: 0}
-  attackEffectPrefab: {fileID: 0}
+  attackEffectPrefab: {fileID: 4801705998445967163, guid: b1b4925c7f3de2845be2e2fcc0fabc15, type: 3}
   takeDamageEffectPrefeb: {fileID: 0}
   deathEffectPrefab: {fileID: 0}
   summonSound: {fileID: 0}

@@ -13,16 +13,16 @@ public class AnimationComponent : MonoBehaviour
     private AudioClip attackSound;
     private AudioClip deathSound;
 
-    IAttackNotifier  _attackSrc;
-    IMoveNotifier    _moveSrc;
-    IDeathNotifier   _deathSrc;
+    //IAttackNotifier _attackSrc;
+    //IMoveNotifier _moveSrc;
+    //IDeathNotifier _deathSrc;
 
     void Awake()
     {
         _animator = GetComponent<Animator>();
-        _attackSrc = GetComponent<IAttackNotifier>();
-        _moveSrc = GetComponent<IMoveNotifier>();
-        _deathSrc = GetComponent<IDeathNotifier>();
+        //_attackSrc = GetComponent<IAttackNotifier>();
+        //_moveSrc = GetComponent<IMoveNotifier>();
+        //_deathSrc = GetComponent<IDeathNotifier>();
         _audioSource = GetComponent<AudioSource>();
     }
 
@@ -50,26 +50,9 @@ public class AnimationComponent : MonoBehaviour
             this.deathSound = data.deathSound;
     }
 
-    //public void Initialize(Core core)
-    //{
-        
-    //}
 
-    public void Bind()
-    {
-        _attackSrc.OnAttackStateChanged += HandleAttack;
-        _moveSrc.OnMove += HandleMove;
-        _deathSrc.OnDeath += HandleDeath;
-    }
 
-    public void Unbind()
-    {
-        _attackSrc.OnAttackStateChanged -= HandleAttack;
-        _moveSrc.OnMove -= HandleMove;
-        _deathSrc.OnDeath -= HandleDeath;
-    }
-
-    void HandleAttack(bool isAttacking)
+    public void HandleAttack(bool isAttacking)
     {
         if (isAttacking)
         {
@@ -85,16 +68,15 @@ public class AnimationComponent : MonoBehaviour
     }
             
 
-    void HandleMove()
+    public void HandleMove()
     {
         _animator.SetTrigger("Move");
     }
 
-    void HandleDeath()
+    public void HandleDeath()
     {
         _animator.SetTrigger("Die");
         _audioSource.PlayOneShot(deathSound);
-        Unbind();
     }
 }
 
