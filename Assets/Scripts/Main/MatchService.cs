@@ -35,7 +35,7 @@ public class MatchService : MonoBehaviour
     }
 
     // 매칭 상태 확인
-    public IEnumerator CheckMatchStatus(Action<string> onMatched, Action onNotMatched, Action<string> onError)
+    public IEnumerator CheckMatchStatus(Action<string, string> onMatched, Action onNotMatched, Action<string> onError)
     {
         int userId = GameManager.Instance.profile.user_id;
         string url = APIEndpoints.MatchStatus + "?userId=" + userId;
@@ -46,7 +46,7 @@ public class MatchService : MonoBehaviour
             {
                 if (res.matched)
                 {
-                    onMatched?.Invoke(res.opponentId);
+                    onMatched?.Invoke(res.opponentId, res.roomId);
                 }
                 else
                 {
@@ -60,7 +60,29 @@ public class MatchService : MonoBehaviour
             }
         );
     }
+
+    public IEnumerator NotifyGameEnd(Action onSuccess, Action<string> onError)
+    {
+        var userId = GameManager.Instance.profile.user_id;
+        var req = new MatchRequest { userId = userId };
+
+        yield return APIService.Instance.Post<MatchRequest, BasicResponse>(
+            APIEndpoints.MatchEnd,
+            req,
+            res =>
+            {
+                Debug.Log("게임 종료 처리 완료");
+                onSuccess?.Invoke();
+            },
+            err =>
+            {
+                Debug.LogWarning("게임 종료 처리 실패: " + err);
+                onError?.Invoke(err);
+            }
+        );
+    }
 }
+
 
 [Serializable]
 public class MatchRequest
@@ -79,4 +101,12 @@ public class MatchStatusResponse
 {
     public bool matched;
     public string opponentId;
+    public string roomId;
+}
+
+[Serializable]
+public class BasicResponse
+{
+    public bool success;
+    public string message;
 }
