@@ -73,7 +73,6 @@ public class Entity : MonoBehaviour
         _health.OnTakeDamageEffect -= _effect.PlayTakeDamageEffect;
         _health.OnDeathEffect -= _effect.PlayDeathEffect;
     }
-
 }
 
 /* network

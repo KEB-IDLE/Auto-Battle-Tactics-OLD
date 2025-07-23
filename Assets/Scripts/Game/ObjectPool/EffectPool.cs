@@ -20,33 +20,45 @@ public class EffectPool : MonoBehaviour
 
     public GameObject GetEffect(Vector3 position, Quaternion rotation)
     {
-        GameObject obj;
-        if (pool.Count > 0)
+        GameObject obj = null;
+        while (pool.Count > 0)
+        {
             obj = pool.Dequeue();
-        else
+            //Debug.Log($"[EffectPool] GetEffect Dequeue: {obj?.name}, id: {obj?.GetInstanceID()}, activeSelf: {obj?.activeSelf}");
+            if (obj != null && !obj.Equals(null)) break;
+            else obj = null;
+        }
+        if (obj == null)
+        {
             obj = Instantiate(effectPrefab, transform);
+        }
 
         obj.transform.position = position;
         obj.transform.rotation = rotation;
         obj.SetActive(true);
 
-        // 이펙트가 자동으로 꺼지길 원하면, 
-        // 파티클 System의 Stop Action을 "Disable"로 설정하거나,
-        // 아래처럼 반환 코루틴을 활용
-        // StartCoroutine(AutoReturn(obj, duration));
+        // ParticleSystem 초기화 코드 추가 (필요하면)
+        var ps = obj.GetComponent<ParticleSystem>();
+        if (ps != null)
+        {
+            ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            ps.Play(true);
+        }
+
         return obj;
     }
 
     public void ReturnEffect(GameObject obj)
     {
+        if (obj == null || obj.Equals(null)) return;
+        // ParticleSystem initialize
+        var particle = obj.GetComponent<ParticleSystem>();
+        if (particle != null)
+        {
+            particle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        }
+        
         obj.SetActive(false);
         pool.Enqueue(obj);
     }
-
-    // 코루틴 반환 예시 (필요하면 활성화)
-    // private IEnumerator AutoReturn(GameObject obj, float delay)
-    // {
-    //     yield return new WaitForSeconds(delay);
-    //     ReturnEffect(obj);
-    // }
 }

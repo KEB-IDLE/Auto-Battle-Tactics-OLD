@@ -40,7 +40,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
     public event Action<Transform> OnAttackEffect;
     public event Action<Transform> OnTakeDamageEffect;
     public event Action<Transform> OnDeathEffect;
-    public event Action<Transform> OnProjectileAttackingEffect;
+    public event Action<Transform> FlightEffect;
 #pragma warning restore 67
 
     public Transform LockedTargetTransform
@@ -295,16 +295,6 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
     {
         return isAttackingFlag;
     }
-    //private void LookAtTarget(IDamageable target)
-    //{
-    //    var mb = target as MonoBehaviour;
-    //    if (mb != null)
-    //    {
-    //        Vector3 targetPos = mb.transform.position;
-    //        targetPos.y = transform.position.y; // y 고정(수평 회전)
-    //        transform.LookAt(targetPos);
-    //    }
-    //}
 
     public bool isMelee => attackType == AttackType.Melee;
     public bool isRanged => attackType == AttackType.Ranged;
