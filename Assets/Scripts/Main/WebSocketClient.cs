@@ -40,7 +40,10 @@ public class WebSocketClient : MonoBehaviour
     {
         Debug.Log("[ConnectCoroutine] 시작");
 
-        websocket = new WebSocket("ws://localhost:8080");
+        string roomId = GameManager.Instance.roomId;  // 매칭 후 저장된 roomId
+        string url = $"ws://localhost:8080?roomId={roomId}&playerId={playerId}";
+
+        websocket = new WebSocket(url);
 
         websocket.OnOpen += () => {
             Debug.Log("✅ WebSocket connected (이벤트)");
@@ -96,7 +99,6 @@ public class WebSocketClient : MonoBehaviour
 
         var connectTask = websocket.Connect();
 
-        // 연결 완료까지 기다리기
         yield return new WaitUntil(() => connectTask.IsCompleted);
 
         if (connectTask.IsFaulted)
@@ -107,9 +109,6 @@ public class WebSocketClient : MonoBehaviour
 
         Debug.Log("[ConnectCoroutine] WebSocket 연결 성공");
     }
-
-
-
 
     void Update()
     {
@@ -142,7 +141,7 @@ public class WebSocketClient : MonoBehaviour
     IEnumerator SendPositionLoop()
     {
         Debug.Log("[SendPositionLoop] 시작됨");
-        
+
         while (true)
         {
             SendPredictedPosition();

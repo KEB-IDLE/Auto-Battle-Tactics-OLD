@@ -177,7 +177,7 @@ GameObject:
   - component: {fileID: 795988582}
   - component: {fileID: 795988581}
   m_Layer: 0
-  m_Name: Test Attack Effect
+  m_Name: Unit Attack Effect Pool
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -196,7 +196,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   effectPrefab: {fileID: 4801705998445967163, guid: b1b4925c7f3de2845be2e2fcc0fabc15, type: 3}
-  poolSize: 20
+  poolSize: 5
 --- !u!4 &795988582
 Transform:
   m_ObjectHideFlags: 0
@@ -693,7 +693,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3865900570072612479, guid: 3ed81c8dfca06f44ab55e2815b7bbdd0, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -51.615486
+      value: -52.1
       objectReference: {fileID: 0}
     - target: {fileID: 3865900570072612479, guid: 3ed81c8dfca06f44ab55e2815b7bbdd0, type: 3}
       propertyPath: m_LocalPosition.y
@@ -701,7 +701,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3865900570072612479, guid: 3ed81c8dfca06f44ab55e2815b7bbdd0, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 10.439796
+      value: 15.96
       objectReference: {fileID: 0}
     - target: {fileID: 3865900570072612479, guid: 3ed81c8dfca06f44ab55e2815b7bbdd0, type: 3}
       propertyPath: m_LocalRotation.w
@@ -953,7 +953,7 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.5000001
+  m_Radius: 0.65
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0.000000059604645, y: 0, z: -0.00000008940697}
@@ -1100,7 +1100,7 @@ GameObject:
   - component: {fileID: 1573347862}
   - component: {fileID: 1573347863}
   m_Layer: 0
-  m_Name: Test Effect Pool
+  m_Name: Test Projectile Pool
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1134,7 +1134,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   effectPrefab: {fileID: 3634624844514982569, guid: 89d161b7121c31b418ce30b980dfdc53, type: 3}
-  poolSize: 20
+  poolSize: 10
 --- !u!1 &1652622407
 GameObject:
   m_ObjectHideFlags: 0
@@ -1211,7 +1211,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   projectilePrefab: {fileID: 7058709586220217664, guid: 0c144b528e01b334baa60edbf77d3be1, type: 3}
-  poolSize: 30
+  poolSize: 3
 --- !u!4 &1734626562
 Transform:
   m_ObjectHideFlags: 0
@@ -1257,9 +1257,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pools:
-  - poolName: Test Particle System
+  - poolName: Projectile Flight Effect
     pool: {fileID: 1573347863}
-  - poolName: TAF
+  - poolName: Unit Attack Effect
     pool: {fileID: 795988581}
 --- !u!4 &2119869642
 Transform:

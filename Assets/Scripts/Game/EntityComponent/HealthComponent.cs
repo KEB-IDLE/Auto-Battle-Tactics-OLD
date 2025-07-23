@@ -15,7 +15,7 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier, IEffe
     public event Action<Transform> OnAttackEffect;
     public event Action<Transform> OnTakeDamageEffect;
     public event Action<Transform> OnDeathEffect;
-    public event Action<Transform> OnProjectileAttackingEffect;
+    public event Action<Transform> FlightEffect;
 #pragma warning restore 67
 
     public void Initialize(EntityData data) 
@@ -39,7 +39,7 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier, IEffe
             // 여기에 피격 이펙트 추가하기.
             OnTakeDamageEffect?.Invoke(this.transform);
             currentHP -= damage; // 데미지를 받아 현재 체력 감소
-            Debug.Log(currentHP);
+            Debug.Log("Core Current HP : " + currentHP);
             if (!IsAlive()) DeathRoutine();
         }
     }
@@ -49,6 +49,7 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier, IEffe
         OnDeathEffect?.Invoke(this.transform);
         yield return new WaitForSeconds(deathAnimDuration);
         gameObject.GetComponent<Entity>().UnbindEvent();
+        Debug.Log("deathRoutine Called");
         Destroy(gameObject);
     }
 }

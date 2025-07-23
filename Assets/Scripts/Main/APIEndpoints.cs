@@ -19,6 +19,8 @@ public static class APIEndpoints
 
     public const string MatchJoin = "/match/join";
     public const string MatchStatus = "/match/status";
+    public const string MatchStart = "/match/start";
+    public const string MatchEnd = "/match/end";
 
     //public const string MatchHistory = "/user/match/history";
 }

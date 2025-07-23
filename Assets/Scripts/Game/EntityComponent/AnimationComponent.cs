@@ -1,5 +1,4 @@
-
-using System.Runtime.CompilerServices;
+using System.Collections;
 using UnityEngine;
 
 [RequireComponent(typeof(Animator))]
@@ -56,13 +55,11 @@ public class AnimationComponent : MonoBehaviour
     {
         if (isAttacking)
         {
-            Debug.Log("attack Start!");
             _animator.SetBool("Attack", true);
             _audioSource.PlayOneShot(attackSound);
         }
         else
         {
-            Debug.Log("attack End!");
             _animator.SetBool("Attack", false);
         }
     }

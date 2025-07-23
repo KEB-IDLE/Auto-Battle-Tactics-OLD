@@ -4,7 +4,7 @@ using UnityEngine;
 public class ProjectileData : ScriptableObject
 {
     public GameObject projectilePrefab;
-    public GameObject projectileAttackingEffectPrefab;
+    public GameObject FlightEffectPrefab;
     public float speed;
     public float verticalSpeed;
     public float lifeTime;

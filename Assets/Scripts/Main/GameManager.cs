@@ -12,10 +12,10 @@ public class GameManager : MonoBehaviour
 
     public List<int> ownedProfileIcons = new List<int>();  // 유저가 가진 프로필 아이콘 ID 리스트
 
-
     public string accessToken;  // JWT 토큰
 
     public string opponentId;
+    public string roomId;
 
     private void Awake()
     {

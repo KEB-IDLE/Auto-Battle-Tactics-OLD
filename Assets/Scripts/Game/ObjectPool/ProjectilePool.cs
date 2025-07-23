@@ -31,6 +31,7 @@ public class ProjectilePool : MonoBehaviour
             var obj = Instantiate(projectilePrefab, transform);
             return obj;
         }
+
     }
 
     public void ReturnProjectile(Projectile obj)

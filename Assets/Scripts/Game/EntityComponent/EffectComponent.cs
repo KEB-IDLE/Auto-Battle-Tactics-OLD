@@ -1,5 +1,6 @@
 using UnityEngine;
 using static UnityEngine.UI.Image;
+using System.Collections;
 
 public class EffectComponent : MonoBehaviour
 {
@@ -51,10 +52,30 @@ public class EffectComponent : MonoBehaviour
         if (effectPrefab != null && origin != null)
         {
             var pool = EffectPoolManager.Instance.GetPool(effectPrefab.name);
+            
             if (pool != null)
-                pool.GetEffect(origin.position, Quaternion.identity);
+            {
+                var obj = pool.GetEffect(origin.position, Quaternion.identity);
+
+                var ps = obj.GetComponent<ParticleSystem>();
+                if (ps != null)
+                    StartCoroutine(ReturnEffectWhenDone(pool, obj, ps.main.duration));
+                else
+                    StartCoroutine(ReturnEffectAfterDelay(pool, obj, 1.0f)); // 기본 1초(수동 조절)
+            } 
             else
                 Debug.LogWarning($"[EffectComponent] No pool for {effectType}: {effectPrefab.name}");
         }
+    }
+    private IEnumerator ReturnEffectWhenDone(EffectPool pool, GameObject obj, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        pool.ReturnEffect(obj);
+    }
+
+    private IEnumerator ReturnEffectAfterDelay(EffectPool pool, GameObject obj, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        pool.ReturnEffect(obj);
     }
 }
