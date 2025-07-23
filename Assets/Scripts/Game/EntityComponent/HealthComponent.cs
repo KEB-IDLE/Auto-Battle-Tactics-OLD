@@ -3,7 +3,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier, IEffectNotifier
+public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
 {
 
     private float currentHP;
@@ -12,10 +12,8 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier, IEffe
     public event Action OnDeath; // 죽음 이벤트
 
 #pragma warning disable 67
-    public event Action<Transform> OnAttackEffect;
     public event Action<Transform> OnTakeDamageEffect;
     public event Action<Transform> OnDeathEffect;
-    public event Action<Transform> FlightEffect;
 #pragma warning restore 67
 
     public void Initialize(EntityData data) 

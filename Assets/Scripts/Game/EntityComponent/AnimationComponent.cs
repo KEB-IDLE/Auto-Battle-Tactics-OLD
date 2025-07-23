@@ -12,16 +12,9 @@ public class AnimationComponent : MonoBehaviour
     private AudioClip attackSound;
     private AudioClip deathSound;
 
-    //IAttackNotifier _attackSrc;
-    //IMoveNotifier _moveSrc;
-    //IDeathNotifier _deathSrc;
-
     void Awake()
     {
         _animator = GetComponent<Animator>();
-        //_attackSrc = GetComponent<IAttackNotifier>();
-        //_moveSrc = GetComponent<IMoveNotifier>();
-        //_deathSrc = GetComponent<IDeathNotifier>();
         _audioSource = GetComponent<AudioSource>();
     }
 
@@ -29,8 +22,7 @@ public class AnimationComponent : MonoBehaviour
     {
         if (_controller == null)
             _controller = new AnimatorOverrideController(data.animatorController);
-        
-           
+         
         _animator.runtimeAnimatorController = _controller;
 
         if (data.attackClip != null)
@@ -49,8 +41,6 @@ public class AnimationComponent : MonoBehaviour
             this.deathSound = data.deathSound;
     }
 
-
-
     public void HandleAttack(bool isAttacking)
     {
         if (isAttacking)
@@ -59,9 +49,7 @@ public class AnimationComponent : MonoBehaviour
             _audioSource.PlayOneShot(attackSound);
         }
         else
-        {
             _animator.SetBool("Attack", false);
-        }
     }
             
 

@@ -4,7 +4,7 @@ using System.Collections;
 
 public class EffectComponent : MonoBehaviour
 {
-    private IEffectNotifier _notifier;
+    //private IEffectNotifier _notifier;
     private GameObject summonEffect;
     private GameObject attackEffect;
     private GameObject takeDamageEffect;
@@ -13,13 +13,13 @@ public class EffectComponent : MonoBehaviour
 
     void Awake()
     {
-        _notifier = GetComponent<IEffectNotifier>();
+        //_notifier = GetComponent<IEffectNotifier>();
     }
 
     public void Initialize(EntityData data)
     {
-        if (_notifier == null)
-            Debug.LogError("_notifier is null!");
+        //if (_notifier == null)
+        //    Debug.LogError("_notifier is null!");
 
         if(data.summonEffectPrefab != null)
             this.summonEffect = data.summonEffectPrefab;

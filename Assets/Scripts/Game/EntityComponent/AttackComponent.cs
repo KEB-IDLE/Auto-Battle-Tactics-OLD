@@ -5,7 +5,7 @@ using UnityEngine;
 //using static UnityEngine.GraphicsBuffer;
 //using static UnityEngine.UI.GridLayoutGroup;
 
-public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEffectNotifier
+public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
 {
     // Ony for Gizmo test
     private EntityData _entityData; // EntityData를 통해 초기화할 수 있도록
@@ -38,9 +38,6 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier, IEff
 #pragma warning disable 67
     public event Action<bool> OnAttackStateChanged;
     public event Action<Transform> OnAttackEffect;
-    public event Action<Transform> OnTakeDamageEffect;
-    public event Action<Transform> OnDeathEffect;
-    public event Action<Transform> FlightEffect;
 #pragma warning restore 67
 
     public Transform LockedTargetTransform
