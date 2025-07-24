@@ -5,19 +5,20 @@ using UnityEngine;
 
 public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
 {
-
-    private float currentHP;
-    
+    public float currentHP;
+    public float maxHP;
     private float deathAnimDuration = 0.5f;
     public event Action OnDeath; // 죽음 이벤트
 
 #pragma warning disable 67
     public event Action<Transform> OnTakeDamageEffect;
     public event Action<Transform> OnDeathEffect;
+    public event Action<float, float> OnHealthChanged;
 #pragma warning restore 67
 
     public void Initialize(EntityData data) 
     {
+        this.maxHP = data.maxHP;
         currentHP = data.maxHP;
     }
     public void Initialize(float hp)
@@ -37,17 +38,19 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
             // 여기에 피격 이펙트 추가하기.
             OnTakeDamageEffect?.Invoke(this.transform);
             currentHP -= damage; // 데미지를 받아 현재 체력 감소
-            Debug.Log("Core Current HP : " + currentHP);
-            if (!IsAlive()) DeathRoutine();
+            OnHealthChanged?.Invoke(currentHP, maxHP);
+            Debug.Log("Current HP : " + currentHP);
+            if (!IsAlive()) { StartCoroutine(DeathRoutine()); }
         }
     }
     private IEnumerator DeathRoutine()
     {
+        Debug.Log("deathRoutine Called");
         OnDeath?.Invoke(); // 죽음 이밴트 알림
         OnDeathEffect?.Invoke(this.transform);
         yield return new WaitForSeconds(deathAnimDuration);
         gameObject.GetComponent<Entity>().UnbindEvent();
-        Debug.Log("deathRoutine Called");
+        
         Destroy(gameObject);
     }
 }

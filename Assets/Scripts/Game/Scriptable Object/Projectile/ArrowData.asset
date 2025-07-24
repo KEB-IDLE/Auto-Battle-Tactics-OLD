@@ -18,4 +18,4 @@ MonoBehaviour:
   verticalSpeed: 5
   lifeTime: 2
   detectionRadius: 0.5
-  explosionRadius: 5
+  explosionRadius: 0
