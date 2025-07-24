@@ -10,6 +10,7 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
     Transform coreTransform;
     NavMeshAgent _agent;
     IAttackable _attacker;
+    IDamageable _health;
     ITeamProvider _teamProvider;
     private float moveSpeed;
     bool _isMoving;
@@ -18,6 +19,7 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
     {
         _agent = GetComponent<NavMeshAgent>();
         _attacker = GetComponent<IAttackable>();
+        _health = GetComponent<IDamageable>();
         _teamProvider = GetComponent<ITeamProvider>();
     }
 
@@ -28,7 +30,7 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
 
     void Update()
     {
-        if(_attacker.IsAttacking())
+        if(_attacker.IsAttacking() || !_health.IsAlive())
         {
             if(_isMoving) 
                 _isMoving = false;

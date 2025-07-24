@@ -7,7 +7,7 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
 {
     public float currentHP;
     public float maxHP;
-    private float deathAnimDuration = 0.5f;
+    private float deathAnimDuration;
     public event Action OnDeath; // 죽음 이벤트
 
 #pragma warning disable 67
@@ -20,6 +20,7 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
     {
         this.maxHP = data.maxHP;
         currentHP = data.maxHP;
+        deathAnimDuration = data.deathClip.length;
     }
     public void Initialize(float hp)
     {
