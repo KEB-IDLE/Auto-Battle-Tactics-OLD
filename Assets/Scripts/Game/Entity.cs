@@ -21,6 +21,7 @@ public class Entity : MonoBehaviour
     private TeamComponent   _team;
     private AnimationComponent _animation;
     private EffectComponent _effect;
+    private HealthBar _healthBar;
 
     public virtual void Awake()
     {
@@ -30,6 +31,7 @@ public class Entity : MonoBehaviour
         _team =     GetComponent<TeamComponent>();
         _animation = GetComponent<AnimationComponent>();
         _effect =   GetComponent<EffectComponent>();
+        _healthBar = GetComponentInChildren<HealthBar>();
 
         if (entityData == null)
         {
@@ -41,6 +43,7 @@ public class Entity : MonoBehaviour
     public void Start()
     {
         _health.Initialize(entityData);
+        _healthBar.Initialize(_health);
         _attack.Initialize(entityData);
         _move.Initialize(entityData);
         _animation.Initialize(entityData);
@@ -61,7 +64,7 @@ public class Entity : MonoBehaviour
         _attack.OnAttackEffect += _effect.PlayAttackEffect;
         _health.OnTakeDamageEffect += _effect.PlayTakeDamageEffect;
         _health.OnDeathEffect += _effect.PlayDeathEffect;
-
+        _health.OnHealthChanged += _healthBar.UpdateBar;
     }
 
     public void UnbindEvent()
@@ -72,6 +75,7 @@ public class Entity : MonoBehaviour
         _attack.OnAttackEffect -= _effect.PlayAttackEffect;
         _health.OnTakeDamageEffect -= _effect.PlayTakeDamageEffect;
         _health.OnDeathEffect -= _effect.PlayDeathEffect;
+        _health.OnHealthChanged -= _healthBar.UpdateBar;
     }
 }
 

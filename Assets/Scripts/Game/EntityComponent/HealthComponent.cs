@@ -10,11 +10,13 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
     private float deathAnimDuration;
     public event Action OnDeath; // 죽음 이벤트
 
+
 #pragma warning disable 67
     public event Action<Transform> OnTakeDamageEffect;
     public event Action<Transform> OnDeathEffect;
     public event Action<float, float> OnHealthChanged;
 #pragma warning restore 67
+
 
     public void Initialize(EntityData data) 
     {
@@ -40,7 +42,6 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
             OnTakeDamageEffect?.Invoke(this.transform);
             currentHP -= damage; // 데미지를 받아 현재 체력 감소
             OnHealthChanged?.Invoke(currentHP, maxHP);
-            Debug.Log("Current HP : " + currentHP);
             if (!IsAlive()) { StartCoroutine(DeathRoutine()); }
         }
     }

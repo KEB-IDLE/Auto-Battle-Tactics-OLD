@@ -46,7 +46,8 @@ public class AnimationComponent : MonoBehaviour
         if (isAttacking)
         {
             _animator.SetBool("Attack", true);
-            _audioSource.PlayOneShot(attackSound);
+            if(this.attackSound != null)
+                _audioSource.PlayOneShot(attackSound);
         }
         else
             _animator.SetBool("Attack", false);
@@ -62,7 +63,8 @@ public class AnimationComponent : MonoBehaviour
     {
         Debug.Log("DeathAnimation is Called");
         _animator.SetTrigger("Death");
-        _audioSource.PlayOneShot(deathSound);
+        if(this.deathSound != null)
+            _audioSource.PlayOneShot(deathSound);
     }
 }
 

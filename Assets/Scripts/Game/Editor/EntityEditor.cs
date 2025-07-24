@@ -1,4 +1,5 @@
 #if UNITY_EDITOR
+using System.Linq;
 using UnityEditor;
 #endif
 using UnityEngine;
@@ -65,16 +66,28 @@ public class EntityEditor : Editor
         var fillGO = new GameObject("HealthBarFill", typeof(Image));
         fillGO.transform.SetParent(bgGO.transform, false);
         var fillImg = fillGO.GetComponent<Image>();
-        fillImg.color = Color.green; // 체력바 색
+
+        // 1. Sprite 에셋 찾기 (프로젝트 내 "UI_Fill_Green" 이름의 Sprite 사용)
+        var fillSprite = AssetDatabase.FindAssets("t:Sprite UI_Fill_Green")
+            .Select(guid => AssetDatabase.GUIDToAssetPath(guid))
+            .Select(path => AssetDatabase.LoadAssetAtPath<Sprite>(path))
+            .FirstOrDefault();
+        fillImg.sprite = fillSprite;
+
+        // 2. 색상 및 타입 세팅
+        fillImg.color = Color.green; // 혹시 필요하면 원하는 색상으로
         fillImg.type = Image.Type.Filled;
         fillImg.fillMethod = Image.FillMethod.Horizontal;
         fillImg.fillAmount = 1.0f; // 처음엔 가득
+
+        // 3. RectTransform 맞춤
         var fillRect = fillGO.GetComponent<RectTransform>();
         fillRect.anchorMin = new Vector2(0, 0);
         fillRect.anchorMax = new Vector2(1, 1);
         fillRect.offsetMin = Vector2.zero;
         fillRect.offsetMax = Vector2.zero;
 
+        // 4. 스크립트 붙이기
         var healthBar = fillGO.AddComponent<HealthBar>();
         healthBar.fillImage = fillImg;
 

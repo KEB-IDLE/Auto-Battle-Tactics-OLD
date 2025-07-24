@@ -18,15 +18,14 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
     private float detectionRadius;
     private float attackRange;
     private float disengageRange;
-    private bool isAttackingFlag;
     public Transform firePoint;
 
     [SerializeField] private float magicRadius = 2.0f; // 인스펙터에서 반경 지정 가능
 
     //private GameObject projectilePrefab;
     private string projectilePoolName;
-
     private IDamageable lockedTarget;
+
     private ITeamProvider teamProvider;
     private AttackType attackType;
     private IOrientable _orientable;
@@ -34,6 +33,10 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
     private LayerMask towerOnlyMask;
     private LayerMask coreOnlyMask;
     private LayerMask targetLayer;
+
+    private Coroutine attackCoroutine;
+    private bool isAttackingFlag;
+    private bool isDead;
 
 #pragma warning disable 67
     public event Action<bool> OnAttackStateChanged;
@@ -50,6 +53,10 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         teamProvider = GetComponent<ITeamProvider>();
         if (teamProvider == null)
             Debug.LogError($"{name}에 ITeamProvider(TeamComponent)가 할당되지 않았습니다!");
+        var health = GetComponent<HealthComponent>();
+        if (health != null)
+            health.OnDeath += OnOwnerDeath;
+    
     }
 
     public void Initialize(EntityData data)
@@ -66,6 +73,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         disengageRange = data.disengageRange;
         attackType = data.attackType;
         isAttackingFlag = false;
+        isDead = false;
         firePoint = transform.Find("FirePoint");
         projectilePoolName = data.projectilePoolName;
 
@@ -89,8 +97,10 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
 
     void Update()
     {
-        var newTarget = DetectTarget();
+        if (isDead) return;
+        if (attackCoroutine != null) return;
 
+        var newTarget = DetectTarget();
         if (newTarget != null)
         {
             bool visible = true;
@@ -101,8 +111,10 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
             else
                 lockedTarget = null;
         }
-        if (lockedTarget != null && CanAttack(lockedTarget) && !isAttackingFlag)
-                StartCoroutine(AttackRoutine(lockedTarget));
+        if (lockedTarget != null && CanAttack(lockedTarget))
+        {
+            attackCoroutine = StartCoroutine(AttackRoutine(lockedTarget));
+        }
     }
 
     public IDamageable DetectTarget()
@@ -134,7 +146,6 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         }
         return best;
     }
-
     private bool CanAttack(IDamageable target)
     {
         float distance = Vector3.Distance(
@@ -142,7 +153,6 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
             (target as MonoBehaviour).transform.position);
         return distance <= attackRange;
     }
-
     private void TryAttack(IDamageable target)
     {
         if (!CanAttack(target)) return;
@@ -162,27 +172,26 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
                 break;
         }
     }
-
     private IEnumerator AttackRoutine(IDamageable target)
     {
         isAttackingFlag = true;
         OnAttackStateChanged?.Invoke(true);
         float impactDelay = attackAnimLength * attackImpactRatio;
-        
+        var myHealth = GetComponent<HealthComponent>();
+
         try
         {
-            while (target.IsAlive() &&
+            while (myHealth != null && 
+                   myHealth.IsAlive() &&
+                   target.IsAlive() &&
                    Vector3.Distance(transform.position,
                        (target as MonoBehaviour).transform.position) <= attackRange)
             {
                 _orientable.LookAtTarget(target);
-                //LookAtTarget(target);
                 yield return new WaitForSeconds(impactDelay);
                 TryAttack(target);
                 yield return new WaitForSeconds(attackCooldown - impactDelay);
             }
-
-            OnAttackStateChanged?.Invoke(false);
 
             if (!target.IsAlive() ||
                 Vector3.Distance(transform.position,
@@ -194,9 +203,12 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         finally
         {
             isAttackingFlag = false;
-            Debug.Log($"[AttackRoutine END]");
+            attackCoroutine = null;
+            lockedTarget = null;
+            OnAttackStateChanged?.Invoke(false);
         }
     }
+
 
     private void AttackMelee(IDamageable target)
     {
@@ -291,6 +303,10 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
     public bool IsAttacking()
     {
         return isAttackingFlag;
+    }
+    private void OnOwnerDeath()
+    {
+        isDead = true;
     }
 
     public bool isMelee => attackType == AttackType.Melee;
