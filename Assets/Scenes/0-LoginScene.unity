@@ -3153,12 +3153,12 @@ MonoBehaviour:
   openRegisterButton: {fileID: 1983787219}
   statusText: {fileID: 412195001}
   registerPanel: {fileID: 1032548103}
-  registerEmailInput: {fileID: 1122252500}
-  registerPasswordInput: {fileID: 1878477100}
+  registerEmailInput: {fileID: 1878477100}
+  registerPasswordInput: {fileID: 369111319}
   registerSubmitButton: {fileID: 812081961}
   registerCancelButton: {fileID: 1051792902}
   registerStatusText: {fileID: 823484150}
-  registerNicknameInput: {fileID: 369111319}
+  registerNicknameInput: {fileID: 1122252500}
 --- !u!1 &812081959
 GameObject:
   m_ObjectHideFlags: 0
@@ -4057,7 +4057,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: ID
+  m_text: Email
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -4551,7 +4551,7 @@ GameObject:
   - component: {fileID: 1122252501}
   - component: {fileID: 1122252500}
   m_Layer: 5
-  m_Name: RegisterUsernameInput
+  m_Name: RegisterNicknameInput
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6926,7 +6926,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 429.7176, y: 550.2524}
+  m_SizeDelta: {x: 420, y: 550}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1675272682
 MonoBehaviour:
@@ -7361,6 +7361,7 @@ MonoBehaviour:
   ownedProfileIcons: 
   accessToken: 
   opponentId: 
+  roomId: 
 --- !u!4 &1796823180
 Transform:
   m_ObjectHideFlags: 0
@@ -7822,7 +7823,7 @@ GameObject:
   - component: {fileID: 1878477101}
   - component: {fileID: 1878477100}
   m_Layer: 5
-  m_Name: RegisterIDInput
+  m_Name: RegisterEmailInput
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
