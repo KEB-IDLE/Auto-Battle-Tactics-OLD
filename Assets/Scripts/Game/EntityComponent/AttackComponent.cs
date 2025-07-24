@@ -97,8 +97,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
 
     void Update()
     {
-        if (isDead) return;
-        if (attackCoroutine != null) return;
+        if (attackCoroutine != null || isDead) return;
 
         var newTarget = DetectTarget();
         if (newTarget != null)
@@ -179,33 +178,23 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         float impactDelay = attackAnimLength * attackImpactRatio;
         var myHealth = GetComponent<HealthComponent>();
 
-        try
-        {
-            while (myHealth != null && 
+        while (myHealth != null &&
                    myHealth.IsAlive() &&
                    target.IsAlive() &&
                    Vector3.Distance(transform.position,
                        (target as MonoBehaviour).transform.position) <= attackRange)
-            {
-                _orientable.LookAtTarget(target);
-                yield return new WaitForSeconds(impactDelay);
-                TryAttack(target);
-                yield return new WaitForSeconds(attackCooldown - impactDelay);
-            }
-
-            if (!target.IsAlive() ||
-                Vector3.Distance(transform.position,
-                    (target as MonoBehaviour).transform.position) > disengageRange)
-            {
-                lockedTarget = null;
-            }
-        }
-        finally
         {
-            isAttackingFlag = false;
-            attackCoroutine = null;
+            _orientable.LookAtTarget(target);
+            yield return new WaitForSeconds(impactDelay);
+            TryAttack(target);
+            yield return new WaitForSeconds(attackCooldown - impactDelay);
+        }
+
+        if (!target.IsAlive() ||
+            Vector3.Distance(transform.position,
+                (target as MonoBehaviour).transform.position) > disengageRange)
+        {
             lockedTarget = null;
-            OnAttackStateChanged?.Invoke(false);
         }
     }
 
@@ -307,6 +296,14 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
     private void OnOwnerDeath()
     {
         isDead = true;
+        if(attackCoroutine != null)
+        {
+            StopCoroutine(attackCoroutine);
+            attackCoroutine = null;
+            lockedTarget = null;
+            isAttackingFlag = false;
+            OnAttackStateChanged?.Invoke(false);
+        }
     }
 
     public bool isMelee => attackType == AttackType.Melee;
