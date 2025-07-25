@@ -87,9 +87,21 @@ public class EntityEditor : Editor
         fillRect.offsetMin = Vector2.zero;
         fillRect.offsetMax = Vector2.zero;
 
+        // EntityEditor.cs 내 CreateEntityInScene(data) 메서드 마지막에 추가
+        var collider = go.GetComponent<CapsuleCollider>();
+        collider.radius = 0.5f;
+        collider.height = 1.8f;
+        collider.center = new Vector3(0, 0.85f, 0); // 예시값
+
         // 4. 스크립트 붙이기
         var healthBar = fillGO.AddComponent<HealthBar>();
         healthBar.fillImage = fillImg;
+
+        var rb = go.AddComponent<Rigidbody>();
+        rb.freezeRotation = false;
+        rb.constraints = RigidbodyConstraints.FreezeRotationX
+                       | RigidbodyConstraints.FreezeRotationY
+                       | RigidbodyConstraints.FreezeRotationZ;
 
         Selection.activeGameObject = go;
     }

@@ -708,6 +708,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 14
       objectReference: {fileID: 0}
+    - target: {fileID: 145554, guid: 1854a3b64b66724429ff0b04e0891fc1, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 146358, guid: 1854a3b64b66724429ff0b04e0891fc1, type: 3}
       propertyPath: m_Layer
       value: 14
@@ -1345,7 +1349,7 @@ PrefabInstance:
       addedObject: {fileID: 820972195006234250}
     - targetCorrespondingSourceObject: {fileID: 145554, guid: 1854a3b64b66724429ff0b04e0891fc1, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 7596630647451453436}
+      addedObject: {fileID: 2110585889184214027}
   m_SourcePrefab: {fileID: 100100000, guid: 1854a3b64b66724429ff0b04e0891fc1, type: 3}
 --- !u!4 &5688113862545163787 stripped
 Transform:
@@ -1493,7 +1497,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   firePoint: {fileID: 0}
-  magicRadius: 2
 --- !u!114 &2348226729931978678
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1553,7 +1556,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 80
+  m_Constraints: 112
   m_CollisionDetection: 0
 --- !u!114 &7905694949090468099
 MonoBehaviour:
@@ -1593,8 +1596,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   entityData: {fileID: 11400000, guid: c4687fd81f20829489f2a3ddcaa1f34f, type: 2}
---- !u!65 &7596630647451453436
-BoxCollider:
+--- !u!136 &2110585889184214027
+CapsuleCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -1611,6 +1614,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 2.0324333, z: 1}
-  m_Center: {x: 0, y: 0.98, z: 0}
+  serializedVersion: 2
+  m_Radius: 0.5
+  m_Height: 1
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 0}

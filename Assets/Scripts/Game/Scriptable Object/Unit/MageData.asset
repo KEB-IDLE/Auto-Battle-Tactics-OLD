@@ -26,7 +26,7 @@ MonoBehaviour:
   attackPriority: 0
   attackType: 2
   entityPrefab: {fileID: 5688113862545389861, guid: bb2e87239bcf56f43a72ae1892f7ada0, type: 3}
-  magicRadius: 0
+  magicRadius: 3
   projectilePrefab: {fileID: 0}
   projectilePoolName: 
   summonEffectPrefab: {fileID: 0}
