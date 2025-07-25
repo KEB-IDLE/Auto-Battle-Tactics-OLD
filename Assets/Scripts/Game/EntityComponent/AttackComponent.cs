@@ -218,33 +218,73 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
             lockedTarget.TakeDamage(attackDamage);
     }
 
+    //private void AttackRanged(IDamageable target)
+    //{
+    //    lockedTarget = target;
+    //    var pool = ProjectilePoolManager.Instance.GetPool(projectilePoolName);
+    //    if(pool == null)
+    //    {
+    //        Debug.LogError("[AttackComponent] ProjectilePool is null");
+    //        return;
+    //    }
+
+    //    var projectile = pool.GetProjectile();
+
+
+    //    projectile.transform.position = firePoint.position;
+    //    projectile.transform.rotation = Quaternion.identity;
+    //    projectile.SetPool(pool);
+    //    projectile.Initialize(
+    //        owner: this.GetComponent<Entity>(),
+    //        damage: attackDamage,
+    //        coreDamage: attackCoreDamage,
+    //        target: (target as MonoBehaviour).transform
+    //        );
+
+
+    //    if (OnAttackEffect == null)
+    //        Debug.Log("OnAttackEffect is null");
+    //    else
+    //        OnAttackEffect?.Invoke(firePoint);
+    //}
+
     private void AttackRanged(IDamageable target)
     {
         lockedTarget = target;
-        var pool = ProjectilePoolManager.Instance.GetPool(projectilePoolName);
-        if(pool == null)
+        // 풀 이름은 Initialize에서 EntityData로부터 projectilePoolName으로 할당받음
+        var pool = ObjectPoolManager.Instance.GetPool(projectilePoolName);
+        if (pool == null)
         {
-            Debug.LogError("[AttackComponent] ProjectilePool is null");
+            Debug.LogError($"[AttackComponent] ProjectilePool({projectilePoolName}) is null");
             return;
         }
 
-        var projectile = pool.GetProjectile();
-        projectile.transform.position = firePoint.position;
-        projectile.transform.rotation = Quaternion.identity;
-        projectile.SetPool(pool);
+        var projectileObj = pool.Get(firePoint.position, Quaternion.identity);
+        var projectile = projectileObj.GetComponent<Projectile>();
+
+        if (projectile == null)
+        {
+            Debug.LogError("[AttackComponent] Projectile 컴포넌트가 없습니다!");
+            return;
+        }
+
+        // 풀 이름을 Projectile에 세팅 (반환 시 사용)
+        projectile.SetPoolName(projectilePoolName);
+
         projectile.Initialize(
             owner: this.GetComponent<Entity>(),
             damage: attackDamage,
             coreDamage: attackCoreDamage,
-            target: (target as MonoBehaviour).transform
-            );
-
+            target: (target as MonoBehaviour).transform,
+            poolName: projectilePoolName
+        );
 
         if (OnAttackEffect == null)
             Debug.Log("OnAttackEffect is null");
         else
             OnAttackEffect?.Invoke(firePoint);
     }
+
 
     private void AttackMagic(IDamageable target)
     {
