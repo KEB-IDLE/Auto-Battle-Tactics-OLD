@@ -25,8 +25,13 @@ public class UIManager : MonoBehaviour
     public TMP_Text rankPointText;
     public TMP_Text globalRankText;
 
-    public TMP_Text[] rankTexts;
-    public Image[] rankIcons;
+
+
+
+    public TMP_Text[] rankNumberTexts;   // 순위 텍스트
+    public TMP_Text[] rankNameTexts;     // 닉네임 텍스트
+    public TMP_Text[] rankPointTexts;    // 점수 텍스트
+    public Image[] rankIcons;            // 아이콘
 
     public void OnClickJoinMatch()
     {
@@ -244,17 +249,16 @@ public class UIManager : MonoBehaviour
     // 글로벌 랭킹 UI
     public void UpdateGlobalRankingUI(GlobalRankEntry[] entries)
     {
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < entries.Length && i < rankNumberTexts.Length; i++)
         {
-            if (i >= rankTexts.Length || i >= rankIcons.Length)
-            {
-                Debug.LogWarning("랭킹 UI 배열이 부족합니다.");
-                continue;
-            }
-
             var entry = entries[i];
-            rankTexts[i].text = $"{entry.nickname} ({entry.rank_point}pt)";
 
+            // 순위, 닉네임, 포인트 각각 매핑
+            rankNumberTexts[i].text = entry.rank.ToString();
+            rankNameTexts[i].text = entry.nickname;
+            rankPointTexts[i].text = $"{entry.rank_point} pt";
+
+            // 아이콘 설정
             int iconIndex = entry.profile_icon_id - 1;
             if (iconIndex >= 0 && iconIndex < profileIcons.Length)
                 rankIcons[i].sprite = profileIcons[iconIndex];
@@ -390,6 +394,7 @@ public class IconPurchaseResponse
 [System.Serializable]
 public class GlobalRankEntry
 {
+    public int rank;
     public string nickname;
     public int profile_icon_id;
     public int rank_point;
