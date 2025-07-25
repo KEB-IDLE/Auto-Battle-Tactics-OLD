@@ -49,7 +49,10 @@ public class EntityData : ScriptableObject
     [Header("Entity Prefab")]
     public GameObject entityPrefab;
 
-    [Header("Projectile Info")]
+    [Header("Magic")] // 마법사의 마법 피해 범위
+    public float magicRadius;
+
+    [Header("Ranged")]
     [Tooltip("Projectile prefab")]
     public GameObject projectilePrefab;
     [Tooltip("Automatically linked to object pool")]

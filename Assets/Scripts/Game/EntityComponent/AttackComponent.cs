@@ -18,11 +18,9 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
     private float detectionRadius;
     private float attackRange;
     private float disengageRange;
+    private float magicRadius;
     public Transform firePoint;
 
-    [SerializeField] private float magicRadius = 2.0f; // 인스펙터에서 반경 지정 가능
-
-    //private GameObject projectilePrefab;
     private string projectilePoolName;
     private IDamageable lockedTarget;
 
@@ -73,6 +71,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         attackRange = data.attackRange;
         disengageRange = data.disengageRange;
         attackType = data.attackType;
+        magicRadius = data.magicRadius;
         isAttackingFlag = false;
         isDead = false;
         firePoint = transform.Find("FirePoint");
@@ -267,8 +266,6 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         else
             OnAttackEffect?.Invoke(firePoint);
     }
-
-
     private void AttackMagic(IDamageable target)
     {
         if (target == null || !target.IsAlive())

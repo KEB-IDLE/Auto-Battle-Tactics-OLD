@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: KnightData
   m_EditorClassIdentifier: 
   entityName: testKnight
-  maxHP: 5
+  maxHP: 25
   attackDamage: 5
   attackCoreDamage: 5
   attackImpactRatio: 0.1228
@@ -26,13 +26,13 @@ MonoBehaviour:
   attackPriority: 0
   attackType: 0
   entityPrefab: {fileID: 1415375744480942332, guid: 2d32587978d83214989e3051ff51a1cb, type: 3}
+  magicRadius: 0
   projectilePrefab: {fileID: 0}
   projectilePoolName: 
   summonEffectPrefab: {fileID: 0}
   attackEffectPrefab: {fileID: 0}
   takeDamageEffectPrefeb: {fileID: 0}
   deathEffectPrefab: {fileID: 0}
-  projectileAttackingEffectPrefab: {fileID: 0}
   summonSound: {fileID: 0}
   attackSound: {fileID: 0}
   deathSound: {fileID: 0}

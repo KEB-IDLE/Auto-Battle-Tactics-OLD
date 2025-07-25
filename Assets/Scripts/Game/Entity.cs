@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.AI;
 
-
+[RequireComponent(typeof(CapsuleCollider))]
 [RequireComponent(typeof(AnimationComponent))]
 [RequireComponent(typeof(HealthComponent))]
 [RequireComponent(typeof(AttackComponent))]
