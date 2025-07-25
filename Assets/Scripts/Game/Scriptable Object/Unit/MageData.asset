@@ -15,7 +15,7 @@ MonoBehaviour:
   entityName: Mage
   maxHP: 3
   attackDamage: 10
-  attackCoreDamage: 0
+  attackCoreDamage: 2
   attackImpactRatio: 0.7
   moveSpeed: 2
   entityScale: 0
