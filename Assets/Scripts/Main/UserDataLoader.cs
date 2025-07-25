@@ -17,9 +17,11 @@ public class UserDataLoader : MonoBehaviour
             uiManager.UpdateProfileUI();
             uiManager.UpdateRecordUI();
 
+            uiManager.InitializeIconSelection();
+
             uiManager.GetGlobalRanking();
 
-            uiManager.SpawnCharacter(GameManager.Instance.profile.profile_char_id);
+            StartCoroutine(UserManager.Instance.SpawnCharacterCoroutine(GameManager.Instance.profile.profile_char_id));
         }
     }
 
