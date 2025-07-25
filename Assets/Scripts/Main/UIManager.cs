@@ -20,18 +20,19 @@ public class UIManager : MonoBehaviour
     Color enabledColor = Color.white;
     Color disabledColor = new Color(1f, 1f, 1f, 80f / 255f);
 
+    // 내 랭킹
+    public Image rankProfileIcon;
+    public TMP_Text rankNicknameText;
+    public TMP_Text globalRankText;
     public TMP_Text rankMatchText;
     public TMP_Text rankWinsText;
     public TMP_Text rankPointText;
-    public TMP_Text globalRankText;
 
-
-
-
+    // 글로벌 랭킹
     public TMP_Text[] rankNumberTexts;   // 순위 텍스트
+    public Image[] rankIcons;            // 아이콘
     public TMP_Text[] rankNameTexts;     // 닉네임 텍스트
     public TMP_Text[] rankPointTexts;    // 점수 텍스트
-    public Image[] rankIcons;            // 아이콘
 
     public void OnClickJoinMatch()
     {
@@ -273,7 +274,9 @@ public class UIManager : MonoBehaviour
     public void UpdateRecordUI()
     {
         var record = GameManager.Instance.record;
+        var profile = GameManager.Instance.profile;
 
+        // 랭크 전적 텍스트
         if (rankMatchText != null)
             rankMatchText.text = $"Matches: {record.rank_match_count}";
         if (rankWinsText != null)
@@ -282,7 +285,23 @@ public class UIManager : MonoBehaviour
             rankPointText.text = $"Points: {record.rank_point}";
         if (globalRankText != null)
             globalRankText.text = $"Global Rank: {record.global_rank}";
+
+        // 닉네임 텍스트 업데이트
+        if (rankNicknameText != null)
+            rankNicknameText.text = profile.nickname;
+
+        // 프로필 아이콘 업데이트
+        if (rankProfileIcon != null)
+        {
+            int iconIndex = profile.profile_icon_id - 1;
+            if (iconIndex >= 0 && iconIndex < profileIcons.Length)
+                rankProfileIcon.sprite = profileIcons[iconIndex];
+            else
+                Debug.LogWarning($"Invalid profile icon ID: {profile.profile_icon_id}");
+        }
     }
+
+
 }
 
 
