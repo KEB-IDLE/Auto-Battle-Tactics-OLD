@@ -104,8 +104,17 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         if (newTarget != null)
         {
             bool visible = true;
-            if (firePoint != null)
-                visible = IsTargetVisible(firePoint, (newTarget as MonoBehaviour).transform);
+            switch (attackType)
+            {
+                case AttackType.Melee:
+                case AttackType.Ranged:
+                    if (firePoint != null)
+                        visible = IsTargetVisible(firePoint, (newTarget as MonoBehaviour).transform);
+                    break;
+                case AttackType.Magic:
+                    visible = true; // 무조건 true
+                    break;
+            }
             if (visible)
                 lockedTarget = newTarget;
             else
@@ -138,6 +147,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
             if (provider == null || provider.Team == teamProvider.Team)
                 continue;
             float dist = Vector3.Distance(transform.position, col.transform.position);
+
             if (dist < bestDist)
             {
                 bestDist = dist;
@@ -197,6 +207,10 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         {
             lockedTarget = null;
         }
+
+        attackCoroutine = null;
+        isAttackingFlag = false;
+        OnAttackStateChanged?.Invoke(false);
     }
 
 
@@ -222,7 +236,6 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
     private void AttackRanged(IDamageable target)
     {
         lockedTarget = target;
-        // 풀 이름은 Initialize에서 EntityData로부터 projectilePoolName으로 할당받음
         var pool = ObjectPoolManager.Instance.GetPool(projectilePoolName);
         if (pool == null)
         {
@@ -239,7 +252,6 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
             return;
         }
 
-        // 풀 이름을 Projectile에 세팅 (반환 시 사용)
         projectile.SetPoolName(projectilePoolName);
 
         projectile.Initialize(
@@ -270,33 +282,24 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         foreach (var col in hits)
         {
             var dmg = col.GetComponent<IDamageable>();
+            var coreComp = col.GetComponent<Core>();
             if (dmg != null && dmg.IsAlive())
-            {
-                var coreComp = (dmg as MonoBehaviour).GetComponent<Core>();
-                if (coreComp != null)
-                    dmg.TakeDamage(attackCoreDamage);
-                else
-                    dmg.TakeDamage(attackDamage);
-            }
+                dmg.TakeDamage(coreComp != null ? attackCoreDamage : attackDamage);
         }
     }
 
-    private bool IsTargetVisible(Transform fireOrigin, Transform target)
+    public bool IsTargetVisible(Transform fireOrigin, Transform target)
     {
         Vector3 origin = fireOrigin.position;
         Vector3 dest = target.position;
         Vector3 dir = (dest - origin).normalized;
         float dist = Vector3.Distance(origin, dest);
 
-        // "Obstacle" layer..
         int raycastMask = LayerMask.GetMask("Agent", "Tower", "Core", "Obstacle", "Structure");
 
         if (Physics.Raycast(origin, dir, out RaycastHit hit, dist, raycastMask))
-        {
-            // Ray가 타겟을 정확히 맞췄을 때만 공격 가능
             return hit.transform == target;
-        }
-        // 아무것도 안 맞으면 시야 막힘(비정상)
+
         return false;
     }
 
@@ -304,10 +307,12 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
     {
         return isAttackingFlag;
     }
+
     private void OnOwnerDeath()
     {
         isDead = true;
-        if(attackCoroutine != null)
+        GetComponent<Collider>().enabled = false;
+        if (attackCoroutine != null)
         {
             StopCoroutine(attackCoroutine);
             attackCoroutine = null;

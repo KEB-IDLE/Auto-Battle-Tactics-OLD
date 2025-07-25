@@ -42,7 +42,7 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
             _agent.isStopped = false;
 
         var target = _attacker.DetectTarget();
-        if (target != null && target.IsAlive())
+        if (target != null && target.IsAlive() && CanSee(target))
         {
             var mb = target as MonoBehaviour;
             _agent.SetDestination(mb.transform.position);
@@ -77,4 +77,25 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
             transform.LookAt(targetPos);
         }
     }
+
+    private bool CanSee(IDamageable target)
+    {
+        var attackComponent = _attacker as AttackComponent;
+        if (attackComponent == null || target == null)
+            return false;
+
+        // 공격 타입별로 가시성 판정 커스텀 가능
+        // 예: 마법사는 무조건 true, 원거리/근접은 Raycast
+        if (attackComponent.isMagic)
+            return true;
+
+        var firePoint = attackComponent.firePoint != null ? attackComponent.firePoint : attackComponent.transform;
+        var targetTransform = (target as MonoBehaviour)?.transform;
+
+        if (firePoint == null || targetTransform == null)
+            return false;
+
+        return attackComponent.IsTargetVisible(firePoint, targetTransform);
+    }
+
 }

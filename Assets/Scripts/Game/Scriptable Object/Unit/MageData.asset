@@ -20,14 +20,14 @@ MonoBehaviour:
   moveSpeed: 2
   entityScale: 0
   Layer: 14
-  detectionRadius: 10
-  attackRange: 10
-  disengageRange: 10
+  detectionRadius: 20
+  attackRange: 20
+  disengageRange: 20
   attackPriority: 0
   attackType: 2
   entityPrefab: {fileID: 5688113862545389861, guid: bb2e87239bcf56f43a72ae1892f7ada0, type: 3}
-  projectilePrefab: {fileID: 3287624786238722518, guid: 0c144b528e01b334baa60edbf77d3be1, type: 3}
-  projectilePoolName: Arrow
+  projectilePrefab: {fileID: 0}
+  projectilePoolName: 
   summonEffectPrefab: {fileID: 0}
   attackEffectPrefab: {fileID: 0}
   takeDamageEffectPrefeb: {fileID: 0}
