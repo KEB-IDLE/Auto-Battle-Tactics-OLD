@@ -22,7 +22,10 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
     {
         this.maxHP = data.maxHP;
         currentHP = data.maxHP;
-        deathAnimDuration = data.deathClip.length;
+        if(data.deathClip != null)
+            deathAnimDuration = data.deathClip.length;
+        else
+            deathAnimDuration = 0f;
     }
     public void Initialize(float hp)
     {

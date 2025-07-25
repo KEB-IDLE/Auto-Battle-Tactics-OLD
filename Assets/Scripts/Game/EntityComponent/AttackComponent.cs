@@ -65,7 +65,8 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         _entityData = data;
         attackDamage = data.attackDamage;
         attackCoreDamage = data.attackCoreDamage;
-        attackAnimLength = data.attackClip.length;
+        if(data.attackClip !=  null)
+            attackAnimLength = data.attackClip.length;
         attackCooldown = attackAnimLength;
         attackImpactRatio = data.attackImpactRatio;
         detectionRadius = data.detectionRadius;
@@ -217,36 +218,6 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         else
             lockedTarget.TakeDamage(attackDamage);
     }
-
-    //private void AttackRanged(IDamageable target)
-    //{
-    //    lockedTarget = target;
-    //    var pool = ProjectilePoolManager.Instance.GetPool(projectilePoolName);
-    //    if(pool == null)
-    //    {
-    //        Debug.LogError("[AttackComponent] ProjectilePool is null");
-    //        return;
-    //    }
-
-    //    var projectile = pool.GetProjectile();
-
-
-    //    projectile.transform.position = firePoint.position;
-    //    projectile.transform.rotation = Quaternion.identity;
-    //    projectile.SetPool(pool);
-    //    projectile.Initialize(
-    //        owner: this.GetComponent<Entity>(),
-    //        damage: attackDamage,
-    //        coreDamage: attackCoreDamage,
-    //        target: (target as MonoBehaviour).transform
-    //        );
-
-
-    //    if (OnAttackEffect == null)
-    //        Debug.Log("OnAttackEffect is null");
-    //    else
-    //        OnAttackEffect?.Invoke(firePoint);
-    //}
 
     private void AttackRanged(IDamageable target)
     {

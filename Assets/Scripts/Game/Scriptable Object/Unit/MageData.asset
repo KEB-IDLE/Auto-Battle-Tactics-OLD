@@ -32,12 +32,11 @@ MonoBehaviour:
   attackEffectPrefab: {fileID: 0}
   takeDamageEffectPrefeb: {fileID: 0}
   deathEffectPrefab: {fileID: 0}
-  projectileAttackingEffectPrefab: {fileID: 0}
   summonSound: {fileID: 0}
   attackSound: {fileID: 0}
   deathSound: {fileID: 0}
   animatorController: {fileID: 9100000, guid: 978dfb3f95c533c4aa9742b18291eb77, type: 2}
-  attackClip: {fileID: 0}
-  runClip: {fileID: 0}
-  deathClip: {fileID: 0}
-  idleClip: {fileID: 0}
+  attackClip: {fileID: 7400000, guid: f653247add3aab64bb8f0b4c6465a742, type: 3}
+  runClip: {fileID: 7400000, guid: 58b522b345a775d4a9b69ba407ac6165, type: 3}
+  deathClip: {fileID: 7400000, guid: 8a4ff3a854fe14b449c68d73693ddc38, type: 3}
+  idleClip: {fileID: 7400000, guid: 0f32bec07db70154dacf4fbc48ecf254, type: 3}
