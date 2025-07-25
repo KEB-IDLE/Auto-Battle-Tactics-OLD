@@ -9,34 +9,34 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 826a7d254cca7e547ab90347db98c1b9, type: 3}
+  m_Script: {fileID: 11500000, guid: 3a7c9c71710beb0479729de009243f0b, type: 3}
   m_Name: Human
   m_EditorClassIdentifier: 
-  maxHP: 100
-  attackDamage: 20
-  attackCoreDamage: 20
-  attackCooldown: 1
-  moveSpeed: 1
+  entityName: 
+  maxHP: 0
+  attackDamage: 0
+  attackCoreDamage: 0
+  attackImpactRatio: 0
+  moveSpeed: 0
   entityScale: 0
-  Layer: 7
-  detectionRadius: 5
-  attackRange: 1
-  disengageRange: 1
+  Layer: 0
+  detectionRadius: 0
+  attackRange: 0
+  disengageRange: 0
   attackPriority: 0
-  attackableType: 0
   attackType: 0
+  entityPrefab: {fileID: 0}
   projectilePrefab: {fileID: 0}
-  projectileSpeed: 0
-  projectileLifeTime: 0
-  entityPrefab: {fileID: 3906550537786496408, guid: 964cb2d7a2b27664fa83aa625e6b819f, type: 3}
+  projectilePoolName: 
   summonEffectPrefab: {fileID: 0}
   attackEffectPrefab: {fileID: 0}
+  takeDamageEffectPrefeb: {fileID: 0}
   deathEffectPrefab: {fileID: 0}
   summonSound: {fileID: 0}
   attackSound: {fileID: 0}
   deathSound: {fileID: 0}
-  animatorController: {fileID: 9100000, guid: d0eeb9f03739fe040a4442b1e2f2224e, type: 2}
-  attackClip: {fileID: -203655887218126122, guid: 07a232c3759c96544a7c4400ed04a494, type: 3}
-  runClip: {fileID: -203655887218126122, guid: 5f86ba74454f6a847a27d749984d72dc, type: 3}
-  deathClip: {fileID: -203655887218126122, guid: 68c7f0af547386243a9238a6e035a518, type: 3}
-  idleClip: {fileID: -203655887218126122, guid: 8312c4e79a39d0943bb56a9417bb4727, type: 3}
+  animatorController: {fileID: 0}
+  attackClip: {fileID: 0}
+  runClip: {fileID: 0}
+  deathClip: {fileID: 0}
+  idleClip: {fileID: 0}

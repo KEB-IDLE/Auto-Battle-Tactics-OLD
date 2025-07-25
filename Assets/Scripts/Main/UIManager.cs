@@ -13,23 +13,26 @@ public class UIManager : MonoBehaviour
     public Image profileIcon;
     public Sprite[] profileIcons;
 
-    public GameObject[] characterPrefabs;
-    private GameObject currentCharacterInstance;
-
     public TMP_Text levelText;
     public TMP_Text goldText;
 
     public Image[] iconImages;
     Color enabledColor = Color.white;
-    Color disabledColor = new Color(1f, 1f, 1f, 0.1f);
+    Color disabledColor = new Color(1f, 1f, 1f, 80f / 255f);
 
+    // 내 랭킹
+    public Image rankProfileIcon;
+    public TMP_Text rankNicknameText;
+    public TMP_Text globalRankText;
     public TMP_Text rankMatchText;
     public TMP_Text rankWinsText;
     public TMP_Text rankPointText;
-    public TMP_Text globalRankText;
 
-    public TMP_Text[] rankTexts;
-    public Image[] rankIcons;
+    // 글로벌 랭킹
+    public TMP_Text[] rankNumberTexts;   // 순위 텍스트
+    public Image[] rankIcons;            // 아이콘
+    public TMP_Text[] rankNameTexts;     // 닉네임 텍스트
+    public TMP_Text[] rankPointTexts;    // 점수 텍스트
 
     public void OnClickJoinMatch()
     {
@@ -41,37 +44,52 @@ public class UIManager : MonoBehaviour
         StartCoroutine(MatchManager.Instance.EndMatchFlow());
     }
 
-    // 메인캐릭터 생성
-    public void SpawnCharacter(int charId)
+    // 프로필 UI 갱신
+    public void UpdateProfileUI()
     {
-        int prefabIndex = charId - 1;
+        var profile = GameManager.Instance.profile;
 
-        if (prefabIndex < 0 || prefabIndex >= characterPrefabs.Length)
-        {
-            Debug.LogWarning("Invalid character ID: " + charId);
-            return;
-        }
+        if (nicknameText != null) nicknameText.text = profile.nickname;
+        if (levelText != null) levelText.text = $"Lv {profile.level}";
+        if (goldText != null) goldText.text = $"{profile.gold}";
 
-        if (currentCharacterInstance != null)
-            Destroy(currentCharacterInstance);
+        int iconId = profile.profile_icon_id;
+        int iconIndex = iconId - 1;
 
-        GameObject prefab = characterPrefabs[prefabIndex];
-        currentCharacterInstance = Instantiate(prefab, Vector3.zero, Quaternion.identity);
+        if (iconIndex >= 0 && iconIndex < profileIcons.Length)
+            profileIcon.sprite = profileIcons[iconIndex];
+        else
+            Debug.LogWarning("Invalid profile icon ID");
+
+        RefreshIconButtonVisuals();
+        HighlightSelectedIcon(iconIndex); // 선택 아이콘 강조
     }
 
-    // 메인캐릭터 선택
-    public void ChangeProfileCharacter(int charId)
+    // 아이콘 크기 초기화 후 특정 아이콘만 강조
+    private void HighlightSelectedIcon(int iconIndex)
     {
-        StartCoroutine(UserService.Instance.ChangeProfileCharacter(
-            charId,
-            profile =>
+        if (iconImages == null || iconImages.Length == 0) return;
+
+        // 이전 선택 아이콘 크기 리셋
+        for (int i = 0; i < iconImages.Length; i++)
+        {
+            iconImages[i].transform.localScale = Vector3.one;
+        }
+
+        // 현재 선택 아이콘 확대
+        if (iconIndex >= 0 && iconIndex < iconImages.Length)
+        {
+            iconImages[iconIndex].transform.localScale = new Vector3(1.2f, 1.2f, 1f);
+
+
+            // Button의 "Selected Color" 상태 적용
+            Button selectedBtn = iconImages[iconIndex].GetComponent<Button>();
+            if (selectedBtn != null)
             {
-                GameManager.Instance.profile = profile;
-                UpdateProfileUI();
-                SpawnCharacter(charId);
-            },
-            err => Debug.LogWarning("Main champion update failed: " + err)
-        ));
+                // 선택 상태를 강제로 트리거
+                selectedBtn.Select();
+            }
+        }
     }
 
     // 프로필 아이콘 시각화
@@ -86,8 +104,24 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    // 초기 아이콘 선택 반영 (UserDataLoader에서 LoadProfile 후 수동 호출)
+    public void InitializeIconSelection()
+    {
+        int iconIndex = GameManager.Instance.profile.profile_icon_id - 1;
+        HighlightSelectedIcon(iconIndex);
+    }
+
+    // 메인캐릭터 선택 버튼
+    public void ChangeProfileCharacter(int charId)
+    {
+        StartCoroutine(UserManager.Instance.ChangeProfileCharacterCoroutine(
+            charId,
+            onComplete: UpdateProfileUI
+        ));
+    }
+
     // 아이콘 버튼 클릭시
-    public void OnIconButtonClicked(int iconId)
+    public void OnClickIcon(int iconId)
     {
         var ownedIcons = GameManager.Instance.ownedProfileIcons;
 
@@ -132,55 +166,46 @@ public class UIManager : MonoBehaviour
             {
                 GameManager.Instance.profile = profile;
                 UpdateProfileUI();
+                GetGlobalRanking();
             },
             err => Debug.LogWarning("Profile icon update failed: " + err)
         ));
     }
 
-    // 레벨 변경 버튼
+
+
+
+
+
+    // 레벨 변경
     public void ChangeLevel(int deltaLevel)
     {
-        int newLevel = GameManager.Instance.profile.level + deltaLevel;
-        StartCoroutine(UserService.Instance.ChangeLevel(
-            newLevel,
-            profile =>
-            {
-                GameManager.Instance.profile = profile;
-                UpdateProfileUI();
-            },
-            err => Debug.LogWarning("Level update failed: " + err)
+        StartCoroutine(UserManager.Instance.ChangeLevelCoroutine(
+            deltaLevel,
+            onComplete: UpdateProfileUI
         ));
     }
 
-    // 경험치 변경 버튼
+    // 경험치 변경
     public void ChangeExp(int deltaExp)
     {
-        int newExp = GameManager.Instance.profile.exp + deltaExp;
-        StartCoroutine(UserService.Instance.ChangeExp(
-            newExp,
-            profile =>
-            {
-                GameManager.Instance.profile = profile;
-                UpdateProfileUI();
-            },
-            err => Debug.LogWarning("Exp update failed: " + err)
+        StartCoroutine(UserManager.Instance.ChangeExpCoroutine(
+            deltaExp,
+            onComplete: UpdateProfileUI
         ));
     }
 
-    // 골드 변경 버튼
+    // 골드 변경
     public void ChangeGold(int deltaGold)
     {
-        int newGold = GameManager.Instance.profile.gold + deltaGold;
-        StartCoroutine(UserService.Instance.ChangeGold(
-            newGold,
-            profile =>
-            {
-                GameManager.Instance.profile = profile;
-                UpdateProfileUI();
-            },
-            err => Debug.LogWarning("Gold update failed: " + err)
+        StartCoroutine(UserManager.Instance.ChangeGoldCoroutine(
+            deltaGold,
+            onComplete: UpdateProfileUI
         ));
     }
+
+
+
 
     // 랭크 전적 변경 버튼
     public void UpdateUserRecord(int deltaMatch, int deltaWins, int deltaLosses, int deltaPoint)
@@ -225,17 +250,16 @@ public class UIManager : MonoBehaviour
     // 글로벌 랭킹 UI
     public void UpdateGlobalRankingUI(GlobalRankEntry[] entries)
     {
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < entries.Length && i < rankNumberTexts.Length; i++)
         {
-            if (i >= rankTexts.Length || i >= rankIcons.Length)
-            {
-                Debug.LogWarning("랭킹 UI 배열이 부족합니다.");
-                continue;
-            }
-
             var entry = entries[i];
-            rankTexts[i].text = $"{entry.nickname} ({entry.rank_point}pt)";
 
+            // 순위, 닉네임, 포인트 각각 매핑
+            rankNumberTexts[i].text = entry.rank.ToString();
+            rankNameTexts[i].text = entry.nickname;
+            rankPointTexts[i].text = $"{entry.rank_point} pt";
+
+            // 아이콘 설정
             int iconIndex = entry.profile_icon_id - 1;
             if (iconIndex >= 0 && iconIndex < profileIcons.Length)
                 rankIcons[i].sprite = profileIcons[iconIndex];
@@ -244,31 +268,15 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    // 프로필 UI 갱신
-    public void UpdateProfileUI()
-    {
-        var profile = GameManager.Instance.profile;
 
-        if (nicknameText != null) nicknameText.text = profile.nickname;
-        if (levelText != null) levelText.text = $"Lv {profile.level}";
-        if (goldText != null) goldText.text = $"Gold {profile.gold}";
-
-        int iconId = profile.profile_icon_id;
-        int iconIndex = iconId - 1;
-
-        if (iconIndex >= 0 && iconIndex < profileIcons.Length)
-            profileIcon.sprite = profileIcons[iconIndex];
-        else
-            Debug.LogWarning("Invalid profile icon ID");
-
-        RefreshIconButtonVisuals();
-    }
 
     // 랭크 전적 UI 갱신
     public void UpdateRecordUI()
     {
         var record = GameManager.Instance.record;
+        var profile = GameManager.Instance.profile;
 
+        // 랭크 전적 텍스트
         if (rankMatchText != null)
             rankMatchText.text = $"Matches: {record.rank_match_count}";
         if (rankWinsText != null)
@@ -277,7 +285,23 @@ public class UIManager : MonoBehaviour
             rankPointText.text = $"Points: {record.rank_point}";
         if (globalRankText != null)
             globalRankText.text = $"Global Rank: {record.global_rank}";
+
+        // 닉네임 텍스트 업데이트
+        if (rankNicknameText != null)
+            rankNicknameText.text = profile.nickname;
+
+        // 프로필 아이콘 업데이트
+        if (rankProfileIcon != null)
+        {
+            int iconIndex = profile.profile_icon_id - 1;
+            if (iconIndex >= 0 && iconIndex < profileIcons.Length)
+                rankProfileIcon.sprite = profileIcons[iconIndex];
+            else
+                Debug.LogWarning($"Invalid profile icon ID: {profile.profile_icon_id}");
+        }
     }
+
+
 }
 
 
@@ -389,6 +413,7 @@ public class IconPurchaseResponse
 [System.Serializable]
 public class GlobalRankEntry
 {
+    public int rank;
     public string nickname;
     public int profile_icon_id;
     public int rank_point;
