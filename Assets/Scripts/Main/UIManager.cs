@@ -34,6 +34,17 @@ public class UIManager : MonoBehaviour
     public TMP_Text[] rankNameTexts;     // 닉네임 텍스트
     public TMP_Text[] rankPointTexts;    // 점수 텍스트
 
+
+
+
+    public static UIManager Instance;
+
+    private void Awake()
+    {
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
+    }
+
     public void OnClickJoinMatch()
     {
         StartCoroutine(MatchManager.Instance.StartMatchFlow());

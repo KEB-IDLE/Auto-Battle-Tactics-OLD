@@ -35,7 +35,10 @@ public class MatchService : MonoBehaviour
     }
 
     // 매칭 상태 확인
-    public IEnumerator CheckMatchStatus(Action<string, string> onMatched, Action onNotMatched, Action<string> onError)
+    public IEnumerator CheckMatchStatus(
+        Action<string, string, long> onMatched,  // opponentId, roomId, startAt (long)
+        Action onNotMatched,
+        Action<string> onError)
     {
         int userId = GameManager.Instance.profile.user_id;
         string url = APIEndpoints.MatchStatus + "?userId=" + userId;
@@ -46,7 +49,24 @@ public class MatchService : MonoBehaviour
             {
                 if (res.matched)
                 {
-                    onMatched?.Invoke(res.opponentId, res.roomId);
+                    // start_at → long 변환 시도
+                    long startAtLong = 0;
+
+                    if (long.TryParse(res.start_at, out startAtLong))
+                    {
+                        onMatched?.Invoke(res.opponentId, res.roomId, startAtLong);
+                    }
+                    else if (DateTimeOffset.TryParse(res.start_at, out var startDate))
+                    {
+                        // ISO8601 포맷이라면 UnixTime(초)로 변환
+                        startAtLong = startDate.ToUnixTimeSeconds();
+                        onMatched?.Invoke(res.opponentId, res.roomId, startAtLong);
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"start_at 변환 실패: {res.start_at}");
+                        onError?.Invoke("start_at parsing failed");
+                    }
                 }
                 else
                 {
@@ -83,7 +103,6 @@ public class MatchService : MonoBehaviour
     }
 }
 
-
 [Serializable]
 public class MatchRequest
 {
@@ -93,7 +112,7 @@ public class MatchRequest
 [Serializable]
 public class MatchJoinResponse
 {
-    public bool matched; // 서버에서 matched: false 로 응답해줘도 호환 위해 유지
+    public bool matched;
 }
 
 [Serializable]
@@ -102,6 +121,7 @@ public class MatchStatusResponse
     public bool matched;
     public string opponentId;
     public string roomId;
+    public string start_at;  // 서버 응답 키와 동일하게 snake_case 사용
 }
 
 [Serializable]
