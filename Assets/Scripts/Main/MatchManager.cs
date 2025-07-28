@@ -1,9 +1,14 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class MatchManager : MonoBehaviour
 {
+    public TMP_Text matchTimerText;  // 매칭 대기 시간 표시 텍스트
+    private Coroutine matchTimerCoroutine;  // 타이머 코루틴 참조
+
     public static MatchManager Instance;
 
     private void Awake()
@@ -18,12 +23,13 @@ public class MatchManager : MonoBehaviour
             onSuccess: () =>
             {
                 Debug.Log("큐 등록 완료, 매칭 대기 시작...");
+                StartMatchTimer();  // 매칭 타이머 시작
                 StartCoroutine(PollUntilMatched());
             },
             onError: err =>
             {
                 Debug.LogWarning("큐 등록 실패: " + err);
-                // TODO: 실패 UI 띄우기
+                ClearMatchUI();  // 실패 시 타이머 종료
             }
         );
     }
@@ -37,13 +43,14 @@ public class MatchManager : MonoBehaviour
         while (elapsed < timeout)
         {
             yield return MatchService.Instance.CheckMatchStatus(
-                onMatched: (opponentId, roomId) =>
+                onMatched: (opponentId, roomId, startAt) =>
                 {
-                    Debug.Log("매칭 성공! 상대: " + opponentId + ", room: " + roomId);
+                    Debug.Log($"매칭 성공! 상대: {opponentId}, room: {roomId}, start_at: {startAt}");
                     GameManager.Instance.opponentId = opponentId;
                     GameManager.Instance.roomId = roomId;
 
-                    SceneManager.LoadScene(2); // 게임씬 로드
+                    StartCoroutine(OnMatchSuccess(startAt));  // 매칭 성공 처리 & 동시 시작 대기
+                    elapsed = timeout;  // 폴링 종료
                 },
                 onNotMatched: () =>
                 {
@@ -55,12 +62,79 @@ public class MatchManager : MonoBehaviour
                 }
             );
 
+            if (elapsed >= timeout) break;
+
             yield return new WaitForSeconds(pollInterval);
             elapsed += pollInterval;
         }
 
-        Debug.LogWarning("매칭 시간 초과");
-        // TODO: 타임아웃 UI 처리
+        if (elapsed >= timeout)
+        {
+            Debug.LogWarning("매칭 시간 초과");
+            ClearMatchUI();
+        }
+    }
+
+    private IEnumerator OnMatchSuccess(long startAtUnix)
+    {
+        // 매칭 타이머만 중지하고 UI 전체는 비활성화하지 않음
+        if (matchTimerCoroutine != null)
+        {
+            StopCoroutine(matchTimerCoroutine);
+            matchTimerCoroutine = null;
+        }
+
+        // "MATCHED!" 표시
+        if (matchTimerText != null)
+            matchTimerText.text = "MATCHED!";
+
+        long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        float wait = Mathf.Max(0, startAtUnix - now);
+
+        yield return new WaitForSeconds(wait);
+
+        ClearMatchUI();  // 씬 전환 전 UI 초기화
+        SceneManager.LoadScene(2);
+    }
+
+    public void StartMatchTimer()
+    {
+        if (matchTimerText != null)
+            matchTimerText.transform.parent.gameObject.SetActive(true);
+
+        if (matchTimerCoroutine != null)
+            StopCoroutine(matchTimerCoroutine);
+
+        matchTimerCoroutine = StartCoroutine(MatchTimerRoutine());
+    }
+
+    private IEnumerator MatchTimerRoutine()
+    {
+        float elapsed = 0f;
+
+        while (true)
+        {
+            elapsed += Time.deltaTime;
+            int minutes = (int)(elapsed / 60);
+            int seconds = (int)(elapsed % 60);
+            matchTimerText.text = $"WAITING... {minutes:00}:{seconds:00}";
+            yield return null;
+        }
+    }
+
+    public void ClearMatchUI()
+    {
+        if (matchTimerCoroutine != null)
+        {
+            StopCoroutine(matchTimerCoroutine);
+            matchTimerCoroutine = null;
+        }
+
+        if (matchTimerText != null)
+        {
+            matchTimerText.text = string.Empty;
+            matchTimerText.transform.parent.gameObject.SetActive(false);
+        }
     }
 
     public IEnumerator EndMatchFlow()
@@ -69,13 +143,10 @@ public class MatchManager : MonoBehaviour
             onSuccess: () =>
             {
                 Debug.Log("게임 종료 처리 완료");
-
-                //SceneManager.LoadScene("MainLobby");
             },
             onError: err =>
             {
                 Debug.LogWarning("게임 종료 처리 실패: " + err);
-                // TODO: 실패 UI 처리
             }
         );
     }
