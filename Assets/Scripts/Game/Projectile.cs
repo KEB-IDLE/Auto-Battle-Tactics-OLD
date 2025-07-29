@@ -85,7 +85,7 @@ public class Projectile : MonoBehaviour
             if (dist <= data.detectionRadius)
             {
                 var hp = target.GetComponent<HealthComponent>();
-                if (hp != null) hp.TakeDamage(coreDamage != 0 ? coreDamage : damage);
+                if (hp != null) hp.RequestDamage(coreDamage != 0 ? coreDamage : damage);
 
                 if (data.explosionRadius > 0f)
                 {
@@ -102,7 +102,7 @@ public class Projectile : MonoBehaviour
 
                         var otherHp = enemy.GetComponent<HealthComponent>();
                         if (otherHp != null)
-                            otherHp.TakeDamage(coreDamage != 0 ? coreDamage : damage);
+                            otherHp.RequestDamage(coreDamage != 0 ? coreDamage : damage);
                     }
                 }
                 ReturnFlightEffect();

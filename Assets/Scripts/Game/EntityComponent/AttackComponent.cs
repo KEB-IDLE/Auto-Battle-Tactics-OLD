@@ -120,9 +120,8 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
                 lockedTarget = null;
         }
         if (lockedTarget != null && CanAttack(lockedTarget))
-        {
             attackCoroutine = StartCoroutine(AttackRoutine(lockedTarget));
-        }
+
     }
 
     public IDamageable DetectTarget()
@@ -221,15 +220,9 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
 
         OnAttackEffect?.Invoke(transform);
 
-        var coreComp = (lockedTarget as MonoBehaviour)
-                          .GetComponent<Core>();
-
-        Debug.Log("attack!!!!!!");
-
-        if (coreComp != null)
-            lockedTarget.TakeDamage(attackCoreDamage);
-        else
-            lockedTarget.TakeDamage(attackDamage);
+        var coreComp = (lockedTarget as MonoBehaviour).GetComponent<Core>();
+        target.RequestDamage(coreComp != null ? attackCoreDamage : attackDamage);
+        (target as HealthComponent)?.ApplyImmediateDamage();
     }
 
     private void AttackRanged(IDamageable target)
@@ -281,7 +274,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
             var dmg = col.GetComponent<IDamageable>();
             var coreComp = col.GetComponent<Core>();
             if (dmg != null && dmg.IsAlive())
-                dmg.TakeDamage(coreComp != null ? attackCoreDamage : attackDamage);
+                dmg.RequestDamage(coreComp != null ? attackCoreDamage : attackDamage);
         }
     }
 
