@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: MageData
   m_EditorClassIdentifier: 
   entityName: Mage
-  maxHP: 3
+  maxHP: 6
   attackDamage: 4
   attackCoreDamage: 2
   attackImpactRatio: 0.7

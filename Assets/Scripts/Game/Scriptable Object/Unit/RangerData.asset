@@ -16,7 +16,7 @@ MonoBehaviour:
   maxHP: 20
   attackDamage: 8
   attackCoreDamage: 7
-  attackImpactRatio: 0.5
+  attackImpactRatio: 0.47
   moveSpeed: 2
   entityScale: 0
   Layer: 14
@@ -26,6 +26,7 @@ MonoBehaviour:
   attackPriority: 0
   attackType: 1
   entityPrefab: {fileID: 3865900570072927925, guid: 3ed81c8dfca06f44ab55e2815b7bbdd0, type: 3}
+  magicRadius: 0
   projectilePrefab: {fileID: 3287624786238722518, guid: 0c144b528e01b334baa60edbf77d3be1, type: 3}
   projectilePoolName: Arrow
   summonEffectPrefab: {fileID: 0}
