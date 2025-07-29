@@ -101,8 +101,6 @@ public class EntityEditor : Editor
         collider.height = 1.8f;
         collider.center = new Vector3(0, 0.85f, 0); // ¿¹½Ã°ª
 
-        
-
         var rb = go.AddComponent<Rigidbody>();
         rb.freezeRotation = false;
         rb.constraints = RigidbodyConstraints.FreezeRotationX
