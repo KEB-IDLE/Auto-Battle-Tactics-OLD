@@ -20,6 +20,8 @@ public class EntityData : ScriptableObject
     public float moveSpeed;
     [Tooltip("Entity scale")]
     public EntityScale entityScale;
+    [Tooltip("gold")]
+    public float gold_;
 
     [Header("Layer")]
     [Tooltip("Layer: 7=Human, 8=Mutant, 9=Tower, 10=Core, 11=Projectile, 12=Structure, 13=Obstacle, 14=Agent")]
@@ -40,8 +42,6 @@ public class EntityData : ScriptableObject
     }
     [Tooltip("Attack target type (Agent, Tower, Core)")]
     public AttackPriority attackPriority;
-    //[Tooltip("Can attack air units or not")]
-    //public AttackableType attackableType;
 
     [Tooltip("Attack type (Melee, Ranged, Magic)")]
     public AttackType attackType;
@@ -67,8 +67,6 @@ public class EntityData : ScriptableObject
     public GameObject takeDamageEffectPrefeb;
     [Tooltip("Death effect prefab")]
     public GameObject deathEffectPrefab;
-    //[Tooltip("Projectile move effect prefab")]
-    //public GameObject projectileAttackingEffectPrefab;
 
     [Header("Audio Settings")]
     public AudioClip summonSound;
