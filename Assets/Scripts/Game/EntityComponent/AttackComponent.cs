@@ -251,7 +251,8 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
             damage: attackDamage,
             coreDamage: attackCoreDamage,
             target: (target as MonoBehaviour).transform,
-            poolName: projectilePoolName
+            poolName: projectilePoolName,
+            disengageRange : disengageRange
         );
 
         if (OnAttackEffect == null)

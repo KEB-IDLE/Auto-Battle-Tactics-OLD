@@ -17,7 +17,7 @@ MonoBehaviour:
   attackDamage: 5
   attackCoreDamage: 5
   attackImpactRatio: 0.4
-  moveSpeed: 2
+  moveSpeed: 5
   entityScale: 0
   Layer: 14
   detectionRadius: 20

@@ -15,9 +15,13 @@ public class Projectile : MonoBehaviour
 
     private Team team;
     private float timer;
+    private float lifeTime;
     private float damage;
     private float coreDamage;
     private Transform target;
+    private float speedWeight;
+    private float verticalSpeedWeight;
+    private float disengageRange = 100f;
 
     private void Awake()
     {
@@ -26,24 +30,32 @@ public class Projectile : MonoBehaviour
     }
 
     // ObjectPoolManager를 통한 초기화
-    public void Initialize(Entity owner, float damage, float coreDamage, Transform target, string poolName)
+    public void Initialize(Entity owner, float damage, float coreDamage, Transform target, string poolName, float disengageRange)
     {
         this.damage = damage;
         this.target = target;
         this.coreDamage = coreDamage;
-        this.poolName = poolName; // 어떤 풀에 반환해야 할지 기억
+        this.poolName = poolName;
+        this.disengageRange = disengageRange;
         timer = 0f;
+        lifeTime = 5f;
         _rb.linearVelocity = Vector3.zero;
         _rb.angularVelocity = Vector3.zero;
 
+        
         SetTeam(owner);
         AttachFlightEffect();
 
-        // 발사 방향 초기화
         if (target != null)
         {
-            _rb.linearVelocity = (target.position - transform.position)
-                                .normalized * data.speed + Vector3.up * data.verticalSpeed;
+            float distance = Vector3.Distance(transform.position, target.position);
+
+            // 가중치(Weight)에 따라 자동 보정
+            float autoSpeed = Mathf.Max(distance * data.speedWeight, 4f);
+            float autoVerticalSpeed = Math.Max(distance * data.verticalSpeedWeight, 4f);
+
+            Vector3 direction = (target.position - transform.position).normalized;
+            _rb.linearVelocity = direction * autoSpeed + Vector3.up * autoVerticalSpeed;
         }
     }
 
@@ -59,7 +71,14 @@ public class Projectile : MonoBehaviour
     private void Update()
     {
         timer += Time.deltaTime;
-        if (timer > data.lifeTime || target == null)
+        if (target == null || timer > lifeTime)
+        {
+            ReturnFlightEffect();
+            ReturnToPool();
+            return;
+        }
+        float dist = Vector3.Distance(transform.position, target.position);
+        if (dist > disengageRange)
         {
             ReturnFlightEffect();
             ReturnToPool();
@@ -71,10 +90,16 @@ public class Projectile : MonoBehaviour
 
     private void Move()
     {
-        if (target == null) return;
-        Vector3 dir = (target.position - transform.position).normalized;
-        transform.position += dir * data.speed * Time.deltaTime;
-        transform.forward = dir;
+
+        if (_rb == null || target == null) return;
+        Vector3 toTarget = (target.position - transform.position).normalized;
+        float currentSpeed = _rb.linearVelocity.magnitude;
+
+        // 살짝 유도 (0.08~0.18 사이에서 실험 추천)
+        _rb.linearVelocity = Vector3.Lerp(_rb.linearVelocity, toTarget * currentSpeed, 0.12f);
+        if (_rb.linearVelocity.sqrMagnitude > 0.01f)
+            transform.forward = _rb.linearVelocity.normalized;
+
     }
 
     protected virtual void CheckHit()
@@ -86,7 +111,7 @@ public class Projectile : MonoBehaviour
             {
                 var hp = target.GetComponent<HealthComponent>();
                 if (hp != null) hp.RequestDamage(coreDamage != 0 ? coreDamage : damage);
-
+                hp?.ApplyImmediateDamage();
                 if (data.explosionRadius > 0f)
                 {
                     Collider[] explosionHits = Physics.OverlapSphere(
@@ -102,7 +127,10 @@ public class Projectile : MonoBehaviour
 
                         var otherHp = enemy.GetComponent<HealthComponent>();
                         if (otherHp != null)
+                        {
                             otherHp.RequestDamage(coreDamage != 0 ? coreDamage : damage);
+                            otherHp?.ApplyImmediateDamage();
+                        }
                     }
                 }
                 ReturnFlightEffect();
@@ -115,10 +143,7 @@ public class Projectile : MonoBehaviour
     /// <summary>
     /// 풀 이름을 직접 지정해줌
     /// </summary>
-    public void SetPoolName(string poolName)
-    {
-        this.poolName = poolName;
-    }
+    public void SetPoolName(string poolName) => this.poolName = poolName;
 
     private void ReturnToPool()
     {
