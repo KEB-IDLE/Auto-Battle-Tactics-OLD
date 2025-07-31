@@ -71,7 +71,6 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
         pendingDamage = 0f;
         OnHealthChanged?.Invoke(currentHP, maxHP);
     }
-
     public void ApplyPendingDamage()
     {
         if (pendingDamage > 0f && this.IsAlive())
@@ -80,8 +79,6 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
             currentHP -= pendingDamage;
             pendingDamage = 0f;
             OnHealthChanged?.Invoke(currentHP, maxHP);
-
-
         }
     }
     private IEnumerator DeathRoutine()

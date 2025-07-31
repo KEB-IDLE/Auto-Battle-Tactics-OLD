@@ -14,7 +14,7 @@ using UnityEngine.AI;
 
 public class Entity : MonoBehaviour
 {
-    private EntityData entityData;
+    [SerializeField] private EntityData entityData;
 
     private HealthComponent _health;
     private AttackComponent _attack;
