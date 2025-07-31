@@ -23,9 +23,9 @@ public class EntityData : ScriptableObject
     [Tooltip("gold")]
     public float gold_;
 
-    [Header("Layer")]
-    [Tooltip("Layer: 7=Human, 8=Mutant, 9=Tower, 10=Core, 11=Projectile, 12=Structure, 13=Obstacle, 14=Agent")]
-    public int Layer;
+    [Header("Unit Type")]
+    public string unitType;
+    public string layer;
 
     [Header("Target Detection")]
     [Tooltip("Target detection radius")]
@@ -49,7 +49,7 @@ public class EntityData : ScriptableObject
     [Header("Entity Prefab")]
     public GameObject entityPrefab;
 
-    [Header("Magic")] // ¸¶¹ý»çÀÇ ¸¶¹ý ÇÇÇØ ¹üÀ§
+    [Header("Magic")] // Â¸Â¶Â¹Ã½Â»Ã§Ã€Ã‡ Â¸Â¶Â¹Ã½ Ã‡Ã‡Ã‡Ã˜ Â¹Ã¼Ã€Â§
     public float magicRadius;
 
     [Header("Ranged")]

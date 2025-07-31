@@ -1,14 +1,13 @@
-// ✅ UnitManager.cs
-/*
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class UnitManager : MonoBehaviour
 {
     public static UnitManager Instance { get; private set; }
 
     [SerializeField] private List<EntityData> allEntityData;
-    private Dictionary<int, EntityData> entityDataByLayer = new();
+    private Dictionary<string, EntityData> entityDataMap = new();
 
     void Awake()
     {
@@ -21,112 +20,136 @@ public class UnitManager : MonoBehaviour
 
         foreach (var data in allEntityData)
         {
-            if (data != null && !entityDataByLayer.ContainsKey(data.Layer))
-                entityDataByLayer[data.Layer] = data;
+            if (!entityDataMap.ContainsKey(data.unitType))
+            {
+                entityDataMap[data.unitType] = data;
+            }
         }
     }
 
-    public EntityData GetEntityData(int layer)
+    public EntityData GetEntityData(string unitType)
     {
-        entityDataByLayer.TryGetValue(layer, out var data);
+        if (!entityDataMap.TryGetValue(unitType, out var data))
+        {
+            Debug.LogError($"❌ 유닛 타입 [{unitType}] 에 대한 EntityData가 없습니다.");
+        }
         return data;
     }
 
-    public void SpawnUnits(int layer, Vector3 position)
+    public void SpawnUnits(string unitType, Vector3 position, string ownerId)
     {
-        var data = GetEntityData(layer);
-        if (data == null)
+        Debug.Log($"🟡 [SpawnUnits] 호출됨: {unitType}");
+        var data = GetEntityData(unitType);
+        if (data == null || data.entityPrefab == null)
         {
-            Debug.LogWarning($"❌ 유닛 레이어 {layer}에 해당하는 프리팹이 없습니다.");
+            Debug.LogError($"❌ [SpawnUnits] EntityData 없음 또는 프리팹 누락. unitType: {unitType}");
             return;
         }
 
-        GameObject go = GameObject.Instantiate(data.entityPrefab, position, Quaternion.identity);
-        go.layer = layer;
+        GameObject go = Instantiate(data.entityPrefab, position, Quaternion.identity);
+        var entity = go.GetComponent<Entity>();
 
-        var teamComponent = go.GetComponent<TeamComponent>();
-        if (data.Layer == 7) // Human
-            teamComponent.SetTeam(Team.Blue);
-        else if (data.Layer == 8) // Mutant
-            teamComponent.SetTeam(Team.Red);
-        else
+        string generatedId = System.Guid.NewGuid().ToString();
+        entity.SetUnitId(generatedId);
+        entity.SetOwnerId(ownerId);
+        GameManager2.Instance.Register(entity);
+
+        // 공통 컴포넌트 초기화
+        go.GetComponent<HealthComponent>()?.Initialize(data);
+        go.GetComponent<AnimationComponent>()?.Initialize(data);
+        go.GetComponent<EffectComponent>()?.Initialize(data);
+
+        // 네트워크 초기화
+        bool isMine = (ownerId == UserNetwork.Instance.MyId);
+        bool isPlacement = GameManager2.Instance.IsPlacementPhase;
+        go.GetComponent<UnitNetwork>()?.InitializeNetwork(isMine);
+
+        // 팀 설정 (내 유닛만 직접 설정)
+        if (isMine)
         {
-            Debug.LogWarning($"❗ 예상치 못한 레이어: {go.layer}, 기본값 Red로 설정함");
-            teamComponent.SetTeam(Team.Red);
+            var teamComponent = go.GetComponent<TeamComponent>();
+            if (teamComponent != null)
+            {
+                teamComponent.SetTeam(UserNetwork.Instance.MyTeam);
+                Debug.Log($"✅ 내 유닛 팀 설정됨: {UserNetwork.Instance.MyTeam}");
+            }
         }
 
-        Debug.Log($"[Spawned] layer={data.Layer} 팀 = {teamComponent.Team}");
+        // 배치/전투에 따라 컴포넌트 활성화 분기
+        var move = go.GetComponent<MoveComponent>();
+        if (move != null) move.enabled = !isPlacement;
 
+        var atk = go.GetComponent<AttackComponent>();
+        if (atk != null) atk.enabled = !isPlacement;
+
+        var core = go.GetComponent<CoreComponent>();
+        if (core != null) core.enabled = !isPlacement;
+
+        // 배치 중에는 내 유닛만 드래그 가능
+        if (isMine && isPlacement)
+        {
+            if (!go.TryGetComponent<DraggableUnit>(out _))
+            {
+                go.AddComponent<DraggableUnit>();
+            }
+        }
+    }
+
+
+    public void OnReceiveInitMessage(string message)
+    {
+        var initData = JsonUtility.FromJson<InitMessage>(message);
+
+        Debug.Log($"📨 [Init 수신] 유닛ID: {initData.unitId} | 타입: {initData.unitType} | 팀: {initData.team} | 소유자: {initData.ownerId}");
+
+        // ✅ 전투 씬 진입 후 일괄 복원을 위해 무조건 메시지 저장
+        GameManager2.Instance.AddInitMessage(initData);
+
+        // ✅ BattleScene 씬일 때만 즉시 복원
+        if (!UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.Contains("Battle"))
+            return;
+
+        // 내 유닛은 복원하지 않음 (씬에서 이미 복원됨)
+        if (initData.ownerId == UserNetwork.Instance.MyId)
+        {
+            Debug.Log($"⚠️ [무시됨] 내 유닛 메시지임 → {initData.unitId}");
+            return;
+        }
+
+        Debug.Log($"🟥 [적 유닛 복원 시작] 유닛ID: {initData.unitId}");
+
+        string unitType = initData.unitType;
+        Vector3 position = new Vector3(initData.position[0], initData.position[1], initData.position[2]);
+        var data = GetEntityData(unitType);
+        GameObject go = Instantiate(data.entityPrefab, position, Quaternion.identity);
+
+        int parsedLayer = LayerMask.NameToLayer(initData.layer);
+        if (parsedLayer != -1)
+            go.layer = parsedLayer;
+        else
+            Debug.LogError($"❗ 존재하지 않는 레이어 이름: {initData.layer}");
 
         var entity = go.GetComponent<Entity>();
-        entity.SetUnitId(System.Guid.NewGuid().ToString());
+        entity.SetUnitId(initData.unitId);
+        entity.SetOwnerId(initData.ownerId);
+        GameManager2.Instance.Register(entity);
+
+        if (Enum.TryParse(initData.team, out Team parsedTeam))
+            go.GetComponent<TeamComponent>()?.SetTeam(parsedTeam);
 
         var health = go.GetComponent<HealthComponent>();
-        health?.Initialize(entity.Data);
-
-        GameManager2.Instance.Register(entity);
-
-        // ✅ 유닛 스폰 후 상태를 서버에 전송하도록 직접 요청
-        go.GetComponent<UnitNetwork>()?.SendInit();
-    }
-
-    public void OnReceiveInitMessage(string json)
-    {
-
-        var msg = JsonUtility.FromJson<InitMessage>(json);
-        if (GameManager2.Instance.FindById(msg.unitId) != null) return;
-        bool isMyUnit = msg.ownerId == UserNetwork.Instance.MyId;
-        var team = isMyUnit ? Team.Blue : Team.Red;
-
-
-        var pos = new Vector3(msg.position[0], msg.position[1], msg.position[2]);
-        int layer;
-
-        switch (msg.unitType)
+        if (health != null)
         {
-            case "Human":
-                layer = 7;
-                break;
-            case "Mutant":
-                layer = 8;
-                break;
-            default:
-                Debug.LogWarning($"❌ 알 수 없는 unitType 수신: {msg.unitType}");
-                return;
+            if (initData.hp > 0)
+                health.Initialize(initData.hp);
+            else
+                health.Initialize(entity.Data);
         }
 
-        var data = GetEntityData(layer);
-        if (data == null) return;
+        go.GetComponent<AnimationComponent>()?.Initialize(data);
+        go.GetComponent<AttackComponent>()?.Initialize(entity.Data);
+        go.GetComponent<UnitNetwork>()?.InitializeNetwork(false);
 
-        var obj = Instantiate(data.entityPrefab, pos, Quaternion.identity);
-        obj.layer = layer;
-
-        var entity = obj.GetComponent<Entity>();
-        entity.SetUnitId(msg.unitId);
-
-        var teamComponent = obj.GetComponent<TeamComponent>();
-        if (teamComponent != null)
-        {
-            teamComponent.Team = team;
-        }
-
-        var health = obj.GetComponent<HealthComponent>();
-        health?.Initialize(entity.Data);
-        health?.Initialize(msg.hp);
-
-        GameManager2.Instance.Register(entity);
+        Debug.Log($"✅ [적 유닛 복원 완료] {unitType} ({initData.unitId}) 위치: {position}");
     }
-
-    public void OnReceiveStateUpdate(string json)
-    {
-        var update = JsonUtility.FromJson<StateUpdateMessage>(json);
-        foreach (var state in update.units)
-        {
-            var entity = GameManager2.Instance.FindById(state.unitId);
-            if (entity != null)
-                entity.GetComponent<UnitNetwork>()?.ApplyRemoteState(state);
-        }
-    }
-} // 메시지 클래스들은 UnitNetwork.cs에만 존재하도록 유지
-
-*/
+}

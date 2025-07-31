@@ -9,24 +9,26 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3a7c9c71710beb0479729de009243f0b, type: 3}
+  m_Script: {fileID: 11500000, guid: 826a7d254cca7e547ab90347db98c1b9, type: 3}
   m_Name: MageData
   m_EditorClassIdentifier: 
-  entityName: Mage
-  maxHP: 6
-  attackDamage: 4
-  attackCoreDamage: 2
-  attackImpactRatio: 0.7
-  moveSpeed: 2
+  entityName: 
+  maxHP: 100
+  attackDamage: 20
+  attackCoreDamage: 5
+  attackImpactRatio: 0.5
+  moveSpeed: 1
   entityScale: 0
-  Layer: 14
+  gold_: 0
+  unitType: Mage
+  layer: 14
   detectionRadius: 20
-  attackRange: 20
-  disengageRange: 20
+  attackRange: 10
+  disengageRange: 15
   attackPriority: 0
   attackType: 2
-  entityPrefab: {fileID: 5688113862545389861, guid: bb2e87239bcf56f43a72ae1892f7ada0, type: 3}
-  magicRadius: 3
+  entityPrefab: {fileID: 1052314300090537878, guid: 2bce17b6c1ff8ef4c9e517f46e3491ab, type: 3}
+  magicRadius: 10
   projectilePrefab: {fileID: 0}
   projectilePoolName: 
   summonEffectPrefab: {fileID: 0}
@@ -37,7 +39,7 @@ MonoBehaviour:
   attackSound: {fileID: 0}
   deathSound: {fileID: 0}
   animatorController: {fileID: 9100000, guid: 978dfb3f95c533c4aa9742b18291eb77, type: 2}
-  attackClip: {fileID: 7400000, guid: f653247add3aab64bb8f0b4c6465a742, type: 3}
-  runClip: {fileID: 7400000, guid: 58b522b345a775d4a9b69ba407ac6165, type: 3}
-  deathClip: {fileID: 7400000, guid: 8a4ff3a854fe14b449c68d73693ddc38, type: 3}
-  idleClip: {fileID: 7400000, guid: 0f32bec07db70154dacf4fbc48ecf254, type: 3}
+  attackClip: {fileID: 7400000, guid: ad9e42ea78d0e944d8002e8e45dae882, type: 3}
+  runClip: {fileID: 7400000, guid: 7109018f1b954e644813d5aa7553d6db, type: 3}
+  deathClip: {fileID: 7400000, guid: af05d5481c4396e4885b9a72f3f8d215, type: 3}
+  idleClip: {fileID: 7400000, guid: 492977a7084e52549ae091d8faca54f4, type: 3}

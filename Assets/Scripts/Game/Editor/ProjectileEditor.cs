@@ -13,7 +13,7 @@ public class ProjectileDataEditor : Editor
 
         ProjectileData data = (ProjectileData)target;
 
-        if (GUILayout.Button("ÀÌ µ¥ÀÌÅÍ·Î Projectile ¿ÀºêÁ§Æ® »ı¼º"))
+        if (GUILayout.Button("ì´ ë°ì´í„°ë¡œ Projectile ì˜¤ë¸Œì íŠ¸ ìƒì„±"))
         {
             CreateProjectileFromData(data);
         }
@@ -31,7 +31,7 @@ public class ProjectileDataEditor : Editor
         var projectile = go.GetComponent<Projectile>() ?? go.AddComponent<Projectile>();
 
         Selection.activeGameObject = go;
-        Debug.Log($"{go.name} Projectile »ı¼ºµÊ (µ¥ÀÌÅÍ µå¸®ºì)");
+        Debug.Log($"{go.name} Projectile ìƒì„±ë¨ (ë°ì´í„° ë“œë¦¬ë¸)");
     }
 }
 #endif

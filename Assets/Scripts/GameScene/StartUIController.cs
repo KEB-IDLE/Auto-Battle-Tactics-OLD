@@ -1,8 +1,8 @@
-/*
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using TMPro;
+using UnityEngine.SceneManagement;  // ✅ 추가
 
 public class StartUIController : MonoBehaviour
 {
@@ -22,7 +22,6 @@ public class StartUIController : MonoBehaviour
         }
 
         Instance = this;
-        DontDestroyOnLoad(gameObject);
     }
 
     private void Start()
@@ -33,14 +32,10 @@ public class StartUIController : MonoBehaviour
             return;
         }
 
-        // 시작 시에는 기다리는 메시지만 표시
         countdownText.text = "Waiting...";
         countdownText.gameObject.SetActive(true);
     }
 
-    /// <summary>
-    /// 서버에서 "startCountdown" 메시지를 받았을 때 호출
-    /// </summary>
     public void BeginCountdown()
     {
         if (countdownStarted) return;
@@ -61,7 +56,6 @@ public class StartUIController : MonoBehaviour
             currentTime -= 1f;
         }
 
-        // 카운트다운 끝 → 상대방 기다리는 중
         countdownText.text = "Waiting...";
 
         if (UserNetwork.Instance != null)
@@ -75,9 +69,6 @@ public class StartUIController : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 서버로부터 "gameStart" 신호 수신 → 전투 시작
-    /// </summary>
     public void OnAllPlayersReady()
     {
         Debug.Log("💥 [UI] 모든 플레이어 준비됨 → BattleStartSequence 시작");
@@ -112,11 +103,29 @@ public class StartUIController : MonoBehaviour
         {
             Debug.Log("[UI] GameManager2.StartBattle() 호출");
             GameManager2.Instance.StartBattle();
+            GameManager2.Instance.LockAllUnitsMovement();
+            GameManager2.Instance.SendInitMessages();
+            Debug.Log($"🧾 InitMessage 저장 개수: {GameManager2.Instance.GetInitMessages().Count}");
+            yield return new WaitForSeconds(0.2f);
+            GameManager2.Instance.DeactivateAllMyUnits();
         }
         else
         {
             Debug.LogWarning("GameManager2 인스턴스가 존재하지 않습니다.");
         }
+
+        string sceneName = "4-BattleScene";
+        Debug.Log($"[UI] 씬 전환 시도: {sceneName}");
+
+        try
+        {
+            SceneManager.LoadScene(sceneName);
+            Debug.Log("[UI] 씬 로드 호출 성공 (예외 없음)");
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"❌ 씬 로드 실패: {ex.Message}");
+        }
+
     }
 }
-*/

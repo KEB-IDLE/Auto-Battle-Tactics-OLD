@@ -3,13 +3,13 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "ProjectileData", menuName = "Scriptable Objects/ProjectileData")]
 public class ProjectileData : ScriptableObject
 {
-    [Header("¹ß»çÃ¼ ÇÁ¸®ÆÕ")]
+    [Header("ë°œì‚¬ì²´ í”„ë¦¬íŒ¹")]
     public GameObject projectilePrefab;
-    [Header("¹ß»ç Áß º¸ÀÏ ÀÌÆåÆ®")]
+    [Header("ë°œì‚¬ ì¤‘ ë³´ì¼ ì´í™íŠ¸")]
     public GameObject FlightEffectPrefab;
-    [Header("¼öÆò ÀÌµ¿¼Óµµ °¡ÁßÄ¡")]
+    [Header("ìˆ˜í‰ ì´ë™ì†ë„ ê°€ì¤‘ì¹˜")]
     public float speedWeight;
-    [Header("¼öÁ÷ ÀÌµ¿¼Óµµ °¡ÁßÄ¡")]
+    [Header("ìˆ˜ì§ ì´ë™ì†ë„ ê°€ì¤‘ì¹˜")]
     public float verticalSpeedWeight;
     
     public float lifeTime;
