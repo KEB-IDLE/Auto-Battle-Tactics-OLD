@@ -1316,6 +1316,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 179124, guid: 04c79b5f6e9ebab48af48fdcf7b6d570, type: 3}
       insertIndex: -1
       addedObject: {fileID: 6268335715438717284}
+    - targetCorrespondingSourceObject: {fileID: 179124, guid: 04c79b5f6e9ebab48af48fdcf7b6d570, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8573175034710174447}
   m_SourcePrefab: {fileID: 100100000, guid: 04c79b5f6e9ebab48af48fdcf7b6d570, type: 3}
 --- !u!4 &3865900570072612479 stripped
 Transform:
@@ -1450,6 +1453,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentHP: 0
   maxHP: 0
+  pendingDamage: 0
 --- !u!114 &5348848750705704425
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1536,7 +1540,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c9e7357e5931b940a73a9b7f2577af0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _team: 1
 --- !u!114 &1049635192283584299
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1585,3 +1588,15 @@ CapsuleCollider:
   m_Height: 1.8
   m_Direction: 1
   m_Center: {x: 0, y: 0.85, z: 0}
+--- !u!114 &8573175034710174447
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3865900570072927925}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: abe2de35d331f9b44a5a34d241a14e37, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

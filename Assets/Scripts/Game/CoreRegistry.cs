@@ -4,7 +4,7 @@ public class CoreRegistry : MonoBehaviour
 {
     public static CoreRegistry Instance { get; private set; }
 
-    [Header("¾À¿¡¼­ µå·¡±×: RedCore, BlueCore")]
+    [Header("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½å·¡ï¿½ï¿½: RedCore, BlueCore")]
     [SerializeField] private Transform redCoreTransform;
     [SerializeField] private Transform blueCoreTransform;
 
@@ -13,16 +13,27 @@ public class CoreRegistry : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            // (ÇÊ¿äÇÏ´Ù¸é) DontDestroyOnLoad(gameObject);
+            // (ï¿½Ê¿ï¿½ï¿½Ï´Ù¸ï¿½) DontDestroyOnLoad(gameObject);
         }
         else Destroy(gameObject);
     }
+    private void Start()
+    {
+        if (redCoreTransform != null)
+            redCoreTransform.GetComponent<TeamComponent>()?.SetTeam(Team.Red);
 
-    /// <summary>ÁöÁ¤ ÆÀÀÇ ÄÚ¾î Transform</summary>
+        if (blueCoreTransform != null)
+            blueCoreTransform.GetComponent<TeamComponent>()?.SetTeam(Team.Blue);
+
+        Debug.Log("âœ… ì½”ì–´ íŒ€ ì •ë³´ ì„¤ì • ì™„ë£Œ (CoreRegistry)");
+    }
+
+
+    /// <summary>ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ú¾ï¿½ Transform</summary>
     public Transform GetCore(Team team)
         => team == Team.Red ? redCoreTransform : blueCoreTransform;
 
-    /// <summary>³» ÆÀÀ» ³Ñ±â¸é Àû±º ÄÚ¾î ¹ÝÈ¯</summary>
+    /// <summary>ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ñ±ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ú¾ï¿½ ï¿½ï¿½È¯</summary>
     public Transform GetEnemyCore(Team myTeam)
         => GetCore(myTeam == Team.Red ? Team.Blue : Team.Red);
 }

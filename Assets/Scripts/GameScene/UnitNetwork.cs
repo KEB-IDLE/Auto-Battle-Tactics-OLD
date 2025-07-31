@@ -1,16 +1,7 @@
-/*
 using UnityEngine;
 using NativeWebSocket;
-using System.Collections;
-[System.Serializable]
-public class UnitState
-{
-    public string unitId;
-    public string unitType;
-    public float[] position;
-    public string animation;
-    public int hp;
-}
+using UnityEngine.AI;
+
 [System.Serializable]
 public class InitMessage
 {
@@ -21,97 +12,63 @@ public class InitMessage
     public int hp;
     public int atk;
     public string ownerId;
-}
-
-
-[System.Serializable]
-public class StateUpdateMessage
-{
-    public string type = "stateUpdate";
-    public UnitState[] units;
+    public string team;
+    public string layer;
 }
 
 public class UnitNetwork : MonoBehaviour
 {
     private WebSocket socket;
-    private Entity entity;
+    private Entity _entity;
+    private bool _isMyUnit = false;
+    private bool hasInitSent = false;
 
-    void Start()
+    public void InitializeNetwork(bool isMine)
     {
-        entity = GetComponent<Entity>();
+        _isMyUnit = isMine;
+        _entity = GetComponent<Entity>();
         socket = UserNetwork.GetSocket();
 
-        if (socket != null && socket.State == WebSocketState.Open)
-        {
-            SendInit();
-            StartCoroutine(SendStateLoop());
-        }
+        if (!_isMyUnit) return;
+
+        // 내 유닛: 애니메이션 + AI 설정
+        var anim = GetComponent<AnimationComponent>();
+        var move = GetComponent<MoveComponent>();
+        var atk = GetComponent<AttackComponent>();
+
+        if (anim != null && move != null)
+            move.OnMove += anim.HandleMove;
+        if (anim != null && atk != null)
+            atk.OnAttackStateChanged += anim.HandleAttack;
+
+        move?.SetIsMine(true);
+
+        Debug.Log($"[UnitNetwork] ✅ 내 유닛 소유권 설정 완료: {_entity.UnitId}");
     }
 
     public void SendInit()
     {
+        if (hasInitSent || !_isMyUnit || socket == null || socket.State != WebSocketState.Open) return;
+        hasInitSent = true;
 
         Vector3 pos = transform.position;
         var msg = new InitMessage
         {
-            unitId = entity.UnitId,
-            unitType = entity.UnitType,
+            unitId = _entity.UnitId,
+            unitType = _entity.UnitType,
             position = new float[] { pos.x, pos.y, pos.z },
-            hp = Mathf.FloorToInt(GetComponent<HealthComponent>()?.CurrentHp ?? entity.Data.maxHP),
-            atk = Mathf.FloorToInt(entity.Data.attackDamage),
-            ownerId = UserNetwork.Instance.MyId
+            hp = Mathf.FloorToInt(GetComponent<HealthComponent>()?.CurrentHp ?? _entity.Data.maxHP),
+            atk = Mathf.FloorToInt(_entity.Data.attackDamage),
+            ownerId = UserNetwork.Instance.MyId,
+            team = UserNetwork.Instance.MyTeam.ToString(),
+            layer = LayerMask.LayerToName(gameObject.layer)
         };
 
         string json = JsonUtility.ToJson(msg);
-        Debug.Log($"[SendInit] ▶ unitId={entity.UnitId}, layer={gameObject.layer}, unitType={entity.UnitType}");
         socket.SendText(json);
-    }
 
-    IEnumerator SendStateLoop()
-    {
-        while (true)
-        {
-            if (socket != null && socket.State == WebSocketState.Open)
-            {
-                Vector3 pos = transform.position;
-                string anim = GetComponent<AnimationComponent>()?.GetCurrentAnimation();
-                float hp = GetComponent<HealthComponent>()?.CurrentHp ?? entity.Data.maxHP;
-
-                var msg = new StateUpdateMessage
-                {
-                    type = "stateUpdate",
-                    units = new UnitState[]
-                    {
-                        new UnitState
-                        {
-                            unitId = entity.UnitId,
-                            unitType = entity.UnitType,
-                            position = new float[] { pos.x, pos.y, pos.z },
-                            animation = anim,
-                            hp = Mathf.FloorToInt(hp)
-                        }
-                    }
-                };
-
-                string json = JsonUtility.ToJson(msg);
-                socket.SendText(json);
-            }
-            yield return new WaitForSeconds(2f);
-        }
-    }
-
-    public void ApplyRemoteState(UnitState state)
-    {
-        if (state.position != null && state.position.Length == 3)
-        {
-            Vector3 pos = new Vector3(state.position[0], state.position[1], state.position[2]);
-            GetComponent<PositionComponent>()?.SyncPosition(pos);
-        }
-
-        if (!string.IsNullOrEmpty(state.animation))
-        {
-            GetComponent<AnimationComponent>()?.PlayAnimation(state.animation);
-        }
+        GameManager2.Instance?.SaveInitMessage(msg);
+        hasInitSent = true;
+        Debug.Log($"\uD83D\uDCE4 [SendInit] {_entity.UnitId} 정보 서버 전송 완료");
     }
 }
-*/

@@ -5,6 +5,7 @@ using System;
 
 public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
 {
+     private bool _isMine;
     public event Action OnMove;
 
     Transform coreTransform;
@@ -30,9 +31,9 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
 
     void Update()
     {
-        if(_attacker.IsAttacking() || !_health.IsAlive())
+        if (_attacker.IsAttacking() || !_health.IsAlive())
         {
-            if(_isMoving) 
+            if (_isMoving)
                 _isMoving = false;
             _agent.isStopped = true;
             _agent.ResetPath();
@@ -73,7 +74,7 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
         if (mb != null)
         {
             Vector3 targetPos = mb.transform.position;
-            targetPos.y = transform.position.y; // y °íÁ¤(¼öÆò È¸Àü)
+            targetPos.y = transform.position.y; // y ê³ ì •(ìˆ˜í‰ íšŒì „)
             transform.LookAt(targetPos);
         }
     }
@@ -84,8 +85,8 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
         if (attackComponent == null || target == null)
             return false;
 
-        // °ø°İ Å¸ÀÔº°·Î °¡½Ã¼º ÆÇÁ¤ Ä¿½ºÅÒ °¡´É
-        // ¿¹: ¸¶¹ı»ç´Â ¹«Á¶°Ç true, ¿ø°Å¸®/±ÙÁ¢Àº Raycast
+        // ê³µê²© íƒ€ì…ë³„ë¡œ ê°€ì‹œì„± íŒì • ì»¤ìŠ¤í…€ ê°€ëŠ¥
+        // ì˜ˆ: ë§ˆë²•ì‚¬ëŠ” ë¬´ì¡°ê±´ true, ì›ê±°ë¦¬/ê·¼ì ‘ì€ Raycast
         if (attackComponent.isMagic)
             return true;
 
@@ -96,6 +97,10 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
             return false;
 
         return attackComponent.IsTargetVisible(firePoint, targetTransform);
+    }
+    public void SetIsMine(bool isMine)
+    {
+        _isMine = isMine;
     }
 
 }

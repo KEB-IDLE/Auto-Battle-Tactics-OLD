@@ -24,6 +24,6 @@ public class Core : MonoBehaviour
     private void Start()
     {
         _health.Initialize(maxHP);
-        //07.18¿¡ ÇØ¾ßÇÒ ÀÏ..
+        //07.18ï¿½ï¿½ ï¿½Ø¾ï¿½ï¿½ï¿½ ï¿½ï¿½..
     }
 }

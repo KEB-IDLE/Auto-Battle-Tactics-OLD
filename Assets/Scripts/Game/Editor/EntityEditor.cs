@@ -16,7 +16,7 @@ public class EntityEditor : Editor
 
         EntityData data = (EntityData)target;
 
-        if (GUILayout.Button("ÀÌ µ¥ÀÌÅÍ·Î Entity »ı¼º"))
+        if (GUILayout.Button("ì´ ë°ì´í„°ë¡œ Entity ìƒì„±"))
             CreateEntityInScene(data);
     }
 
@@ -42,26 +42,26 @@ public class EntityEditor : Editor
             firePoint.transform.localPosition = new Vector3(0, 1, 0);
         }
 
-        // === HealthBar Canvas »ı¼º ===
-        if(go.transform.Find("HealthBarCanvas") == null)
+        // === HealthBar Canvas ìƒì„± ===
+        if (go.transform.Find("HealthBarCanvas") == null)
         {
             var healthBarCanvas = new GameObject("HealthBarCanvas", typeof(Canvas), typeof(CanvasRenderer));
             healthBarCanvas.transform.SetParent(go.transform);
-            healthBarCanvas.transform.localPosition = new Vector3(0, 2.0f, 0); // ¸Ó¸® À§¿¡ À§Ä¡(Á¶Á¤ °¡´É)
+            healthBarCanvas.transform.localPosition = new Vector3(0, 2.0f, 0); // ë¨¸ë¦¬ ìœ„ì— ìœ„ì¹˜(ì¡°ì • ê°€ëŠ¥)
 
             var canvas = healthBarCanvas.GetComponent<Canvas>();
             canvas.renderMode = RenderMode.WorldSpace;
-            canvas.worldCamera = Camera.main; // ¾À¿¡ Ä«¸Ş¶ó ÇÏ³ª ÀÖ´Ù°í °¡Á¤
+            canvas.worldCamera = Camera.main; // ì”¬ì— ì¹´ë©”ë¼ í•˜ë‚˜ ìˆë‹¤ê³  ê°€ì •
 
-            // Canvas Å©±â, ½ºÄÉÀÏ Á¶Á¤
+            // Canvas í¬ê¸°, ìŠ¤ì¼€ì¼ ì¡°ì •
             healthBarCanvas.GetComponent<RectTransform>().sizeDelta = new Vector2(1.5f, 0.3f);
-            healthBarCanvas.transform.localScale = Vector3.one * 0.01f; // Å©±â Ãà¼Ò
+            healthBarCanvas.transform.localScale = Vector3.one * 0.01f; // í¬ê¸° ì¶•ì†Œ
 
             // === HealthBar(Background) ===
             var bgGO = new GameObject("HealthBarBG", typeof(Image));
             bgGO.transform.SetParent(healthBarCanvas.transform, false);
             var bgImg = bgGO.GetComponent<Image>();
-            bgImg.color = Color.grey; // ¹è°æ»ö
+            bgImg.color = Color.grey; // ë°°ê²½ìƒ‰
             var bgRect = bgGO.GetComponent<RectTransform>();
             bgRect.sizeDelta = new Vector2(150, 20);
 
@@ -70,38 +70,41 @@ public class EntityEditor : Editor
             fillGO.transform.SetParent(bgGO.transform, false);
             var fillImg = fillGO.GetComponent<Image>();
 
-            // 1. Sprite ¿¡¼Â Ã£±â (ÇÁ·ÎÁ§Æ® ³» "UI_Fill_Green" ÀÌ¸§ÀÇ Sprite »ç¿ë)
+            // 1. Sprite ì—ì…‹ ì°¾ê¸° (í”„ë¡œì íŠ¸ ë‚´ "UI_Fill_Green" ì´ë¦„ì˜ Sprite ì‚¬ìš©)
             var fillSprite = AssetDatabase.FindAssets("t:Sprite UI_Fill_Green")
                 .Select(guid => AssetDatabase.GUIDToAssetPath(guid))
                 .Select(path => AssetDatabase.LoadAssetAtPath<Sprite>(path))
                 .FirstOrDefault();
             fillImg.sprite = fillSprite;
 
-            // 2. »ö»ó ¹× Å¸ÀÔ ¼¼ÆÃ
-            fillImg.color = Color.green; // È¤½Ã ÇÊ¿äÇÏ¸é ¿øÇÏ´Â »ö»óÀ¸·Î
+            // 2. ìƒ‰ìƒ ë° íƒ€ì… ì„¸íŒ…
+            fillImg.color = Color.green; // í˜¹ì‹œ í•„ìš”í•˜ë©´ ì›í•˜ëŠ” ìƒ‰ìƒìœ¼ë¡œ
             fillImg.type = Image.Type.Filled;
             fillImg.fillMethod = Image.FillMethod.Horizontal;
-            fillImg.fillAmount = 1.0f; // Ã³À½¿£ °¡µæ
+            fillImg.fillAmount = 1.0f; // ì²˜ìŒì—” ê°€ë“
 
-            // 3. RectTransform ¸ÂÃã
+            // 3. RectTransform ë§ì¶¤
             var fillRect = fillGO.GetComponent<RectTransform>();
             fillRect.anchorMin = new Vector2(0, 0);
             fillRect.anchorMax = new Vector2(1, 1);
             fillRect.offsetMin = Vector2.zero;
             fillRect.offsetMax = Vector2.zero;
 
-            // 4. ½ºÅ©¸³Æ® ºÙÀÌ±â
+            // 4. ìŠ¤í¬ë¦½íŠ¸ ë¶™ì´ê¸°
             var healthBar = fillGO.AddComponent<HealthBar>();
             healthBar.fillImage = fillImg;
         }
-        
-        // EntityEditor.cs ³» CreateEntityInScene(data) ¸Ş¼­µå ¸¶Áö¸·¿¡ Ãß°¡
+
+        // EntityEditor.cs ë‚´ CreateEntityInScene(data) ë©”ì„œë“œ ë§ˆì§€ë§‰ì— ì¶”ê°€
         var collider = go.GetComponent<CapsuleCollider>();
         collider.radius = 0.5f;
         collider.height = 1.8f;
-        collider.center = new Vector3(0, 0.85f, 0); // ¿¹½Ã°ª
+        collider.center = new Vector3(0, 0.85f, 0); // ì˜ˆì‹œê°’
 
-        var rb = go.AddComponent<Rigidbody>();
+        var rb = go.GetComponent<Rigidbody>();
+        if (rb == null)
+            rb = go.AddComponent<Rigidbody>();
+
         rb.freezeRotation = false;
         rb.constraints = RigidbodyConstraints.FreezeRotationX
                        | RigidbodyConstraints.FreezeRotationY

@@ -1,8 +1,16 @@
-/*
 using UnityEngine;
 using NativeWebSocket;
 using System.Text;
 using System.Collections.Generic;
+
+[System.Serializable]
+public class TeamAssignMessage
+{
+    public string type;
+    public string ownerId;
+    public string team;
+}
+
 [System.Serializable]
 public class MessageTypeHeader
 {
@@ -15,32 +23,51 @@ public class ReadyMessage
     public string type;
     public string ownerId;
 }
+
+[System.Serializable]
+public class AssignIdMessage
+{
+    public string type;
+    public string clientId;
+}
+
 public class UserNetwork : MonoBehaviour
 {
     public static UserNetwork Instance { get; private set; }
+    private Queue<string> pendingInitMessages = new();
     public string MyId { get; private set; } = System.Guid.NewGuid().ToString();
     public Team MyTeam { get; private set; }
+    public bool IsTeamReady { get; private set; } = false;
+    public bool IsSocketReady => socket != null && socket.State == WebSocketState.Open;
+
 
     private WebSocket socket;
 
-    public static WebSocket GetSocket() => Instance?.socket;
-
     private static List<string> connectedIds = new();
-
+    public static WebSocket GetSocket() => Instance?.socket;
     public static IReadOnlyList<string> GetAllConnectedIds() => connectedIds;
+
     public void SetTeam(Team team)
     {
         MyTeam = team;
+        IsTeamReady = true;
         Debug.Log($"✅ 내 팀 설정됨: {team}");
+
+        var controller = Object.FindFirstObjectByType<TeamUIController>();
+        if (controller == null)
+        {
+            Debug.LogError("❌ TeamUIController 못 찾음");
+        }
+        else
+        {
+            controller.SetTeam(team);
+        }
     }
 
     void Awake()
     {
-        Debug.Log("🧪 UserNetwork.Awake() 호출됨");
-
         if (Instance != null && Instance != this)
         {
-            Debug.LogWarning("⚠️ 중복된 UserNetwork 감지 → 파괴");
             Destroy(gameObject);
             return;
         }
@@ -58,8 +85,7 @@ public class UserNetwork : MonoBehaviour
         socket.OnMessage += (bytes) =>
         {
             string json = Encoding.UTF8.GetString(bytes);
-            Debug.Log($"📩 테스트 메시지 수신: {json}");
-            HandleMessage(bytes); // ✅ 꼭 호출!
+            HandleMessage(bytes);
         };
 
         socket.OnClose += (_) => Debug.LogWarning("🔌 연결 종료");
@@ -67,22 +93,28 @@ public class UserNetwork : MonoBehaviour
 
         await socket.Connect();
     }
+
     void Update()
     {
 #if !UNITY_WEBGL || UNITY_EDITOR
-        socket?.DispatchMessageQueue(); // 💡 이걸 반드시 호출해야 메시지 수신됨
+        socket?.DispatchMessageQueue();
 #endif
     }
-
-
+    void LateUpdate()
+    {
+        if (pendingInitMessages.Count > 0 && UnitManager.Instance != null)
+        {
+            while (pendingInitMessages.Count > 0)
+            {
+                string msg = pendingInitMessages.Dequeue();
+                UnitManager.Instance.OnReceiveInitMessage(msg);
+            }
+        }
+    }
     void HandleMessage(byte[] bytes)
     {
         string json = Encoding.UTF8.GetString(bytes).Trim();
         var header = JsonUtility.FromJson<MessageTypeHeader>(json);
-
-        Debug.Log($"📩 수신된 메시지: {json}");
-
-
 
         switch (header.type)
         {
@@ -93,13 +125,24 @@ public class UserNetwork : MonoBehaviour
                 StartUIController.Instance?.OnAllPlayersReady();
                 break;
             case "init":
-                UnitManager.Instance?.OnReceiveInitMessage(json);
+                if (UnitManager.Instance != null)
+                    UnitManager.Instance.OnReceiveInitMessage(json);
+                else
+                    pendingInitMessages.Enqueue(json); // ✅ 저장해놨다가 나중에 처리
                 break;
-            case "stateUpdate":
-                UnitManager.Instance?.OnReceiveStateUpdate(json);
+            case "teamAssign":
+                var teamMsg = JsonUtility.FromJson<TeamAssignMessage>(json);
+                Team parsedTeam = (Team)System.Enum.Parse(typeof(Team), teamMsg.team);
+                SetTeam(parsedTeam);
+                break;
+            case "assignId":
+                var assign = JsonUtility.FromJson<AssignIdMessage>(json);
+                MyId = assign.clientId;
+                Debug.Log($"🆔 [UserNetwork] 내 클라이언트 ID 설정됨: {MyId}");
                 break;
         }
     }
+
     private bool alreadyReadySent = false;
 
     public void SendReady()
@@ -111,7 +154,7 @@ public class UserNetwork : MonoBehaviour
             var readyMsg = new ReadyMessage
             {
                 type = "ready",
-                ownerId = System.Guid.NewGuid().ToString() // or use a playerId if stored
+                ownerId = MyId
             };
 
             string json = JsonUtility.ToJson(readyMsg);
@@ -120,7 +163,18 @@ public class UserNetwork : MonoBehaviour
             Debug.Log("📤 [UserNetwork] ready 전송 완료");
         }
     }
+    // UserNetwork.cs 내부에 추가
+    public void ProcessPendingMessages()
+    {
+        if (UnitManager.Instance == null) return;
 
+        while (pendingInitMessages.Count > 0)
+        {
+            string msg = pendingInitMessages.Dequeue();
+            UnitManager.Instance.OnReceiveInitMessage(msg);
+        }
+
+        Debug.Log("🧹 [UserNetwork] 대기 중인 init 메시지 처리 완료");
+    }
 
 }
-*/

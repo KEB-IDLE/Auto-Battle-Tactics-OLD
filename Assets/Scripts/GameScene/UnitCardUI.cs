@@ -1,4 +1,4 @@
-/*
+
 using UnityEngine;
 using UnityEngine.EventSystems;
 using TMPro;
@@ -6,7 +6,7 @@ using TMPro;
 
 public class UnitCardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
-    public int unitLayer; // 예: "human", "goblin"
+    public string unitType;
     private GameObject dragIcon;
     private RectTransform canvasTransform;
 
@@ -55,11 +55,16 @@ public class UnitCardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDr
         if (dragIcon != null)
             Destroy(dragIcon);
 
+        // ❗ 전투 시작되었으면 무시
+        if (!GameManager2.Instance.IsPlacementPhase)
+        {
+            Debug.LogWarning("❌ 배치 시간이 끝났습니다. 유닛을 소환할 수 없습니다.");
+            return;
+        }
+
         if (TryGetWorldPosition(eventData, out Vector3 worldPos))
         {
-            Debug.Log($"🟢 드래그 종료 → {unitLayer} 유닛 생성 시도 at {worldPos}");
-            UnitManager.Instance.SpawnUnits(unitLayer, worldPos); // ✅ Vector3 하나 넘김
-
+            UnitManager.Instance.SpawnUnits(unitType, worldPos, UserNetwork.Instance.MyId);
         }
         else
         {
@@ -84,4 +89,3 @@ public class UnitCardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDr
     }
 
 }
-*/

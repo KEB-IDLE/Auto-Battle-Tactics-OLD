@@ -9,28 +9,30 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3a7c9c71710beb0479729de009243f0b, type: 3}
+  m_Script: {fileID: 11500000, guid: 826a7d254cca7e547ab90347db98c1b9, type: 3}
   m_Name: RangerData
   m_EditorClassIdentifier: 
-  entityName: Ranger
-  maxHP: 20
-  attackDamage: 8
-  attackCoreDamage: 7
-  attackImpactRatio: 0.47
-  moveSpeed: 10
+  entityName: 
+  maxHP: 150
+  attackDamage: 15
+  attackCoreDamage: 5
+  attackImpactRatio: 0.5
+  moveSpeed: 1
   entityScale: 0
-  Layer: 14
-  detectionRadius: 50
-  attackRange: 47
-  disengageRange: 55
+  gold_: 0
+  unitType: Ranger
+  layer: 14
+  detectionRadius: 20
+  attackRange: 15
+  disengageRange: 17
   attackPriority: 0
   attackType: 1
   entityPrefab: {fileID: 3865900570072927925, guid: 3ed81c8dfca06f44ab55e2815b7bbdd0, type: 3}
   magicRadius: 0
-  projectilePrefab: {fileID: 1085649348315297137, guid: 68b8b649dba962f4db22a6043739049b, type: 3}
-  projectilePoolName: FireBall
+  projectilePrefab: {fileID: 3287624786238722518, guid: 0c144b528e01b334baa60edbf77d3be1, type: 3}
+  projectilePoolName: Arrow
   summonEffectPrefab: {fileID: 0}
-  attackEffectPrefab: {fileID: 4801705998445967163, guid: b1b4925c7f3de2845be2e2fcc0fabc15, type: 3}
+  attackEffectPrefab: {fileID: 0}
   takeDamageEffectPrefeb: {fileID: 0}
   deathEffectPrefab: {fileID: 0}
   summonSound: {fileID: 0}
