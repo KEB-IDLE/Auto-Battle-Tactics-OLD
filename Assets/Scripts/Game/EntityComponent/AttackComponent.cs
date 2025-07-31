@@ -273,9 +273,9 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         foreach (var col in hits)
         {
             var dmg = col.GetComponent<IDamageable>();
-            var coreComp = col.GetComponent<Core>();
+            var core = col.GetComponent<Core>();
             if (dmg != null && dmg.IsAlive())
-                dmg.RequestDamage(coreComp != null ? attackCoreDamage : attackDamage);
+                dmg.RequestDamage(core != null ? attackCoreDamage : attackDamage);
             (dmg as HealthComponent)?.ApplyImmediateDamage();
         }
     }

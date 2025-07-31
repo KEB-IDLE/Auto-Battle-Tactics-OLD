@@ -51,7 +51,7 @@ public class Projectile : MonoBehaviour
             float distance = Vector3.Distance(transform.position, target.position);
 
             // 가중치(Weight)에 따라 자동 보정
-            float autoSpeed = Mathf.Max(distance * data.speedWeight, 4f);
+            float autoSpeed = Mathf.Max(distance * data.speedWeight, 10f);
             float autoVerticalSpeed = Math.Max(distance * data.verticalSpeedWeight, 4f);
 
             Vector3 direction = (target.position - transform.position).normalized;

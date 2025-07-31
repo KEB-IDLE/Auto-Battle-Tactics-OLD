@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 826a7d254cca7e547ab90347db98c1b9, type: 3}
   m_Name: RangerData
   m_EditorClassIdentifier: 
-  entityName: 
+  entityName: Ranger
   maxHP: 150
   attackDamage: 20
   attackCoreDamage: 2
