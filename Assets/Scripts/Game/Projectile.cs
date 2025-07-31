@@ -110,7 +110,11 @@ public class Projectile : MonoBehaviour
             if (dist <= data.detectionRadius)
             {
                 var hp = target.GetComponent<HealthComponent>();
-                if (hp != null) hp.RequestDamage(coreDamage != 0 ? coreDamage : damage);
+                var core = target.GetComponent<Core>();
+
+                float damageToApply = (core != null) ? coreDamage : damage;
+
+                if (hp != null) hp.RequestDamage(damageToApply);
                 hp?.ApplyImmediateDamage();
                 if (data.explosionRadius > 0f)
                 {
@@ -126,9 +130,11 @@ public class Projectile : MonoBehaviour
                         if (teamComp == null || teamComp.Team == team) continue;
 
                         var otherHp = enemy.GetComponent<HealthComponent>();
+                        var otherCore = enemy.GetComponent<Core>();
+                        float explosionDamage = (otherCore != null) ? coreDamage : damage;
                         if (otherHp != null)
                         {
-                            otherHp.RequestDamage(coreDamage != 0 ? coreDamage : damage);
+                            otherHp.RequestDamage(explosionDamage);
                             otherHp?.ApplyImmediateDamage();
                         }
                     }

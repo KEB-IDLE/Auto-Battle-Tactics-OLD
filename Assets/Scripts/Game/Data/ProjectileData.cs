@@ -11,8 +11,9 @@ public class ProjectileData : ScriptableObject
     public float speedWeight;
     [Header("수직 이동속도 가중치")]
     public float verticalSpeedWeight;
-    
-    public float lifeTime;
+    [Header("발사체 유도 정도 조절")]
+    public float lerp;
+    //public float lifeTime;
     public float detectionRadius;
     public float explosionRadius;
 }
