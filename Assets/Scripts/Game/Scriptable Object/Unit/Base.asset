@@ -9,20 +9,22 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3a7c9c71710beb0479729de009243f0b, type: 3}
+  m_Script: {fileID: 11500000, guid: 826a7d254cca7e547ab90347db98c1b9, type: 3}
   m_Name: Base
   m_EditorClassIdentifier: 
-  entityName: Base
-  maxHP: 10
-  attackDamage: 10
-  attackCoreDamage: 10
-  attackImpactRatio: 10
-  moveSpeed: 5
+  entityName: 
+  maxHP: 0
+  attackDamage: 0
+  attackCoreDamage: 0
+  attackImpactRatio: 0
+  moveSpeed: 0
   entityScale: 0
-  Layer: 14
-  detectionRadius: 20
-  attackRange: 5
-  disengageRange: 15
+  gold_: 0
+  unitType: 
+  layer: 
+  detectionRadius: 0
+  attackRange: 0
+  disengageRange: 0
   attackPriority: 0
   attackType: 0
   entityPrefab: {fileID: 0}
@@ -36,7 +38,7 @@ MonoBehaviour:
   summonSound: {fileID: 0}
   attackSound: {fileID: 0}
   deathSound: {fileID: 0}
-  animatorController: {fileID: 9100000, guid: 978dfb3f95c533c4aa9742b18291eb77, type: 2}
+  animatorController: {fileID: 0}
   attackClip: {fileID: 0}
   runClip: {fileID: 0}
   deathClip: {fileID: 0}

@@ -4,11 +4,10 @@ using UnityEngine;
 
 public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
 {
-    public float currentHP;
-    public float maxHP;
+    [HideInInspector] public float currentHP;
+    [HideInInspector] public float maxHP;
+    [HideInInspector] public float pendingDamage = 0f;
     private float deathAnimDuration;
-    public float pendingDamage = 0f;
-
 
 #pragma warning disable 67
     public event Action<Transform> OnTakeDamageEffect;

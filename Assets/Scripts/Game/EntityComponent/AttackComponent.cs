@@ -19,7 +19,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
     private float attackRange;
     private float disengageRange;
     private float magicRadius;
-    public Transform firePoint;
+    [HideInInspector] public Transform firePoint;
 
     private string projectilePoolName;
     private IDamageable lockedTarget;
