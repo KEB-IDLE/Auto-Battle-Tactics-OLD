@@ -23,6 +23,16 @@ public class Core : MonoBehaviour
     private void Start()
     {
         _health.Initialize(maxHP);
-        //07.18�� �ؾ��� ��..
+        BindEvent();
+    }
+
+    public void BindEvent()
+    {
+        _health.OnDeath += _core.OnCoreDestroyed;
+    }
+
+    public void UnBindEvent()
+    {
+        _health.OnDeath -= _core.OnCoreDestroyed;
     }
 }

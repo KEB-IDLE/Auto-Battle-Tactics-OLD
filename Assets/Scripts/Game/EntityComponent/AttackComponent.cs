@@ -76,10 +76,6 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         firePoint = transform.Find("FirePoint");
         projectilePoolName = data.projectilePoolName;
 
-        //allUnitMask = LayerMask.GetMask("Agent", "Tower", "Core");
-        //towerOnlyMask = LayerMask.GetMask("Tower", "Core");
-        //coreOnlyMask = LayerMask.GetMask("Core");
-
 
         targetLayer = LayerMask.GetMask("Agent", "Tower", "Core");
         switch (data.attackPriority)
@@ -90,6 +86,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
             case EntityData.AttackPriority.CoreOnly:
                 targetLayer = LayerMask.GetMask("Core");
                 break;
+            default: break;
         }
     }
 
@@ -100,7 +97,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         var newTarget = DetectTarget();
         if (newTarget != null)
         {
-            bool visible = (attackType == AttackType.Magic) ? true :
+            bool visible = (attackType == AttackType.Magic || attackType == AttackType.Melee) ? true :
                 (firePoint != null && IsTargetVisible(firePoint, (newTarget as MonoBehaviour).transform));
 
             if (visible)
@@ -208,9 +205,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         lockedTarget = target;
         if (lockedTarget == null || !lockedTarget.IsAlive())
             return;
-
         OnAttackEffect?.Invoke(transform);
-
         var coreComp = (lockedTarget as MonoBehaviour).GetComponent<Core>();
         target.RequestDamage(coreComp != null ? attackCoreDamage : attackDamage);
         (target as HealthComponent)?.ApplyImmediateDamage();

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.SocialPlatforms;
 
 public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
 {
@@ -19,12 +20,12 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
 
     private Coroutine damageRoutine;
 
-    public void Awake() => CombatManager.Instance?.Register(this);
-    public void OnDestroy() => CombatManager.Instance?.Unregister(this);
+    //public void Awake() => CombatManager.Instance?.Register(this);
+    //public void OnDestroy() => CombatManager.Instance?.Unregister(this);
 
     public void Initialize(EntityData data)
     {
-        this.maxHP = data.maxHP;
+        maxHP = data.maxHP;
         currentHP = data.maxHP;
         deathAnimDuration = (data.deathClip != null) ? data.deathClip.length : 0f;
         isTargetable = true;
