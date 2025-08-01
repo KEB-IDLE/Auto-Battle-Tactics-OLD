@@ -45,6 +45,7 @@ public class AnimationComponent : MonoBehaviour
     {
         if (isAttacking)
         {
+            Debug.Log("dfddffd");
             _animator.SetBool("Attack", true);
             if(this.attackSound != null)
                 _audioSource.PlayOneShot(attackSound);

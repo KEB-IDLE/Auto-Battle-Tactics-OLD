@@ -59,14 +59,8 @@ public class Entity : MonoBehaviour
         BindEvent();
     }
 
-    public void SetData(EntityData data)
-    {
-        entityData = data;
-    }
-    public void SetOwnership(bool isMine)
-    {
-        _move.SetIsMine(isMine);
-    }
+    public void SetData(EntityData data) => entityData = data;
+    public void SetOwnership(bool isMine) => _move.SetIsMine(isMine);
 
 
     public void BindEvent()
