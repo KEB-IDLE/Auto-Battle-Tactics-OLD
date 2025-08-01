@@ -7,6 +7,7 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
     [HideInInspector] public float currentHP;
     [HideInInspector] public float maxHP;
     [HideInInspector] public float pendingDamage = 0f;
+    private bool isTargetable;
     private float deathAnimDuration;
 
 #pragma warning disable 67
@@ -18,23 +19,15 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
 
     private Coroutine damageRoutine;
 
-    public void Awake()
-    {
-        CombatManager.Instance?.Register(this);
-    }
-    public void OnDestroy()
-    {
-        CombatManager.Instance?.Unregister(this);
-    }
-
+    public void Awake() => CombatManager.Instance?.Register(this);
+    public void OnDestroy() => CombatManager.Instance?.Unregister(this);
 
     public void Initialize(EntityData data)
     {
         this.maxHP = data.maxHP;
         currentHP = data.maxHP;
-
-        deathAnimDuration = data.deathClip != null ? data.deathClip.length : 0f;
-
+        deathAnimDuration = (data.deathClip != null) ? data.deathClip.length : 0f;
+        isTargetable = true;
         if (damageRoutine == null)
             damageRoutine = StartCoroutine(ApplyDamageEndOfFrame());
     }
@@ -83,6 +76,9 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
     }
     private IEnumerator DeathRoutine()
     {
+        isTargetable = false;
+        var coll = GetComponent<Collider>();
+        if (coll != null) coll.enabled = false;
         Debug.Log("deathRoutine Called");
         OnDeath?.Invoke(); // 죽음 이밴트 알림
         OnDeathEffect?.Invoke(this.transform);
@@ -91,6 +87,7 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
 
         Destroy(gameObject);
     }
+    public bool IsTargetable() => isTargetable;
     public float CurrentHp => currentHP;
     public float MaxHp => maxHP;
 }

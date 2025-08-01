@@ -35,6 +35,22 @@ public class EntityEditor : Editor
         var entity = go.GetComponent<Entity>() ?? go.AddComponent<Entity>();
         entity.SetData(data);
 
+        // EntityEditor.cs 내 CreateEntityInScene(data) 메서드 마지막에 추가
+        var collider = go.GetComponent<CapsuleCollider>();
+        if (collider == null)
+            collider = go.AddComponent<CapsuleCollider>();
+        collider.radius = 0.5f;
+        collider.height = 1.8f;
+        collider.center = new Vector3(0, 0.85f, 0); // 예시값
+
+        if (go.transform.Find("HitPoint") == null)
+        {
+            GameObject hitPoint = new GameObject("HitPoint");
+            hitPoint.transform.SetParent(go.transform);
+            // 기본 위치 (예: 몸통 중앙에 오도록) → 필요에 따라 조정
+            hitPoint.transform.localPosition = collider.center; // 또는 원하는 값
+        }
+
         if (data.projectilePrefab != null && go.transform.Find("FirePoint") == null)
         {
             GameObject firePoint = new GameObject("FirePoint");
@@ -94,12 +110,6 @@ public class EntityEditor : Editor
             var healthBar = fillGO.AddComponent<HealthBar>();
             healthBar.fillImage = fillImg;
         }
-
-        // EntityEditor.cs 내 CreateEntityInScene(data) 메서드 마지막에 추가
-        var collider = go.GetComponent<CapsuleCollider>();
-        collider.radius = 0.5f;
-        collider.height = 1.8f;
-        collider.center = new Vector3(0, 0.85f, 0); // 예시값
 
         var rb = go.GetComponent<Rigidbody>();
         if (rb == null)

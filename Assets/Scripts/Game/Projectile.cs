@@ -18,9 +18,8 @@ public class Projectile : MonoBehaviour
     private float lifeTime;
     private float damage;
     private float coreDamage;
-    private Transform target;
-    private float speedWeight;
-    private float verticalSpeedWeight;
+    private Transform targetEntity;
+    private Transform hitPoint;
     private float disengageRange = 100f;
 
     private void Awake()
@@ -30,10 +29,11 @@ public class Projectile : MonoBehaviour
     }
 
     // ObjectPoolManager를 통한 초기화
-    public void Initialize(Entity owner, float damage, float coreDamage, Transform target, string poolName, float disengageRange)
+    public void Initialize(Entity owner, float damage, float coreDamage, Transform targetEntity, Transform hitPoint, string poolName, float disengageRange)
     {
         this.damage = damage;
-        this.target = target;
+        this.targetEntity = targetEntity;
+        this.hitPoint = hitPoint;
         this.coreDamage = coreDamage;
         this.poolName = poolName;
         this.disengageRange = disengageRange;
@@ -46,15 +46,15 @@ public class Projectile : MonoBehaviour
         SetTeam(owner);
         AttachFlightEffect();
 
-        if (target != null)
+        if (this.targetEntity != null)
         {
-            float distance = Vector3.Distance(transform.position, target.position);
+            float distance = Vector3.Distance(transform.position, this.targetEntity.position);
 
             // 가중치(Weight)에 따라 자동 보정
             float autoSpeed = Mathf.Max(distance * data.speedWeight, 10f);
             float autoVerticalSpeed = Math.Max(distance * data.verticalSpeedWeight, 4f);
 
-            Vector3 direction = (target.position - transform.position).normalized;
+            Vector3 direction = (this.targetEntity.position - transform.position).normalized;
             _rb.linearVelocity = direction * autoSpeed + Vector3.up * autoVerticalSpeed;
         }
     }
@@ -71,46 +71,64 @@ public class Projectile : MonoBehaviour
     private void Update()
     {
         timer += Time.deltaTime;
-        if (target == null || timer > lifeTime)
-        {
-            ReturnFlightEffect();
-            ReturnToPool();
+        if (ShouldReturnToPool())
             return;
-        }
-        float dist = Vector3.Distance(transform.position, target.position);
-        if (dist > disengageRange)
-        {
-            ReturnFlightEffect();
-            ReturnToPool();
-            return;
-        }
+
         Move();
         CheckHit();
     }
 
+    private bool ShouldReturnToPool()
+    {
+        if (targetEntity == null || timer >= lifeTime)
+            return ReturnProjectile();
+
+        var health = targetEntity.GetComponent<HealthComponent>();
+        if (health != null && !health.IsTargetable())
+            return ReturnProjectile();
+
+        float dist = Vector3.Distance(transform.position, targetEntity.position);
+        if (dist > disengageRange)
+            return ReturnProjectile();
+
+        return false;
+    }
+
+    private bool ReturnProjectile()
+    {
+        ReturnFlightEffect();
+        ReturnToPool();
+        return true;
+    }
+
     private void Move()
     {
+        //if (_rb == null || target == null) return;
+        //Vector3 toTarget = (target.position - transform.position).normalized;
+        //float currentSpeed = _rb.linearVelocity.magnitude;
 
-        if (_rb == null || target == null) return;
-        Vector3 toTarget = (target.position - transform.position).normalized;
+        //// 살짝 유도 (0.08~0.18 사이에서 실험 추천)
+        //_rb.linearVelocity = Vector3.Lerp(_rb.linearVelocity, toTarget * currentSpeed, 0.12f);
+        //if (_rb.linearVelocity.sqrMagnitude > 0.01f)
+        //    transform.forward = _rb.linearVelocity.normalized;
+
+        if (_rb == null || hitPoint == null) return;
+        Vector3 toTarget = (hitPoint.position - transform.position).normalized;
         float currentSpeed = _rb.linearVelocity.magnitude;
-
-        // 살짝 유도 (0.08~0.18 사이에서 실험 추천)
         _rb.linearVelocity = Vector3.Lerp(_rb.linearVelocity, toTarget * currentSpeed, 0.12f);
         if (_rb.linearVelocity.sqrMagnitude > 0.01f)
             transform.forward = _rb.linearVelocity.normalized;
-
     }
 
     protected virtual void CheckHit()
     {
-        if (target != null)
+        if (targetEntity != null && hitPoint != null)
         {
-            float dist = Vector3.Distance(transform.position, target.position);
+            float dist = Vector3.Distance(transform.position, hitPoint.position);
             if (dist <= data.detectionRadius)
             {
-                var hp = target.GetComponent<HealthComponent>();
-                var core = target.GetComponent<Core>();
+                var hp = targetEntity.GetComponent<HealthComponent>();
+                var core = targetEntity.GetComponent<Core>();
 
                 float damageToApply = (core != null) ? coreDamage : damage;
 

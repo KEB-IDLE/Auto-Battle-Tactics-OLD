@@ -7,8 +7,7 @@ using UnityEngine;
 
 public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
 {
-    // Ony for Gizmo test
-    private EntityData _entityData; // EntityData를 통해 초기화할 수 있도록
+   
     
     private float attackDamage;
     private float attackCoreDamage;
@@ -27,9 +26,9 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
     private ITeamProvider teamProvider;
     private AttackType attackType;
     private IOrientable _orientable;
-    private LayerMask allUnitMask;
-    private LayerMask towerOnlyMask;
-    private LayerMask coreOnlyMask;
+    //private LayerMask allUnitMask;
+    //private LayerMask towerOnlyMask;
+    //private LayerMask coreOnlyMask;
     private LayerMask targetLayer;
 
     private Coroutine attackCoroutine;
@@ -77,20 +76,19 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         firePoint = transform.Find("FirePoint");
         projectilePoolName = data.projectilePoolName;
 
-        allUnitMask = LayerMask.GetMask("Agent", "Tower", "Core");
-        towerOnlyMask = LayerMask.GetMask("Tower", "Core");
-        coreOnlyMask = LayerMask.GetMask("Core");
+        //allUnitMask = LayerMask.GetMask("Agent", "Tower", "Core");
+        //towerOnlyMask = LayerMask.GetMask("Tower", "Core");
+        //coreOnlyMask = LayerMask.GetMask("Core");
 
+
+        targetLayer = LayerMask.GetMask("Agent", "Tower", "Core");
         switch (data.attackPriority)
         {
-            case EntityData.AttackPriority.AllUnits:
-                targetLayer = allUnitMask;
-                break;
             case EntityData.AttackPriority.TowersOnly:
-                targetLayer = towerOnlyMask;
+                targetLayer = LayerMask.GetMask("Tower", "Core");
                 break;
             case EntityData.AttackPriority.CoreOnly:
-                targetLayer = coreOnlyMask;
+                targetLayer = LayerMask.GetMask("Core");
                 break;
         }
     }
@@ -102,18 +100,9 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         var newTarget = DetectTarget();
         if (newTarget != null)
         {
-            bool visible = true;
-            switch (attackType)
-            {
-                case AttackType.Melee:
-                case AttackType.Ranged:
-                    if (firePoint != null)
-                        visible = IsTargetVisible(firePoint, (newTarget as MonoBehaviour).transform);
-                    break;
-                case AttackType.Magic:
-                    visible = true; // 무조건 true
-                    break;
-            }
+            bool visible = (attackType == AttackType.Magic) ? true :
+                (firePoint != null && IsTargetVisible(firePoint, (newTarget as MonoBehaviour).transform));
+
             if (visible)
                 lockedTarget = newTarget;
             else
@@ -140,6 +129,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
 
             var dmg = col.GetComponent<IDamageable>();
             if (dmg == null || !dmg.IsAlive()) continue;
+            if(dmg is HealthComponent hc && !hc.IsTargetable()) continue;
 
             var provider = col.GetComponent<ITeamProvider>();
             if (provider == null || provider.Team == teamProvider.Team)
@@ -180,6 +170,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
                 break;
         }
     }
+
     private IEnumerator AttackRoutine(IDamageable target)
     {
         isAttackingFlag = true;
@@ -246,11 +237,20 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
 
         projectile.SetPoolName(projectilePoolName);
 
+        Transform targetHitPoint = null;
+        var mb = (target as MonoBehaviour);
+        if (mb != null)
+            targetHitPoint = mb.transform.Find("HitPoint");
+        if (targetHitPoint == null)
+            targetHitPoint = mb?.transform;
+
+
         projectile.Initialize(
             owner: this.GetComponent<Entity>(),
             damage: attackDamage,
             coreDamage: attackCoreDamage,
-            target: (target as MonoBehaviour).transform,
+            targetEntity: (target as MonoBehaviour).transform,
+            hitPoint: targetHitPoint,
             poolName: projectilePoolName,
             disengageRange : disengageRange
         );
@@ -319,6 +319,8 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
     public bool isMagic => attackType == AttackType.Magic;
 
 #if UNITY_EDITOR
+    // Ony for Gizmo test
+    private EntityData _entityData; // EntityData를 통해 초기화할 수 있도록
     private void OnDrawGizmosSelected()
     {
         if (_entityData == null) return;

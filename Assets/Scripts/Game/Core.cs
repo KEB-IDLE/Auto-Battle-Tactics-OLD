@@ -13,7 +13,6 @@ public class Core : MonoBehaviour
     private TeamComponent _team;
     private CoreComponent _core;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {
         _health = GetComponent<HealthComponent>();

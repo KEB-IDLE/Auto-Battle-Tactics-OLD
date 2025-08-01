@@ -17,7 +17,7 @@ MonoBehaviour:
   attackDamage: 25
   attackCoreDamage: 5
   attackImpactRatio: 0.5
-  moveSpeed: 5
+  moveSpeed: 1
   entityScale: 0
   gold_: 0
   unitType: Knight
@@ -25,7 +25,7 @@ MonoBehaviour:
   detectionRadius: 100
   attackRange: 2
   disengageRange: 5
-  attackPriority: 0
+  attackPriority: 2
   attackType: 0
   entityPrefab: {fileID: 6159849336836508998, guid: b0fad61085f0abe4d9d39873fbe11e69, type: 3}
   magicRadius: 0
