@@ -35,7 +35,9 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
 
     public void Initialize(float hp)
     {
+        maxHP = hp;
         currentHP = hp;
+        isTargetable = true;
         if (damageRoutine == null)
             damageRoutine = StartCoroutine(ApplyDamageEndOfFrame());
     }
@@ -80,7 +82,7 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
         isTargetable = false;
         var coll = GetComponent<Collider>();
         if (coll != null) coll.enabled = false;
-        Debug.Log("deathRoutine Called");
+
         OnDeath?.Invoke(); // 죽음 이밴트 알림
         OnDeathEffect?.Invoke(this.transform);
         yield return new WaitForSeconds(deathAnimDuration);

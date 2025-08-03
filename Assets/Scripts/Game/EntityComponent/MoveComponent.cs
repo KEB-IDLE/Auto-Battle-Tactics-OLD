@@ -1,7 +1,8 @@
-using UnityEngine;
-using System.Linq;
-using UnityEngine.AI;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+using UnityEngine.AI;
 
 public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
 {
@@ -9,12 +10,14 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
     public event Action OnMove;
 
     Transform coreTransform;
+    IAttackNotifier _attackNotifier;
     NavMeshAgent _agent;
     IAttackable _attacker;
     IDamageable _health;
     ITeamProvider _teamProvider;
     private float moveSpeed;
     bool _isMoving;
+    private bool _isAttackLock;
 
     private void Awake()
     {
@@ -22,21 +25,32 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
         _attacker = GetComponent<IAttackable>();
         _health = GetComponent<IDamageable>();
         _teamProvider = GetComponent<ITeamProvider>();
+
+        _attackNotifier = GetComponent<IAttackNotifier>();
+
+    }
+
+    private void OnAttackStateChanged(bool isAttacking)
+    {
+        _isAttackLock = isAttacking;
+        _agent.isStopped = isAttacking;
+        if (_attacker.IsAttacking())
+            _agent.ResetPath();
     }
 
     private void Start()
     {
         coreTransform = CoreRegistry.Instance.GetEnemyCore(_teamProvider.Team);
+        _attackNotifier.OnAttackStateChanged += OnAttackStateChanged;
+        
     }
 
     void Update()
     {
-        if (_attacker.IsAttacking() || !_health.IsAlive())
+        if ( _isAttackLock || !_health.IsAlive())
         {
             if (_isMoving)
                 _isMoving = false;
-            _agent.isStopped = true;
-            _agent.ResetPath();
             return;
         }
         if (_agent.isStopped)
@@ -98,9 +112,6 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
 
         return attackComponent.IsTargetVisible(firePoint, targetTransform);
     }
-    public void SetIsMine(bool isMine)
-    {
-        _isMine = isMine;
-    }
+    public void SetIsMine(bool isMine) => _isMine = isMine;
 
 }

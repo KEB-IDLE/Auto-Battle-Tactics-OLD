@@ -26,9 +26,6 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
     private ITeamProvider teamProvider;
     private AttackType attackType;
     private IOrientable _orientable;
-    //private LayerMask allUnitMask;
-    //private LayerMask towerOnlyMask;
-    //private LayerMask coreOnlyMask;
     private LayerMask targetLayer;
 
     private Coroutine attackCoroutine;
