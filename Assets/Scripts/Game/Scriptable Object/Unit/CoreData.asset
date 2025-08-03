@@ -13,10 +13,8 @@ MonoBehaviour:
   m_Name: CoreData
   m_EditorClassIdentifier: 
   maxHP: 15
-  entityPrefab: {fileID: 0}
-  summonEffectPrefab: {fileID: 0}
-  attackEffectPrefab: {fileID: 0}
+  objectPrefab: {fileID: 3469961179386794419, guid: 4ec969db56dd4af4bb4d3e7d645b4b69, type: 3}
+  takeDamageEffectPrefab: {fileID: 0}
   deathEffectPrefab: {fileID: 0}
-  summonSound: {fileID: 0}
-  attackSound: {fileID: 0}
+  takeDamageSound: {fileID: 0}
   deathSound: {fileID: 0}
