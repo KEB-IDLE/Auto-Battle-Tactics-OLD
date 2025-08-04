@@ -320,7 +320,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
             attackCoroutine = null;
             lockedTarget = null;
             isAttackingFlag = false;
-            OnAttackStateChanged?.Invoke(false);
+            //OnAttackStateChanged?.Invoke(false);
         }
     }
 

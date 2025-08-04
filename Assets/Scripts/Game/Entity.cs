@@ -162,6 +162,7 @@ public class Entity : MonoBehaviour
         _health.OnDeath += _move.StopAllAction;
         CombatManager.OnGameEnd += _attack.StopAllAction;
         CombatManager.OnGameEnd += _move.StopAllAction;
+        CombatManager.OnGameEnd += _animation.StopAllAction;
     }
 
     public void UnbindEvent()
@@ -176,6 +177,7 @@ public class Entity : MonoBehaviour
         _health.OnDeath -= _move.StopAllAction;
         CombatManager.OnGameEnd -= _attack.StopAllAction;
         CombatManager.OnGameEnd -= _move.StopAllAction;
+        CombatManager.OnGameEnd -= _animation.StopAllAction;
     }
     public void SetUnitId(string id)
     {

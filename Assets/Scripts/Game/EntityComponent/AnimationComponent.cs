@@ -65,5 +65,9 @@ public class AnimationComponent : MonoBehaviour
         if(this.deathSound != null)
             _audioSource.PlayOneShot(deathSound);
     }
+    public void StopAllAction()
+    {
+        _animator.SetTrigger("StopAllAction");
+    }
 }
 

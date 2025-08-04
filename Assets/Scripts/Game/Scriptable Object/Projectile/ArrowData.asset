@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: ArrowData
   m_EditorClassIdentifier: 
   projectilePrefab: {fileID: 6623840121384637891, guid: 7e3d132b7dc843a4bbe5499eafe20e82, type: 3}
-  FlightEffectPrefab: {fileID: 2613462060424995206, guid: 101a8868c1adc5b40bdaf7526f47b7b5, type: 3}
+  FlightEffectPrefab: {fileID: 4459269702221036292, guid: 495caa306d6cbae42b3fc9fffe06eb74, type: 3}
   speedWeight: 1
   verticalSpeedWeight: 0.2
   localRotationOffset: {x: -90, y: 0, z: 0}
