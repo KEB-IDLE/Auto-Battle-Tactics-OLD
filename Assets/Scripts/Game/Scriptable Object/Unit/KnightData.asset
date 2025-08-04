@@ -25,12 +25,13 @@ MonoBehaviour:
   detectionRadius: 50
   attackRange: 5
   disengageRange: 5
-  attackPriority: 2
+  attackPriority: 0
   attackType: 0
   entityPrefab: {fileID: 6159849336836508998, guid: b0fad61085f0abe4d9d39873fbe11e69, type: 3}
   magicRadius: 0
   projectilePrefab: {fileID: 0}
   projectilePoolName: 
+  projectileData: {fileID: 0}
   summonEffectPrefab: {fileID: 0}
   attackEffectPrefab: {fileID: 0}
   takeDamageEffectPrefeb: {fileID: 0}

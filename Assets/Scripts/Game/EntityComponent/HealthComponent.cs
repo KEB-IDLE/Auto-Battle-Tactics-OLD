@@ -14,14 +14,11 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
 #pragma warning disable 67
     public event Action<Transform> OnTakeDamageEffect;
     public event Action<Transform> OnDeathEffect;
-    public event Action OnDeath; // 죽음 이벤트
+    public event Action OnDeath;
     public event Action<float, float> OnHealthChanged;
 #pragma warning restore 67
 
     private Coroutine damageRoutine;
-
-    //public void Awake() => CombatManager.Instance?.Register(this);
-    //public void OnDestroy() => CombatManager.Instance?.Unregister(this);
 
     public void Initialize(EntityData data)
     {
