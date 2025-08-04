@@ -77,6 +77,7 @@ public class Entity : MonoBehaviour
         _health.OnTakeDamageEffect += _effect.PlayTakeDamageEffect;
         _health.OnDeathEffect += _effect.PlayDeathEffect;
         _health.OnHealthChanged += _healthBar.UpdateBar;
+        _health.OnDeath += _move.StopAllAction;
         CombatManager.OnGameEnd += _attack.StopAllAction;
         CombatManager.OnGameEnd += _move.StopAllAction;
     }
@@ -90,6 +91,7 @@ public class Entity : MonoBehaviour
         _health.OnTakeDamageEffect -= _effect.PlayTakeDamageEffect;
         _health.OnDeathEffect -= _effect.PlayDeathEffect;
         _health.OnHealthChanged -= _healthBar.UpdateBar;
+        _health.OnDeath -= _move.StopAllAction;
         CombatManager.OnGameEnd -= _attack.StopAllAction;
         CombatManager.OnGameEnd -= _move.StopAllAction;
     }

@@ -103,21 +103,16 @@ public class Projectile : MonoBehaviour
 
     private void Move()
     {
-        //if (_rb == null || target == null) return;
-        //Vector3 toTarget = (target.position - transform.position).normalized;
-        //float currentSpeed = _rb.linearVelocity.magnitude;
-
-        //// 살짝 유도 (0.08~0.18 사이에서 실험 추천)
-        //_rb.linearVelocity = Vector3.Lerp(_rb.linearVelocity, toTarget * currentSpeed, 0.12f);
-        //if (_rb.linearVelocity.sqrMagnitude > 0.01f)
-        //    transform.forward = _rb.linearVelocity.normalized;
 
         if (_rb == null || hitPoint == null) return;
         Vector3 toTarget = (hitPoint.position - transform.position).normalized;
         float currentSpeed = _rb.linearVelocity.magnitude;
         _rb.linearVelocity = Vector3.Lerp(_rb.linearVelocity, toTarget * currentSpeed, 0.12f);
         if (_rb.linearVelocity.sqrMagnitude > 0.01f)
-            transform.forward = _rb.linearVelocity.normalized;
+        {
+            Quaternion forward = Quaternion.LookRotation(_rb.linearVelocity.normalized);
+            transform.rotation = forward * Quaternion.Euler(data.localRotationOffset);
+        }
     }
 
     protected virtual void CheckHit()
