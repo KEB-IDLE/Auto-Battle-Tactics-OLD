@@ -86,9 +86,23 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
         OnDeath?.Invoke(); // 죽음 이밴트 알림
         OnDeathEffect?.Invoke(this.transform);
         yield return new WaitForSeconds(deathAnimDuration);
-        gameObject.GetComponent<Entity>().UnbindEvent();
 
-        Destroy(gameObject);
+        var entity = GetComponent<Entity>();
+        if(entity != null)
+        {
+            entity.UnbindEvent();
+            Destroy(gameObject);
+        }
+        else
+        {
+            var core = GetComponent<Core>();
+            if (core != null)
+            {
+                core.UnBindEvent();
+                Destroy(gameObject);
+            }
+        }
+       
     }
     public bool IsTargetable() => isTargetable;
     public float CurrentHp => currentHP;
