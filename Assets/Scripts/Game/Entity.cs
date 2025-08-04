@@ -77,6 +77,8 @@ public class Entity : MonoBehaviour
         _health.OnTakeDamageEffect += _effect.PlayTakeDamageEffect;
         _health.OnDeathEffect += _effect.PlayDeathEffect;
         _health.OnHealthChanged += _healthBar.UpdateBar;
+        CombatManager.OnGameEnd += _attack.StopAllAction;
+        CombatManager.OnGameEnd += _move.StopAllAction;
     }
 
     public void UnbindEvent()
@@ -88,6 +90,8 @@ public class Entity : MonoBehaviour
         _health.OnTakeDamageEffect -= _effect.PlayTakeDamageEffect;
         _health.OnDeathEffect -= _effect.PlayDeathEffect;
         _health.OnHealthChanged -= _healthBar.UpdateBar;
+        CombatManager.OnGameEnd -= _attack.StopAllAction;
+        CombatManager.OnGameEnd -= _move.StopAllAction;
     }
     public void SetUnitId(string id)
     {

@@ -6,7 +6,7 @@ using UnityEngine.AI;
 
 public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
 {
-     private bool _isMine;
+    private bool _isMine;
     public event Action OnMove;
 
     Transform coreTransform;
@@ -18,6 +18,7 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
     private float moveSpeed;
     bool _isMoving;
     private bool _isAttackLock;
+    private bool isGameEnded = false;
 
     private void Awake()
     {
@@ -25,29 +26,18 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
         _attacker = GetComponent<IAttackable>();
         _health = GetComponent<IDamageable>();
         _teamProvider = GetComponent<ITeamProvider>();
-
         _attackNotifier = GetComponent<IAttackNotifier>();
-
-    }
-
-    private void OnAttackStateChanged(bool isAttacking)
-    {
-        _isAttackLock = isAttacking;
-        _agent.isStopped = isAttacking;
-        if (_attacker.IsAttacking())
-            _agent.ResetPath();
     }
 
     private void Start()
     {
         coreTransform = CoreRegistry.Instance.GetEnemyCore(_teamProvider.Team);
         _attackNotifier.OnAttackStateChanged += OnAttackStateChanged;
-        
     }
 
     void Update()
     {
-        if ( _isAttackLock || !_health.IsAlive())
+        if ( isGameEnded || _isAttackLock || !_health.IsAlive())
         {
             if (_isMoving)
                 _isMoving = false;
@@ -82,13 +72,20 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
         _isMoving = false;
 
     }
+    private void OnAttackStateChanged(bool isAttacking)
+    {
+        _isAttackLock = isAttacking;
+        _agent.isStopped = isAttacking;
+        if (_attacker.IsAttacking())
+            _agent.ResetPath();
+    }
     public void LookAtTarget(IDamageable target)
     {
         var mb = target as MonoBehaviour;
         if (mb != null)
         {
             Vector3 targetPos = mb.transform.position;
-            targetPos.y = transform.position.y; // y 고정(수평 회전)
+            targetPos.y = transform.position.y;
             transform.LookAt(targetPos);
         }
     }
@@ -99,8 +96,6 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
         if (attackComponent == null || target == null)
             return false;
 
-        // 공격 타입별로 가시성 판정 커스텀 가능
-        // 예: 마법사는 무조건 true, 원거리/근접은 Raycast
         if (attackComponent.isMagic)
             return true;
 
@@ -112,6 +107,15 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
 
         return attackComponent.IsTargetVisible(firePoint, targetTransform);
     }
+
+    public void StopAllAction()
+    {
+        isGameEnded = true;
+        _agent.isStopped = true;
+    }
+
     public void SetIsMine(bool isMine) => _isMine = isMine;
+
+
 
 }

@@ -31,6 +31,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
     private Coroutine attackCoroutine;
     private bool isAttackingFlag;
     private bool isDead;
+    private bool isGameEnded = false;
 
 #pragma warning disable 67
     public event Action<bool> OnAttackStateChanged;
@@ -89,13 +90,14 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
 
     void Update()
     {
-        if (attackCoroutine != null || isDead) return;
+        if (attackCoroutine != null || isDead || isGameEnded) return;
 
         var newTarget = DetectTarget();
         if (newTarget != null)
         {
+            var mono = newTarget as MonoBehaviour;
             bool visible = (attackType == AttackType.Magic || attackType == AttackType.Melee) ? true :
-                (firePoint != null && IsTargetVisible(firePoint, (newTarget as MonoBehaviour).transform));
+                (firePoint != null && mono != null && IsTargetVisible(firePoint, (mono.transform)));
 
             if (visible)
                 lockedTarget = newTarget;
@@ -105,6 +107,19 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         if (lockedTarget != null && CanAttack(lockedTarget))
             attackCoroutine = StartCoroutine(AttackRoutine(lockedTarget));
 
+    }
+
+    public void StopAllAction()
+    {
+        isGameEnded = true;
+        if(attackCoroutine != null)
+        {
+            StopCoroutine(attackCoroutine);
+            attackCoroutine = null;
+        }
+        isAttackingFlag = false;
+        OnAttackStateChanged?.Invoke(false);
+        isDead = true;
     }
 
     public IDamageable DetectTarget()
@@ -140,6 +155,8 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
     }
     private bool CanAttack(IDamageable target)
     {
+        var mono = target as MonoBehaviour;
+        if (mono == null) return false;
         float distance = Vector3.Distance(
             transform.position,
             (target as MonoBehaviour).transform.position);
@@ -171,10 +188,13 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         OnAttackStateChanged?.Invoke(true);
         float impactDelay = attackAnimLength * attackImpactRatio;
         var myHealth = GetComponent<HealthComponent>();
+        var targetMono = target as MonoBehaviour;
 
         while (myHealth != null &&
                    myHealth.IsAlive() &&
+                   target != null &&
                    target.IsAlive() &&
+                   targetMono != null &&
                    Vector3.Distance(transform.position,
                        (target as MonoBehaviour).transform.position) <= attackRange)
         {
@@ -184,9 +204,9 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
             yield return new WaitForSeconds(attackCooldown - impactDelay);
         }
 
-        if (!target.IsAlive() ||
+        if (!target.IsAlive() || target == null || targetMono == null ||
             Vector3.Distance(transform.position,
-                (target as MonoBehaviour).transform.position) > disengageRange)
+                targetMono.transform.position) > disengageRange)
         {
             lockedTarget = null;
         }
@@ -287,10 +307,8 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         return false;
     }
 
-    public bool IsAttacking()
-    {
-        return isAttackingFlag;
-    }
+    public bool IsAttacking() => isAttackingFlag;
+
 
     private void OnOwnerDeath()
     {
