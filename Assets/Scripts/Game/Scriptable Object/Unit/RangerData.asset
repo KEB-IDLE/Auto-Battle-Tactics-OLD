@@ -29,8 +29,8 @@ MonoBehaviour:
   attackType: 1
   entityPrefab: {fileID: 3865900570072927925, guid: 3ed81c8dfca06f44ab55e2815b7bbdd0, type: 3}
   magicRadius: 0
-  projectilePrefab: {fileID: 1085649348315297137, guid: 68b8b649dba962f4db22a6043739049b, type: 3}
-  projectilePoolName: FireBall
+  projectilePrefab: {fileID: 6623840121384637891, guid: 7e3d132b7dc843a4bbe5499eafe20e82, type: 3}
+  projectilePoolName: Arrow
   summonEffectPrefab: {fileID: 0}
   attackEffectPrefab: {fileID: 0}
   takeDamageEffectPrefeb: {fileID: 0}

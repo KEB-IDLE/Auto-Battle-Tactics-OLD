@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5392a4193bcc6744d98c42f9be10bc66, type: 3}
   m_Name: ArrowData
   m_EditorClassIdentifier: 
-  projectilePrefab: {fileID: 3287624786238722518, guid: 0c144b528e01b334baa60edbf77d3be1, type: 3}
-  FlightEffectPrefab: {fileID: 3634624844514982569, guid: 89d161b7121c31b418ce30b980dfdc53, type: 3}
-  speed: 10
-  verticalSpeed: 5
-  lifeTime: 2
-  detectionRadius: 0.5
+  projectilePrefab: {fileID: 6623840121384637891, guid: 7e3d132b7dc843a4bbe5499eafe20e82, type: 3}
+  FlightEffectPrefab: {fileID: 127166, guid: 4cc2bcf001dff1841ab60befad39294b, type: 3}
+  speedWeight: 1
+  verticalSpeedWeight: 0.2
+  localRotationOffset: {x: -90, y: 0, z: 0}
+  detectionRadius: 1
   explosionRadius: 0
