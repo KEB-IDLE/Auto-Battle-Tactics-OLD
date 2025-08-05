@@ -268,7 +268,7 @@ public class UIManager : MonoBehaviour
             // 순위, 닉네임, 포인트 각각 매핑
             rankNumberTexts[i].text = entry.rank.ToString();
             rankNameTexts[i].text = entry.nickname;
-            rankPointTexts[i].text = $"{entry.rank_point} pt";
+            rankPointTexts[i].text = entry.rank_point.ToString();
 
             // 아이콘 설정
             int iconIndex = entry.profile_icon_id - 1;
