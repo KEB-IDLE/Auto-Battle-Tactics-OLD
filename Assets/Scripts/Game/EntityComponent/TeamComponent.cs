@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class TeamComponent : MonoBehaviour, ITeamProvider
 {
-    private Team _team; 
+    [SerializeField] private Team _team; 
     public Team Team
     {
         get => _team;

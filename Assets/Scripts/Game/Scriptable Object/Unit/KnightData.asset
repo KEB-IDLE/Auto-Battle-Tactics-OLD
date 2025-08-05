@@ -12,18 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 826a7d254cca7e547ab90347db98c1b9, type: 3}
   m_Name: KnightData
   m_EditorClassIdentifier: 
-  entityName: 
+  entityName: Knight
   maxHP: 150
   attackDamage: 25
   attackCoreDamage: 5
   attackImpactRatio: 0.5
-  moveSpeed: 1
+  moveSpeed: 5
   entityScale: 0
   gold_: 0
   unitType: Knight
   layer: 14
-  detectionRadius: 20
-  attackRange: 2
+  detectionRadius: 50
+  attackRange: 5
   disengageRange: 5
   attackPriority: 0
   attackType: 0
@@ -31,6 +31,7 @@ MonoBehaviour:
   magicRadius: 0
   projectilePrefab: {fileID: 0}
   projectilePoolName: 
+  projectileData: {fileID: 0}
   summonEffectPrefab: {fileID: 0}
   attackEffectPrefab: {fileID: 0}
   takeDamageEffectPrefeb: {fileID: 0}
@@ -39,7 +40,7 @@ MonoBehaviour:
   attackSound: {fileID: 0}
   deathSound: {fileID: 0}
   animatorController: {fileID: 9100000, guid: 978dfb3f95c533c4aa9742b18291eb77, type: 2}
-  attackClip: {fileID: 0}
-  runClip: {fileID: 0}
-  deathClip: {fileID: 0}
-  idleClip: {fileID: 0}
+  attackClip: {fileID: 7400000, guid: 33bd65223d28b1c4cb76a7bebb02a099, type: 3}
+  runClip: {fileID: 7400000, guid: 3e26d22a6afd2244a9c4ecaf6b9adf6e, type: 3}
+  deathClip: {fileID: 7400000, guid: a2734260adfadb94ca2629af8af3c3bf, type: 3}
+  idleClip: {fileID: 7400000, guid: ee2d211244aad6943b091b16a3d94a27, type: 3}

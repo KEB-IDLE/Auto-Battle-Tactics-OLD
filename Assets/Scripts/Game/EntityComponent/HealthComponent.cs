@@ -1,50 +1,40 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.SocialPlatforms;
 
 public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
 {
-    public float currentHP;
-    public float maxHP;
+    [HideInInspector] public float currentHP;
+    [HideInInspector] public float maxHP;
+    [HideInInspector] public float pendingDamage = 0f;
+    private bool isTargetable;
     private float deathAnimDuration;
-    public float pendingDamage = 0f;
-
 
 #pragma warning disable 67
     public event Action<Transform> OnTakeDamageEffect;
     public event Action<Transform> OnDeathEffect;
-    public event Action OnDeath; // 죽음 이벤트
+    public event Action OnDeath;
     public event Action<float, float> OnHealthChanged;
 #pragma warning restore 67
 
     private Coroutine damageRoutine;
 
-    public void Awake()
-    {
-        CombatManager.Instance?.Register(this);
-    }
-    public void OnDestroy()
-    {
-        CombatManager.Instance?.Unregister(this);
-    }
-
-
     public void Initialize(EntityData data)
     {
-        this.maxHP = data.maxHP;
+        maxHP = data.maxHP;
         currentHP = data.maxHP;
-
-        deathAnimDuration = data.deathClip != null ? data.deathClip.length : 0f;
-
+        deathAnimDuration = (data.deathClip != null) ? data.deathClip.length : 0f;
+        isTargetable = true;
         if (damageRoutine == null)
             damageRoutine = StartCoroutine(ApplyDamageEndOfFrame());
     }
 
     public void Initialize(float hp)
     {
-        maxHP = hp;               
+        maxHP = hp;
         currentHP = hp;
-
+        isTargetable = true;
         if (damageRoutine == null)
             damageRoutine = StartCoroutine(ApplyDamageEndOfFrame());
     }
@@ -79,7 +69,6 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
 
         OnHealthChanged?.Invoke(currentHP, maxHP);
     }
-
     public void ApplyPendingDamage()
     {
         if (pendingDamage > 0f && this.IsAlive())
@@ -88,20 +77,36 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
             currentHP -= pendingDamage;
             pendingDamage = 0f;
             OnHealthChanged?.Invoke(currentHP, maxHP);
-
-
         }
     }
     private IEnumerator DeathRoutine()
     {
-        Debug.Log("deathRoutine Called");
+        isTargetable = false;
+        var coll = GetComponent<Collider>();
+        if (coll != null) coll.enabled = false;
+
         OnDeath?.Invoke(); // 죽음 이밴트 알림
         OnDeathEffect?.Invoke(this.transform);
         yield return new WaitForSeconds(deathAnimDuration);
-        gameObject.GetComponent<Entity>().UnbindEvent();
 
-        Destroy(gameObject);
+        var entity = GetComponent<Entity>();
+        if(entity != null)
+        {
+            entity.UnbindEvent();
+            Destroy(gameObject);
+        }
+        else
+        {
+            var core = GetComponent<Core>();
+            if (core != null)
+            {
+                core.UnBindEvent();
+                Destroy(gameObject);
+            }
+        }
+       
     }
+    public bool IsTargetable() => isTargetable;
     public float CurrentHp => currentHP;
     public float MaxHp => maxHP;
 }

@@ -47,7 +47,7 @@ public class LoginManager : MonoBehaviour
                 {
                     GameManager.Instance.accessToken = res.token;
                     statusText.text = "Login Success!";
-                    SceneManager.LoadScene(1);
+                    SceneManager.LoadScene("1-MainScene");
                 }
                 else
                 {
