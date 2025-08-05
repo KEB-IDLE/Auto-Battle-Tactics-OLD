@@ -58,6 +58,8 @@ public class EntityData : ScriptableObject
     public GameObject projectilePrefab;
     [Tooltip("Automatically linked to object pool")]
     public string projectilePoolName;
+    [Tooltip("Projectile data containing flight effects and settings")]
+    public ProjectileData projectileData;
 
     [Header("Effect Prefab")]
     [Tooltip("Summon effect prefab")]

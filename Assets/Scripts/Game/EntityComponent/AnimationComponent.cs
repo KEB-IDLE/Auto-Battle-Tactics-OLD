@@ -61,10 +61,13 @@ public class AnimationComponent : MonoBehaviour
 
     public void HandleDeath()
     {
-        Debug.Log("DeathAnimation is Called");
         _animator.SetTrigger("Death");
         if(this.deathSound != null)
             _audioSource.PlayOneShot(deathSound);
+    }
+    public void StopAllAction()
+    {
+        _animator.SetTrigger("StopAllAction");
     }
 }
 

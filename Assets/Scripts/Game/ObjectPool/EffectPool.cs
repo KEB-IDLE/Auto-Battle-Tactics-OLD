@@ -80,16 +80,45 @@ public class EffectPool : MonoBehaviour, IObjectPool
 
     private void Awake()
     {
+        if (effectPrefab != null)
+        {
+            for (int i = 0; i < poolSize; i++)
+            {
+                var obj = Instantiate(effectPrefab, transform);
+                obj.SetActive(false);
+                pool.Enqueue(obj);
+            }
+        }
+    }
 
+    /// <summary>
+    /// 런타임에 EffectPool을 초기화합니다.
+    /// </summary>
+    public void Initialize(string poolName, GameObject effectPrefab, int poolSize)
+    {
+        this.poolName = poolName;
+        this.effectPrefab = effectPrefab;
+        this.poolSize = poolSize;
+
+        // 기존 오브젝트들 정리
+        for (int i = transform.childCount - 1; i >= 0; i--)
+        {
+            DestroyImmediate(transform.GetChild(i).gameObject);
+        }
+        pool.Clear();
+
+        // 새로운 풀 생성
         for (int i = 0; i < poolSize; i++)
         {
             var obj = Instantiate(effectPrefab, transform);
             obj.SetActive(false);
             pool.Enqueue(obj);
         }
+
+        Debug.Log($"✨ EffectPool '{poolName}' initialized with {poolSize} objects");
     }
 
-    // IObjectPool ����
+    // IObjectPool ����
     public GameObject Get(Vector3 position, Quaternion rotation)
     {
         GameObject obj = null;

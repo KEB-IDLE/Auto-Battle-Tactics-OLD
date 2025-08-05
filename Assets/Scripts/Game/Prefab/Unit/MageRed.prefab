@@ -331,6 +331,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c9e7357e5931b940a73a9b7f2577af0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _team: 0
 --- !u!114 &2136948599218128956
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -367,4 +368,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33bc93f8e69ea954d93a63e5a828df91, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  entityData: {fileID: 11400000, guid: c4687fd81f20829489f2a3ddcaa1f34f, type: 2}
+  entityData: {fileID: 11400000, guid: d5feb7c6fc1538e4c94d1911846d43aa, type: 2}

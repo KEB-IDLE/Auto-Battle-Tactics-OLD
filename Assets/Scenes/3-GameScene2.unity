@@ -380,7 +380,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92e63eb6a9194d044b3712f148482283, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHP: 100
+  objectData: {fileID: 11400000, guid: 8674afd5e962b0e4f967afa24761c038, type: 2}
 --- !u!114 &66985193
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -420,6 +420,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c9e7357e5931b940a73a9b7f2577af0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _team: 0
 --- !u!1 &116550654
 GameObject:
   m_ObjectHideFlags: 0
@@ -1066,8 +1067,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   allEntityData:
-  - {fileID: 11400000, guid: c4687fd81f20829489f2a3ddcaa1f34f, type: 2}
-  - {fileID: 11400000, guid: 09d358418d77d374288e307457e20f46, type: 2}
+  - {fileID: 11400000, guid: d5feb7c6fc1538e4c94d1911846d43aa, type: 2}
+  - {fileID: 11400000, guid: c7732a04c81006941824d2187fba76f4, type: 2}
   - {fileID: 11400000, guid: 12f67a452c5f86f44a773349bcacd4d2, type: 2}
 --- !u!4 &537720932
 Transform:
@@ -3018,7 +3019,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   unitType: Mage
-  bluePrefab: {fileID: 1052314300090537878, guid: 2bce17b6c1ff8ef4c9e517f46e3491ab, type: 3}
+  bluePrefab: {fileID: 3876098750152481945, guid: 7f9b069a340cf9c429780e018ce46296, type: 3}
   redPrefab: {fileID: 3760281847762428348, guid: 55e13ddd82ca1894faa4e652df5ff335, type: 3}
 --- !u!114 &1632597435
 MonoBehaviour:
@@ -3644,7 +3645,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92e63eb6a9194d044b3712f148482283, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHP: 100
+  objectData: {fileID: 11400000, guid: 8674afd5e962b0e4f967afa24761c038, type: 2}
 --- !u!114 &1962519197
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3684,6 +3685,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c9e7357e5931b940a73a9b7f2577af0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _team: 0
 --- !u!1 &1969645486
 GameObject:
   m_ObjectHideFlags: 0
