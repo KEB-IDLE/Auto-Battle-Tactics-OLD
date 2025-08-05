@@ -18,8 +18,8 @@ public class APIService : MonoBehaviour
         else Destroy(gameObject);
     }
 
-    //private string baseUrl = "http://localhost:3000/api";
-    private string baseUrl = "https://jamsik.p-e.kr/api";
+    private string baseUrl = "http://localhost:3000/api";
+    //private string baseUrl = "https://jamsik.p-e.kr/api";
 
     public IEnumerator Post<TReq, TRes>(string endpoint, TReq request, Action<TRes> onSuccess, Action<string> onError = null)
     {
