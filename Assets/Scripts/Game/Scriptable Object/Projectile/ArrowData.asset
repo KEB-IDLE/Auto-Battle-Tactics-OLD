@@ -9,13 +9,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5392a4193bcc6744d98c42f9be10bc66, type: 3}
+  m_Script: {fileID: 11500000, guid: f5f00bcc7b7ace74197693563b238528, type: 3}
   m_Name: ArrowData
   m_EditorClassIdentifier: 
   projectilePrefab: {fileID: 3287624786238722518, guid: 0c144b528e01b334baa60edbf77d3be1, type: 3}
-  FlightEffectPrefab: {fileID: 3634624844514982569, guid: 89d161b7121c31b418ce30b980dfdc53, type: 3}
-  speed: 10
-  verticalSpeed: 5
-  lifeTime: 2
-  detectionRadius: 0.5
+  FlightEffectPrefab: {fileID: 0}
+  speedWeight: 1
+  verticalSpeedWeight: 0.2
+  lifeTime: 1
+  detectionRadius: 1
   explosionRadius: 0

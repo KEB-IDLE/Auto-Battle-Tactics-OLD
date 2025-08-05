@@ -9,7 +9,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
 {
     // Ony for Gizmo test
     private EntityData _entityData; // EntityData를 통해 초기화할 수 있도록
-    
+
     private float attackDamage;
     private float attackCoreDamage;
     private float attackImpactRatio;
@@ -54,7 +54,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         var health = GetComponent<HealthComponent>();
         if (health != null)
             health.OnDeath += OnOwnerDeath;
-    
+
     }
 
     public void Initialize(EntityData data)
@@ -63,7 +63,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         _entityData = data;
         attackDamage = data.attackDamage;
         attackCoreDamage = data.attackCoreDamage;
-        if(data.attackClip !=  null)
+        if (data.attackClip != null)
             attackAnimLength = data.attackClip.length;
         attackCooldown = attackAnimLength;
         attackImpactRatio = data.attackImpactRatio;
@@ -136,7 +136,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
 
         foreach (var col in hits)
         {
-            if (col.gameObject == gameObject) continue;
+            if (col.gameObject == this.gameObject) continue;
 
             var dmg = col.GetComponent<IDamageable>();
             if (dmg == null || !dmg.IsAlive()) continue;
@@ -252,7 +252,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
             coreDamage: attackCoreDamage,
             target: (target as MonoBehaviour).transform,
             poolName: projectilePoolName,
-            disengageRange : disengageRange
+            disengageRange: disengageRange
         );
 
         if (OnAttackEffect == null)
@@ -272,11 +272,23 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
 
         foreach (var col in hits)
         {
+            // ✅ 자기 자신 제외
+            if (col.gameObject == this.gameObject)
+                continue;
+            // ✅ 아군 제외
+            var provider = col.GetComponent<ITeamProvider>();
+            if (provider != null && provider.Team == teamProvider.Team)
+                continue;
+
             var dmg = col.GetComponent<IDamageable>();
             var coreComp = col.GetComponent<Core>();
+            var health = col.GetComponent<HealthComponent>();
             if (dmg != null && dmg.IsAlive())
-                dmg.RequestDamage(coreComp != null ? attackCoreDamage : attackDamage);
-            (dmg as HealthComponent)?.ApplyImmediateDamage();
+            {
+                float dmgAmount = coreComp != null ? attackCoreDamage : attackDamage;
+                dmg.RequestDamage(dmgAmount);
+                health?.ApplyImmediateDamage(); // 즉시 적용
+            }
         }
     }
 
