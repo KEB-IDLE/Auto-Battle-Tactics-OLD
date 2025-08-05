@@ -24,11 +24,16 @@ public class EntityEditor : Editor
     {
         GameObject go;
 
-        if (data.entityPrefab != null)
+        // ✅ 내 팀 가져오기
+        Team myTeam = UserNetwork.Instance.MyTeam;
+        // ✅ 내 팀 프리팹 가져오기
+        GameObject prefab = myTeam == Team.Red ? data.redPrefab : data.bluePrefab;
+
+        if (prefab != null)
         {
-            go = (GameObject)PrefabUtility.InstantiatePrefab(data.entityPrefab);
+            go = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
             go.name = data.entityName + "_Entity";
-        }
+        }   
         else
             go = new GameObject(data.entityName + "_Entity");
 

@@ -7,10 +7,10 @@ using System.Runtime.CompilerServices;
 public class Projectile : MonoBehaviour
 {
     private Rigidbody _rb;
-    private string poolName; // ¾î¶² Ç®¿¡ ¼ÓÇÑ ¿ÀºêÁ§Æ®ÀÎÁö
+    private string poolName; // ï¿½î¶² Ç®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ï¿½ï¿½
     private GameObject flightEffect;
 
-    [Header("Projectile Scriptable Object¸¦ ÇÒ´çÇÏ¼¼¿ä.")]
+    [Header("Projectile Scriptable Objectï¿½ï¿½ ï¿½Ò´ï¿½ï¿½Ï¼ï¿½ï¿½ï¿½.")]
     [SerializeField] private ProjectileData data;
 
     private Team team;
@@ -29,7 +29,7 @@ public class Projectile : MonoBehaviour
         _rb.useGravity = true;
     }
 
-    // ObjectPoolManager¸¦ ÅëÇÑ ÃÊ±âÈ­
+    // ObjectPoolManagerï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ê±ï¿½È­
     public void Initialize(Entity owner, float damage, float coreDamage, Transform target, string poolName, float disengageRange)
     {
         this.damage = damage;
@@ -42,7 +42,7 @@ public class Projectile : MonoBehaviour
         _rb.linearVelocity = Vector3.zero;
         _rb.angularVelocity = Vector3.zero;
 
-        
+
         SetTeam(owner);
         AttachFlightEffect();
 
@@ -50,7 +50,7 @@ public class Projectile : MonoBehaviour
         {
             float distance = Vector3.Distance(transform.position, target.position);
 
-            // °¡ÁßÄ¡(Weight)¿¡ µû¶ó ÀÚµ¿ º¸Á¤
+            // ï¿½ï¿½ï¿½ï¿½Ä¡(Weight)ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Úµï¿½ ï¿½ï¿½ï¿½ï¿½
             float autoSpeed = Mathf.Max(distance * data.speedWeight, 4f);
             float autoVerticalSpeed = Math.Max(distance * data.verticalSpeedWeight, 4f);
 
@@ -65,7 +65,7 @@ public class Projectile : MonoBehaviour
         if (teamComponent != null)
             this.team = teamComponent.Team;
         else
-            Debug.LogWarning("[Projectile] Owner¿¡ TeamComponent°¡ ¾ø½À´Ï´Ù!");
+            Debug.LogWarning("[Projectile] Ownerï¿½ï¿½ TeamComponentï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½!");
     }
 
     private void Update()
@@ -95,53 +95,46 @@ public class Projectile : MonoBehaviour
         Vector3 toTarget = (target.position - transform.position).normalized;
         float currentSpeed = _rb.linearVelocity.magnitude;
 
-        // »ìÂ¦ À¯µµ (0.08~0.18 »çÀÌ¿¡¼­ ½ÇÇè ÃßÃµ)
+        // ï¿½ï¿½Â¦ ï¿½ï¿½ï¿½ï¿½ (0.08~0.18 ï¿½ï¿½ï¿½Ì¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ãµ)
         _rb.linearVelocity = Vector3.Lerp(_rb.linearVelocity, toTarget * currentSpeed, 0.12f);
         if (_rb.linearVelocity.sqrMagnitude > 0.01f)
             transform.forward = _rb.linearVelocity.normalized;
 
     }
 
-    protected virtual void CheckHit()
+   protected virtual void CheckHit()
+{
+    if (target != null)
     {
-        if (target != null)
-        {
-            float dist = Vector3.Distance(transform.position, target.position);
+        float dist = Vector3.Distance(transform.position, target.position);
+
             if (dist <= data.detectionRadius)
             {
-                var hp = target.GetComponent<HealthComponent>();
-                if (hp != null) hp.RequestDamage(coreDamage != 0 ? coreDamage : damage);
-                hp?.ApplyImmediateDamage();
-                if (data.explosionRadius > 0f)
-                {
-                    Collider[] explosionHits = Physics.OverlapSphere(
-                        transform.position,
-                        data.explosionRadius,
-                        LayerMask.GetMask("Agent", "Tower", "Core"));
-                    foreach (var ex in explosionHits)
-                    {
-                        var enemy = ex.GetComponent<Entity>();
-                        if (enemy == null) continue;
-                        var teamComp = enemy.GetComponent<TeamComponent>();
-                        if (teamComp == null || teamComp.Team == team) continue;
+                Debug.Log($"[Projectile] ì¶©ëŒ ê°ì§€ë¨ â†’ ëŒ€ìƒ: {target.name}"); // âœ… ì¶”ê°€
 
-                        var otherHp = enemy.GetComponent<HealthComponent>();
-                        if (otherHp != null)
-                        {
-                            otherHp.RequestDamage(coreDamage != 0 ? coreDamage : damage);
-                            otherHp?.ApplyImmediateDamage();
-                        }
-                    }
+                GameObject targetGO = target.gameObject;
+                var hp = targetGO.GetComponent<HealthComponent>();
+                if (hp == null)
+                {
+                    Debug.LogWarning($"âŒ [Projectile] HealthComponent ì—†ìŒ â†’ {targetGO.name}");
                 }
+                else
+                {
+                    float dmg = (coreDamage != 0 ? coreDamage : damage);
+                    Debug.Log($"ğŸ’¥ [Projectile] {targetGO.name}ì—ê²Œ {dmg} ë°ë¯¸ì§€ ì ìš©"); // âœ… í•µì‹¬ ë¡œê·¸
+                    hp.RequestDamage(dmg);
+                    hp.ApplyImmediateDamage();
+                }
+
                 ReturnFlightEffect();
                 ReturnToPool();
-                return;
-            }
+            return;
         }
     }
+}
 
     /// <summary>
-    /// Ç® ÀÌ¸§À» Á÷Á¢ ÁöÁ¤ÇØÁÜ
+    /// Ç® ï¿½Ì¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     /// </summary>
     public void SetPoolName(string poolName) => this.poolName = poolName;
 
@@ -160,7 +153,7 @@ public class Projectile : MonoBehaviour
     }
 
     /// <summary>
-    /// FlightEffect¸¦ EffectPool¿¡¼­ ¹Ş¾Æ¿Í ºÎÂø
+    /// FlightEffectï¿½ï¿½ EffectPoolï¿½ï¿½ï¿½ï¿½ ï¿½Ş¾Æ¿ï¿½ ï¿½ï¿½ï¿½ï¿½
     /// </summary>
     private void AttachFlightEffect()
     {
@@ -183,7 +176,7 @@ public class Projectile : MonoBehaviour
     }
 
     /// <summary>
-    /// ÇöÀç FlightEffect¸¦ ¹İµå½Ã Ç®·Î ¹İÈ¯/Á¦°Å
+    /// ï¿½ï¿½ï¿½ï¿½ FlightEffectï¿½ï¿½ ï¿½İµï¿½ï¿½ Ç®ï¿½ï¿½ ï¿½ï¿½È¯/ï¿½ï¿½ï¿½ï¿½
     /// </summary>
     private void ReturnFlightEffect()
     {
@@ -193,7 +186,7 @@ public class Projectile : MonoBehaviour
         var pool = ObjectPoolManager.Instance.GetPool(data.FlightEffectPrefab.name);
         if (pool != null)
         {
-            if(pool is MonoBehaviour poolObj)
+            if (pool is MonoBehaviour poolObj)
                 flightEffect.transform.SetParent(poolObj.transform, false);
             pool.Return(flightEffect);
         }

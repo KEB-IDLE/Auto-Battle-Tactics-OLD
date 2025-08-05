@@ -5,7 +5,7 @@ public class HealthBar : MonoBehaviour
 {
     public Image fillImage;
 
-    // ÃÊ±âÈ­. Entity¿¡¼­ Á÷Á¢ ¿¬°áÇÏ°Å³ª, Find·Î °¡Á®¿Ã ¼ö ÀÖÀ½
+    // ï¿½Ê±ï¿½È­. Entityï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï°Å³ï¿½, Findï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     public void Initialize(HealthComponent hc)
     {
         UpdateBar(hc.currentHP, hc.maxHP);
