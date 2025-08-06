@@ -35,18 +35,36 @@ public class UnitManager : MonoBehaviour
         }
         return data;
     }
+    public GameObject GetTeamPrefab(string unitType, Team team)
+    {
+        var data = GetEntityData(unitType);
+        if (data == null)
+        {
+            Debug.LogError($"❌ [GetTeamPrefab] EntityData 없음: {unitType}");
+            return null;
+        }
+
+        return team == Team.Red ? data.redPrefab : data.bluePrefab;
+    }
+
 
     public void SpawnUnits(string unitType, Vector3 position, string ownerId)
     {
         Debug.Log($"🟡 [SpawnUnits] 호출됨: {unitType}");
         var data = GetEntityData(unitType);
-        if (data == null || data.entityPrefab == null)
+        if (data == null)
         {
-            Debug.LogError($"❌ [SpawnUnits] EntityData 없음 또는 프리팹 누락. unitType: {unitType}");
+            Debug.LogError($"❌ [SpawnUnits] EntityData 없음. unitType: {unitType}");
             return;
         }
+        // 팀 결정
+        Team team = (ownerId == UserNetwork.Instance.MyId)
+            ? UserNetwork.Instance.MyTeam
+            : (UserNetwork.Instance.MyTeam == Team.Red ? Team.Blue : Team.Red);
 
-        GameObject go = Instantiate(data.entityPrefab, position, Quaternion.identity);
+        // 팀에 따른 프리팹 선택
+        GameObject prefab = GetTeamPrefab(unitType, team);
+        GameObject go = Instantiate(prefab, position, Quaternion.identity);
         var entity = go.GetComponent<Entity>();
 
         string generatedId = System.Guid.NewGuid().ToString();
@@ -120,8 +138,21 @@ public class UnitManager : MonoBehaviour
 
         string unitType = initData.unitType;
         Vector3 position = new Vector3(initData.position[0], initData.position[1], initData.position[2]);
+
+        if (!Enum.TryParse(initData.team, out Team parsedTeam))
+        {
+            Debug.LogError($"❌ [Init] 팀 파싱 실패: {initData.team}");
+            return;
+        }
+        GameObject prefab = GetTeamPrefab(unitType, parsedTeam);
+        if (prefab == null)
+        {
+            Debug.LogError($"❌ [Init] {parsedTeam} 팀 프리팹 없음: {unitType}");
+            return;
+        }
+
         var data = GetEntityData(unitType);
-        GameObject go = Instantiate(data.entityPrefab, position, Quaternion.identity);
+        GameObject go = Instantiate(prefab, position, Quaternion.identity);
 
         int parsedLayer = LayerMask.NameToLayer(initData.layer);
         if (parsedLayer != -1)
@@ -134,8 +165,7 @@ public class UnitManager : MonoBehaviour
         entity.SetOwnerId(initData.ownerId);
         GameManager2.Instance.Register(entity);
 
-        if (Enum.TryParse(initData.team, out Team parsedTeam))
-            go.GetComponent<TeamComponent>()?.SetTeam(parsedTeam);
+        go.GetComponent<TeamComponent>()?.SetTeam(parsedTeam);
 
         var health = go.GetComponent<HealthComponent>();
         if (health != null)

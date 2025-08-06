@@ -9,11 +9,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f0ee2740dca892048b9dad9e8f2096a9, type: 3}
+  m_Script: {fileID: 11500000, guid: dd816813d423cb4498f462a694052eb2, type: 3}
   m_Name: CoreData
   m_EditorClassIdentifier: 
-  maxHP: 15
-  objectPrefab: {fileID: 3469961179386794419, guid: 4ec969db56dd4af4bb4d3e7d645b4b69, type: 3}
+  maxHP: 100
+  objectPrefab: {fileID: 0}
   takeDamageEffectPrefab: {fileID: 0}
   deathEffectPrefab: {fileID: 0}
   takeDamageSound: {fileID: 0}
