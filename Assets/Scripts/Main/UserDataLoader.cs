@@ -21,7 +21,7 @@ public class UserDataLoader : MonoBehaviour
 
             uiManager.GetGlobalRanking();
 
-            StartCoroutine(UserManager.Instance.SpawnCharacterCoroutine(GameManager.Instance.profile.profile_char_id));
+            StartCoroutine(UserManager.Instance.SpawnCharacter(SessionManager.Instance.profile.profile_char_id));
         }
     }
 
@@ -34,7 +34,7 @@ public class UserDataLoader : MonoBehaviour
     {
         yield return APIService.Instance.Get<UserProfile>(
             APIEndpoints.Profile,
-            res => GameManager.Instance.profile = res,
+            res => SessionManager.Instance.profile = res,
             err => Debug.LogError("Profile load failed: " + err)
         );
     }
@@ -43,7 +43,7 @@ public class UserDataLoader : MonoBehaviour
     {
         yield return APIService.Instance.GetList<int>(
             APIEndpoints.ProfileIcons,
-            res => GameManager.Instance.ownedProfileIcons = res,
+            res => SessionManager.Instance.ownedProfileIcons = res,
             err => Debug.LogError("Owned icons load failed: " + err)
         );
     }
@@ -52,7 +52,7 @@ public class UserDataLoader : MonoBehaviour
     {
         yield return APIService.Instance.Get<UserRecord>(
             APIEndpoints.Record,
-            res => GameManager.Instance.record = res,
+            res => SessionManager.Instance.record = res,
             err => Debug.LogError("Record load failed: " + err)
         );
     }
