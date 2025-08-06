@@ -14,14 +14,14 @@ public class UserDataLoader : MonoBehaviour
 
         if (uiManager != null)
         {
-            uiManager.UpdateProfileUI();
+            uiManager.UpdateProfileUI();    // 싱글턴 사용하기
             uiManager.UpdateRecordUI();
 
             uiManager.InitializeIconSelection();
 
             uiManager.GetGlobalRanking();
 
-            StartCoroutine(UserManager.Instance.SpawnCharacter(SessionManager.Instance.profile.profile_char_id));
+            StartCoroutine(UserManager.Instance.SpawnCharacter(SessionManager.Instance.profile.profile_char_id));   // usermanager 사용 x 수정하기
         }
     }
 

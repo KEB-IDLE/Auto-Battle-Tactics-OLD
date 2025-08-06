@@ -4,15 +4,22 @@ using UnityEngine;
 
 public class UserManager : MonoBehaviour
 {
-    public static UserManager Instance;
+    public static UserManager Instance { get; private set; }
 
     public GameObject[] characterPrefabs;  // 메인캐릭터 프리팹
     private GameObject currentCharacterInstance;
 
     private void Awake()
     {
-        if (Instance == null) Instance = this;
-        else Destroy(gameObject);
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
     // ===================== 프로필 캐릭터 관련 =====================

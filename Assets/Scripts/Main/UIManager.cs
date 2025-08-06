@@ -4,6 +4,8 @@ using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
+    public static UIManager Instance;
+
     public UserDataLoader userdataloader;
 
     public TMP_Text nicknameText;
@@ -31,12 +33,17 @@ public class UIManager : MonoBehaviour
     public TMP_Text[] rankNameTexts;     // 닉네임 텍스트
     public TMP_Text[] rankPointTexts;    // 점수 텍스트
 
-    public static UIManager Instance;
-
     private void Awake()
     {
-        if (Instance == null) Instance = this;
-        else Destroy(gameObject);
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
     public void OnClickJoinMatch()
@@ -299,10 +306,7 @@ public class UIManager : MonoBehaviour
                 Debug.LogWarning($"Invalid profile icon ID: {profile.profile_icon_id}");
         }
     }
-
-
 }
-
 
 [System.Serializable]
 class ProfileIconUpdateRequest
@@ -423,5 +427,4 @@ public class GlobalRankingResponse
 {
     public bool success;
     public GlobalRankEntry[] data;
-
 }
