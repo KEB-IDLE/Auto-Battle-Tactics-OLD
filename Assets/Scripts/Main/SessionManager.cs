@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class SessionManager : MonoBehaviour
 {
-    public static SessionManager Instance;
+    public static SessionManager Instance { get; private set; }
 
     public UserProfile profile;
     public UserRecord record;
@@ -13,6 +13,7 @@ public class SessionManager : MonoBehaviour
 
     public string accessToken;  // JWT 토큰
 
+    // 사용 미정
     public string opponentId;
     public string roomId;
 
