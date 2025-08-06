@@ -2,6 +2,7 @@ using UnityEngine;
 using NativeWebSocket;
 using System.Text;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 [System.Serializable]
 public class TeamAssignMessage
@@ -30,6 +31,21 @@ public class AssignIdMessage
     public string type;
     public string clientId;
 }
+[System.Serializable]
+public class CoreHpMessage
+{
+    public string type = "coreHp";
+    public string team;
+    public float hp;
+}
+[System.Serializable]
+public class CoreHpUpdateMessage
+{
+    public string type;
+    public string team;
+    public float hp;
+}
+
 
 public class UserNetwork : MonoBehaviour
 {
@@ -119,11 +135,25 @@ public class UserNetwork : MonoBehaviour
         switch (header.type)
         {
             case "startCountdown":
-                StartUIController.Instance?.BeginCountdown();
+                TimerManager.Instance?.ResetUI();
+                TimerManager.Instance?.BeginCountdown();
                 break;
             case "gameStart":
-                StartUIController.Instance?.OnAllPlayersReady();
-                break;
+                {
+                    string scene = SceneManager.GetActiveScene().name;
+
+                    if (scene == "3-GameScene2")
+                    {
+                        GameManager2.Instance?.OnAllPlayersReadyFromServer();
+                    }
+                    else if (scene == "4-BattleScene")
+                    {
+                        // 안전 장치: 씬 로딩이 너무 빨라졌을 때 대비
+                        TimerManager.Instance?.ResetUI();
+                        TimerManager.Instance?.BeginCountdown();
+                    }
+                    break;
+                }
             case "init":
                 if (UnitManager.Instance != null)
                     UnitManager.Instance.OnReceiveInitMessage(json);
@@ -139,6 +169,10 @@ public class UserNetwork : MonoBehaviour
                 var assign = JsonUtility.FromJson<AssignIdMessage>(json);
                 MyId = assign.clientId;
                 Debug.Log($"🆔 [UserNetwork] 내 클라이언트 ID 설정됨: {MyId}");
+                break;
+            case "coreHpUpdate":
+                var hpUpdate = JsonUtility.FromJson<CoreHpUpdateMessage>(json);
+                ApplyCoreHp(hpUpdate.team, hpUpdate.hp);
                 break;
         }
     }
@@ -163,7 +197,30 @@ public class UserNetwork : MonoBehaviour
             Debug.Log("📤 [UserNetwork] ready 전송 완료");
         }
     }
-    // UserNetwork.cs 내부에 추가
+    public void ResetReadyState()
+    {
+        alreadyReadySent = false;
+    }
+    public void SendCoreHp(Team team, float hp)
+    {
+        if (socket != null && socket.State == WebSocketState.Open)
+        {
+            var msg = new CoreHpMessage
+            {
+                team = team.ToString(),
+                hp = hp
+            };
+
+            string json = JsonUtility.ToJson(msg);
+            socket.SendText(json);
+
+            Debug.Log($"📤 [UserNetwork] 코어 체력 전송됨: 팀={team}, 체력={hp}");
+        }
+        else
+        {
+            Debug.LogWarning("❗ [UserNetwork] 서버에 연결되지 않아 코어 체력 전송 실패");
+        }
+    }
     public void ProcessPendingMessages()
     {
         if (UnitManager.Instance == null) return;
@@ -176,5 +233,26 @@ public class UserNetwork : MonoBehaviour
 
         Debug.Log("🧹 [UserNetwork] 대기 중인 init 메시지 처리 완료");
     }
+    private void ApplyCoreHp(string teamName, float hp)
+    {
+        if (!System.Enum.TryParse(teamName, out Team team))
+        {
+            Debug.LogError($"❌ 팀 이름 파싱 실패: {teamName}");
+            return;
+        }
+
+        var cores = Object.FindObjectsByType<Core>(FindObjectsSortMode.None);
+        foreach (var core in cores)
+        {
+            var coreTeam = core.GetComponent<TeamComponent>().Team;
+            if (coreTeam == team)
+            {
+                var health = core.GetComponent<HealthComponent>();
+                health.Initialize(hp);
+                Debug.Log($"🩺 {team} 코어 체력 적용됨: {hp}");
+            }
+        }
+    }
+
 
 }

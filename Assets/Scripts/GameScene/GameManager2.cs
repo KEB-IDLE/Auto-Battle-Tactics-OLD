@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class GameManager2 : MonoBehaviour
 {
@@ -14,6 +16,7 @@ public class GameManager2 : MonoBehaviour
     private List<Entity> battleEntities = new List<Entity>();
     private bool isSceneReady = false;
     private List<InitMessage> allInitMessages = new();
+    public int CurrentRound { get; private set; } = 0;
 
     private void Awake()
     {
@@ -89,13 +92,16 @@ public class GameManager2 : MonoBehaviour
     }
     public void LockAllUnitsMovement()
     {
-        foreach (var entity in registeredEntities)
+        foreach (var entity in registeredEntities.ToList())
         {
+            if (entity == null || entity.gameObject == null) continue;
+
             var mover = entity.GetComponent<MoveComponent>();
             if (mover != null)
                 mover.enabled = false;
         }
     }
+
 
     public void SendInitMessages()
     {
@@ -117,6 +123,12 @@ public class GameManager2 : MonoBehaviour
     }
     public void AddInitMessage(InitMessage msg)
     {
+        if (allInitMessages.Any(m => m.unitId == msg.unitId))
+        {
+            Debug.LogWarning($"⚠️ [AddInitMessage] 중복 무시: {msg.unitId}");
+            return;
+        }
+
         allInitMessages.Add(msg);
     }
 
@@ -132,6 +144,7 @@ public class GameManager2 : MonoBehaviour
     {
         return registeredEntities.Any(e => e.UnitId == unitId);
     }
+
     public void DeactivateAllMyUnits()
     {
         foreach (var unit in myUnits.ToList())
@@ -146,14 +159,44 @@ public class GameManager2 : MonoBehaviour
         myUnits.Clear(); // ✅ 필요 시 복귀 후 다시 채움
         Debug.Log("🧹 DeactivateAllMyUnits: 유닛 비활성화 + 등록 해제 완료");
     }
+    public void OnAllPlayersReadyFromServer()
+    {
+        Debug.Log("💥 [GameManager2] 모든 플레이어 준비됨 → 전투 씬으로 전환");
+        StartCoroutine(GoToBattleSceneAndPrepare());
+    }
+
+    public IEnumerator GoToBattleSceneAndPrepare()
+    {
+        SendInitMessages();
+
+        yield return new WaitForSeconds(1f); // 최소 1초 이상 기다리기
+        DeactivateAllMyUnits();
+
+        SceneManager.LoadScene("4-BattleScene");
+
+        yield return null;
+
+        StartBattle();
+        LockAllUnitsMovement();
+        Debug.Log($"🧾 InitMessage 저장 개수: {GetInitMessages().Count}");
+    }
+
     public void NotifyBattleSceneReady()
     {
         isSceneReady = true;
+    }
+    public List<Entity> GetBattleEntities()
+    {
+        return new List<Entity>(battleEntities);
     }
 
     public bool IsSceneReady()
     {
         return isSceneReady;
+    }
+    public void NextRound()
+    {
+        CurrentRound++;
     }
 }
 

@@ -39,6 +39,7 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
             damageRoutine = StartCoroutine(ApplyDamageEndOfFrame());
     }
 
+
     public bool IsAlive() => currentHP > 0f;
     public void RequestDamage(float dmg) => pendingDamage += dmg;
 
@@ -59,9 +60,13 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
     public void ApplyImmediateDamage()
     {
         if (pendingDamage <= 0f) return;
+
         OnTakeDamageEffect?.Invoke(transform);
         currentHP -= pendingDamage;
         pendingDamage = 0f;
+
+        Debug.Log($"🩸 [HealthComponent] {gameObject.name} 현재 HP: {currentHP}");
+
         OnHealthChanged?.Invoke(currentHP, maxHP);
     }
     public void ApplyPendingDamage()

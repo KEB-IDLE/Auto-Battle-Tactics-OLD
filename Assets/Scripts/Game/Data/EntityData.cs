@@ -20,8 +20,8 @@ public class EntityData : ScriptableObject
     public float moveSpeed;
     [Tooltip("Entity scale")]
     public EntityScale entityScale;
-    [Tooltip("gold")]
-    public float gold_;
+    [Tooltip("Cost")]
+    public int gold;
 
     [Header("Unit Type")]
     public string unitType;
@@ -46,8 +46,9 @@ public class EntityData : ScriptableObject
     [Tooltip("Attack type (Melee, Ranged, Magic)")]
     public AttackType attackType;
 
-    [Header("Entity Prefab")]
-    public GameObject entityPrefab;
+    [Header("Entity Prefabs (By Team)")]
+    public GameObject redPrefab;
+    public GameObject bluePrefab;
 
     [Header("Magic")] // ¸¶¹ý»çÀÇ ¸¶¹ý ÇÇÇØ ¹üÀ§
     public float magicRadius;

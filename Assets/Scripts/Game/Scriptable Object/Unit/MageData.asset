@@ -19,7 +19,7 @@ MonoBehaviour:
   attackImpactRatio: 0.5
   moveSpeed: 5
   entityScale: 0
-  gold_: 0
+  gold: 10
   unitType: Mage
   layer: 14
   detectionRadius: 50
@@ -27,10 +27,12 @@ MonoBehaviour:
   disengageRange: 50
   attackPriority: 0
   attackType: 2
-  entityPrefab: {fileID: 3876098750152481945, guid: 7f9b069a340cf9c429780e018ce46296, type: 3}
+  redPrefab: {fileID: 3760281847762428348, guid: 55e13ddd82ca1894faa4e652df5ff335, type: 3}
+  bluePrefab: {fileID: 3876098750152481945, guid: 7f9b069a340cf9c429780e018ce46296, type: 3}
   magicRadius: 10
   projectilePrefab: {fileID: 0}
   projectilePoolName: 
+  projectileData: {fileID: 0}
   summonEffectPrefab: {fileID: 0}
   attackEffectPrefab: {fileID: 146768, guid: c1f7cd26d86e36c44921a1c45d23513b, type: 3}
   takeDamageEffectPrefeb: {fileID: 0}
