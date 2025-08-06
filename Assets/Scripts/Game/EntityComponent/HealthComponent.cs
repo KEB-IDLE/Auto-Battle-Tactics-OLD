@@ -5,8 +5,10 @@ using UnityEngine.SocialPlatforms;
 
 public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
 {
-    [HideInInspector] public float currentHP;
-    [HideInInspector] public float maxHP;
+    [HideInInspector] public float logical_maxHP;
+    [HideInInspector] public float logical_currentHP;
+    [HideInInspector] public float display_maxHP;
+    [HideInInspector] public float display_currentHP;
     [HideInInspector] public float pendingDamage = 0f;
     private bool isTargetable;
     private float deathAnimDuration;
@@ -22,8 +24,10 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
 
     public void Initialize(EntityData data)
     {
-        maxHP = data.maxHP;
-        currentHP = data.maxHP;
+        logical_maxHP = data.maxHP;
+        display_maxHP = data.maxHP;
+        logical_currentHP = data.maxHP;
+        display_currentHP = data.maxHP;
         deathAnimDuration = (data.deathClip != null) ? data.deathClip.length : 0f;
         isTargetable = true;
         if (damageRoutine == null)
@@ -32,16 +36,14 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
 
     public void Initialize(float hp)
     {
-        maxHP = hp;
-        currentHP = hp;
+        logical_maxHP = hp;
+        display_maxHP = hp;
+        logical_currentHP = hp;
+        display_currentHP = hp;
         isTargetable = true;
         if (damageRoutine == null)
             damageRoutine = StartCoroutine(ApplyDamageEndOfFrame());
     }
-
-
-    public bool IsAlive() => currentHP > 0f;
-    public void RequestDamage(float dmg) => pendingDamage += dmg;
 
 
     private IEnumerator ApplyDamageEndOfFrame()
@@ -49,11 +51,12 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
         while (true)
         {
             yield return new WaitForEndOfFrame();
-            if (!IsAlive())
-            {
-                StartCoroutine(DeathRoutine());
-                break;
-            }
+            ApplyPendingDamage();
+            //if (!IsAlive())
+            //{
+            //    StartCoroutine(DeathRoutine());
+            //    break;
+            //}
         }
     }
 
@@ -62,37 +65,37 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
         if (pendingDamage <= 0f) return;
 
         OnTakeDamageEffect?.Invoke(transform);
-        currentHP -= pendingDamage;
-        pendingDamage = 0f;
-
-        Debug.Log($"🩸 [HealthComponent] {gameObject.name} 현재 HP: {currentHP}");
-
-        OnHealthChanged?.Invoke(currentHP, maxHP);
+        display_currentHP -= pendingDamage;
+        OnHealthChanged?.Invoke(display_currentHP, display_maxHP);
     }
+
     public void ApplyPendingDamage()
     {
         if (pendingDamage > 0f && this.IsAlive())
         {
-            OnTakeDamageEffect?.Invoke(this.transform);
-            currentHP -= pendingDamage;
+            logical_currentHP -= pendingDamage;
             pendingDamage = 0f;
-            OnHealthChanged?.Invoke(currentHP, maxHP);
+            if(!IsAlive())
+                StartCoroutine(DeathRoutine());
         }
     }
-    private IEnumerator DeathRoutine()
+    public IEnumerator DeathRoutine()
     {
         isTargetable = false;
         var coll = GetComponent<Collider>();
         if (coll != null) coll.enabled = false;
 
-        OnDeath?.Invoke(); // 죽음 이밴트 알림
+        Debug.Log("Ondeath");
+        OnDeath?.Invoke();
+        Debug.Log("Ondeath Event is Called");
         OnDeathEffect?.Invoke(this.transform);
-        yield return new WaitForSeconds(deathAnimDuration);
-
+        
         var entity = GetComponent<Entity>();
         if(entity != null)
         {
+            yield return new WaitForSeconds(deathAnimDuration);
             entity.UnbindEvent();
+            gameObject.SetActive(false);
             Destroy(gameObject);
         }
         else
@@ -101,13 +104,16 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
             if (core != null)
             {
                 core.UnBindEvent();
+                gameObject.SetActive(false);
                 Destroy(gameObject);
             }
         }
        
     }
+    public bool IsAlive() => logical_currentHP > 0f;
+    public void RequestDamage(float dmg) => pendingDamage += dmg;
     public bool IsTargetable() => isTargetable;
-    public float CurrentHp => currentHP;
-    public float MaxHp => maxHP;
+    public float CurrentHp => logical_currentHP;
+    public float MaxHp => logical_maxHP;
 }
 

@@ -35,15 +35,15 @@ public class Core : MonoBehaviour
         _healthBar.Initialize(_health);
         BindEvent();
 
-        var fill = transform.Find("HealthBarCanvas/HealthBarBG/HealthBarFill");
-        if (fill != null)
-            healthBar = fill.GetComponent<HealthBar>();
+        //var fill = transform.Find("HealthBarCanvas/HealthBarBG/HealthBarFill");
+        //if (fill != null)
+        //    healthBar = fill.GetComponent<HealthBar>();
 
-        if (healthBar != null)
-        {
-            healthBar.Initialize(_health);
-            _health.OnHealthChanged += (cur, max) => healthBar.UpdateBar(cur, max);
-        }
+        //if (healthBar != null)
+        //{
+        //    healthBar.Initialize(_health);
+        //    _health.OnHealthChanged += (cur, max) => healthBar.UpdateBar(cur, max);
+        //}
     }
 
     public void SetData(ObjectData data) => objectData = data;

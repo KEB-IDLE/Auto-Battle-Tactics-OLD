@@ -7,10 +7,10 @@ using System.Runtime.CompilerServices;
 public class Projectile : MonoBehaviour
 {
     private Rigidbody _rb;
-    private string poolName; // � Ǯ�� ���� ������Ʈ����
+    private string poolName;
     private GameObject flightEffect;
 
-    [Header("Projectile Scriptable Object�� �Ҵ��ϼ���.")]
+    [Header("Projectile Scriptable Object.")]
     [SerializeField] private ProjectileData data;
 
     private Team team;
@@ -28,7 +28,6 @@ public class Projectile : MonoBehaviour
         _rb.useGravity = true;
     }
 
-    // ObjectPoolManager�� ���� �ʱ�ȭ
     public void Initialize(Entity owner, float damage, float coreDamage, Transform targetEntity, Transform hitPoint, string poolName, float disengageRange)
     {
         this.damage = damage;
@@ -50,7 +49,7 @@ public class Projectile : MonoBehaviour
         {
             float distance = Vector3.Distance(transform.position, this.targetEntity.position);
 
-            // ����ġ(Weight)�� ���� �ڵ� ����
+
             float autoSpeed = Mathf.Max(distance * data.speedWeight, 10f);
             float autoVerticalSpeed = Math.Max(distance * data.verticalSpeedWeight, 4f);
 
@@ -154,14 +153,12 @@ public class Projectile : MonoBehaviour
                 }
                 ReturnFlightEffect();
                 ReturnToPool();
-            return;
+                return;
+            }
         }
     }
-}
 
-    /// <summary>
-    /// Ǯ �̸��� ���� ��������
-    /// </summary>
+
     public void SetPoolName(string poolName) => this.poolName = poolName;
 
     private void ReturnToPool()
