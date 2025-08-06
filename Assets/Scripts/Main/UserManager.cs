@@ -2,6 +2,9 @@ using System;
 using System.Collections;
 using UnityEngine;
 
+/// <summary>
+/// UserManager는 유저 관련 서버 API 호출만 담당하는 싱글턴입니다.
+/// </summary>
 public class UserManager : MonoBehaviour
 {
     public static UserManager Instance { get; private set; }
@@ -24,40 +27,10 @@ public class UserManager : MonoBehaviour
 
     // ===================== 프로필 캐릭터 관련 =====================
 
-    // 메인캐릭터 스폰 로직
-    public IEnumerator SpawnCharacter(int charId)
-    {
-        int prefabIndex = charId - 1;
 
-        if (prefabIndex < 0 || prefabIndex >= characterPrefabs.Length)
-        {
-            Debug.LogWarning("Invalid character ID: " + charId);
-            yield break;
-        }
-
-        if (currentCharacterInstance != null)
-            Destroy(currentCharacterInstance);
-
-        GameObject prefab = characterPrefabs[prefabIndex];
-        currentCharacterInstance = Instantiate(prefab, Vector3.zero, Quaternion.identity);
-
-        yield return null;  // 코루틴 형식 유지
-    }
-
-    // 캐릭터 변경 및 UI 갱신
-    public IEnumerator SetProfileCharacterAndSpawn(int charId, Action onComplete = null)
-    {
-        yield return SetProfileCharacter(
-            charId,
-            profile => { SessionManager.Instance.profile = profile; },
-            err => Debug.LogWarning("Main champion update failed: " + err)
-        );
-
-        yield return SpawnCharacter(charId);
-
-        onComplete?.Invoke();
-    }
-
+    /// <summary>
+    /// 메인 프로필 캐릭터를 서버에 저장하는 요청
+    /// </summary>
     public IEnumerator SetProfileCharacter(int charId, Action<UserProfile> onSuccess, Action<string> onError)
     {
         var req = new ProfileCharacterUpdateRequest { profile_char_id = charId };

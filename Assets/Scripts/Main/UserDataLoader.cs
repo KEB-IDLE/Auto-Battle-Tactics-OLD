@@ -3,8 +3,6 @@ using UnityEngine;
 
 public class UserDataLoader : MonoBehaviour
 {
-    public UIManager uiManager;
-
     public IEnumerator LoadAllUserDataCoroutine()
     {
         yield return LoadProfile();
@@ -12,16 +10,17 @@ public class UserDataLoader : MonoBehaviour
         yield return LoadRecord();
         //yield return LoadMatchHistory();
 
-        if (uiManager != null)
+        if (UIManager.Instance != null)
         {
-            uiManager.UpdateProfileUI();    // 싱글턴 사용하기
-            uiManager.UpdateRecordUI();
+            UIManager.Instance.UpdateProfile();
 
-            uiManager.InitializeIconSelection();
+            UIManager.Instance.UpdateRecordUI();
 
-            uiManager.GetGlobalRanking();
+            UIManager.Instance.HighlightSelectedIcon(SessionManager.Instance.profile.profile_icon_id);
 
-            StartCoroutine(UserManager.Instance.SpawnCharacter(SessionManager.Instance.profile.profile_char_id));   // usermanager 사용 x 수정하기
+            UIManager.Instance.GetGlobalRanking();
+
+            UIManager.Instance.SetProfileCharacter(SessionManager.Instance.profile.profile_char_id);
         }
     }
 
