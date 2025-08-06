@@ -46,8 +46,8 @@ public class MatchManager : MonoBehaviour
                 onMatched: (opponentId, roomId, startAt) =>
                 {
                     Debug.Log($"매칭 성공! 상대: {opponentId}, room: {roomId}, start_at: {startAt}");
-                    GameManager.Instance.opponentId = opponentId;
-                    GameManager.Instance.roomId = roomId;
+                    SessionManager.Instance.opponentId = opponentId;
+                    SessionManager.Instance.roomId = roomId;
 
                     StartCoroutine(OnMatchSuccess(startAt));  // 매칭 성공 처리 & 동시 시작 대기
                     elapsed = timeout;  // 폴링 종료

@@ -7,9 +7,7 @@ using UnityEngine;
 
 public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
 {
-    // Ony for Gizmo test
-    private EntityData _entityData; // EntityData를 통해 초기화할 수 있도록
-    
+    private EntityData _entityData; 
     private float attackDamage;
     private float attackCoreDamage;
     private float attackImpactRatio;
@@ -19,7 +17,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
     private float attackRange;
     private float disengageRange;
     private float magicRadius;
-    public Transform firePoint;
+    [HideInInspector] public Transform firePoint;
 
     private string projectilePoolName;
     private IDamageable lockedTarget;
@@ -27,14 +25,12 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
     private ITeamProvider teamProvider;
     private AttackType attackType;
     private IOrientable _orientable;
-    private LayerMask allUnitMask;
-    private LayerMask towerOnlyMask;
-    private LayerMask coreOnlyMask;
     private LayerMask targetLayer;
 
     private Coroutine attackCoroutine;
     private bool isAttackingFlag;
     private bool isDead;
+    private bool isGameEnded = false;
 
 #pragma warning disable 67
     public event Action<bool> OnAttackStateChanged;
@@ -54,7 +50,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         var health = GetComponent<HealthComponent>();
         if (health != null)
             health.OnDeath += OnOwnerDeath;
-    
+
     }
 
     public void Initialize(EntityData data)
@@ -63,7 +59,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         _entityData = data;
         attackDamage = data.attackDamage;
         attackCoreDamage = data.attackCoreDamage;
-        if(data.attackClip !=  null)
+        if (data.attackClip != null)
             attackAnimLength = data.attackClip.length;
         attackCooldown = attackAnimLength;
         attackImpactRatio = data.attackImpactRatio;
@@ -77,43 +73,31 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         firePoint = transform.Find("FirePoint");
         projectilePoolName = data.projectilePoolName;
 
-        allUnitMask = LayerMask.GetMask("Agent", "Tower", "Core");
-        towerOnlyMask = LayerMask.GetMask("Tower", "Core");
-        coreOnlyMask = LayerMask.GetMask("Core");
 
+        targetLayer = LayerMask.GetMask("Agent", "Tower", "Core");
         switch (data.attackPriority)
         {
-            case EntityData.AttackPriority.AllUnits:
-                targetLayer = allUnitMask;
-                break;
             case EntityData.AttackPriority.TowersOnly:
-                targetLayer = towerOnlyMask;
+                targetLayer = LayerMask.GetMask("Tower", "Core");
                 break;
             case EntityData.AttackPriority.CoreOnly:
-                targetLayer = coreOnlyMask;
+                targetLayer = LayerMask.GetMask("Core");
                 break;
+            default: break;
         }
     }
 
     void Update()
     {
-        if (attackCoroutine != null || isDead) return;
+        if (attackCoroutine != null || isDead || isGameEnded) return;
 
         var newTarget = DetectTarget();
         if (newTarget != null)
         {
-            bool visible = true;
-            switch (attackType)
-            {
-                case AttackType.Melee:
-                case AttackType.Ranged:
-                    if (firePoint != null)
-                        visible = IsTargetVisible(firePoint, (newTarget as MonoBehaviour).transform);
-                    break;
-                case AttackType.Magic:
-                    visible = true; // 무조건 true
-                    break;
-            }
+            var mono = newTarget as MonoBehaviour;
+            bool visible = (attackType == AttackType.Magic || attackType == AttackType.Melee) ? true :
+                (firePoint != null && mono != null && IsTargetVisible(firePoint, (mono.transform)));
+
             if (visible)
                 lockedTarget = newTarget;
             else
@@ -122,6 +106,18 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         if (lockedTarget != null && CanAttack(lockedTarget))
             attackCoroutine = StartCoroutine(AttackRoutine(lockedTarget));
 
+    }
+
+    public void StopAllAction()
+    {
+        isGameEnded = true;
+        if (attackCoroutine != null)
+        {
+            StopCoroutine(attackCoroutine);
+            attackCoroutine = null;
+        }
+        isAttackingFlag = false;
+        isDead = true;
     }
 
     public IDamageable DetectTarget()
@@ -136,10 +132,11 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
 
         foreach (var col in hits)
         {
-            if (col.gameObject == gameObject) continue;
+            if (col.gameObject == this.gameObject) continue;
 
             var dmg = col.GetComponent<IDamageable>();
             if (dmg == null || !dmg.IsAlive()) continue;
+            if (dmg is HealthComponent hc && !hc.IsTargetable()) continue;
 
             var provider = col.GetComponent<ITeamProvider>();
             if (provider == null || provider.Team == teamProvider.Team)
@@ -156,9 +153,11 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
     }
     private bool CanAttack(IDamageable target)
     {
+        var mono = target as MonoBehaviour;
+        if (mono == null) return false;
         float distance = Vector3.Distance(
             transform.position,
-            (target as MonoBehaviour).transform.position);
+            mono.transform.position);
         return distance <= attackRange;
     }
     private void TryAttack(IDamageable target)
@@ -180,16 +179,20 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
                 break;
         }
     }
+
     private IEnumerator AttackRoutine(IDamageable target)
     {
         isAttackingFlag = true;
         OnAttackStateChanged?.Invoke(true);
         float impactDelay = attackAnimLength * attackImpactRatio;
         var myHealth = GetComponent<HealthComponent>();
+        var targetMono = target as MonoBehaviour;
 
         while (myHealth != null &&
                    myHealth.IsAlive() &&
+                   target != null &&
                    target.IsAlive() &&
+                   targetMono != null &&
                    Vector3.Distance(transform.position,
                        (target as MonoBehaviour).transform.position) <= attackRange)
         {
@@ -199,9 +202,9 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
             yield return new WaitForSeconds(attackCooldown - impactDelay);
         }
 
-        if (!target.IsAlive() ||
+        if (!target.IsAlive() || target == null || targetMono == null ||
             Vector3.Distance(transform.position,
-                (target as MonoBehaviour).transform.position) > disengageRange)
+                targetMono.transform.position) > disengageRange)
         {
             lockedTarget = null;
         }
@@ -217,9 +220,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         lockedTarget = target;
         if (lockedTarget == null || !lockedTarget.IsAlive())
             return;
-
         OnAttackEffect?.Invoke(transform);
-
         var coreComp = (lockedTarget as MonoBehaviour).GetComponent<Core>();
         target.RequestDamage(coreComp != null ? attackCoreDamage : attackDamage);
         (target as HealthComponent)?.ApplyImmediateDamage();
@@ -246,13 +247,22 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
 
         projectile.SetPoolName(projectilePoolName);
 
+        Transform targetHitPoint = null;
+        var mb = (target as MonoBehaviour);
+        if (mb != null)
+            targetHitPoint = mb.transform.Find("HitPoint");
+        if (targetHitPoint == null)
+            targetHitPoint = mb?.transform;
+
+
         projectile.Initialize(
             owner: this.GetComponent<Entity>(),
             damage: attackDamage,
             coreDamage: attackCoreDamage,
-            target: (target as MonoBehaviour).transform,
+            targetEntity: (target as MonoBehaviour).transform,
+            hitPoint: targetHitPoint,
             poolName: projectilePoolName,
-            disengageRange : disengageRange
+            disengageRange: disengageRange
         );
 
         if (OnAttackEffect == null)
@@ -272,10 +282,18 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
 
         foreach (var col in hits)
         {
+            // ✅ 자기 자신 제외
+            if (col.gameObject == this.gameObject)
+                continue;
+            // ✅ 아군 제외
+            var provider = col.GetComponent<ITeamProvider>();
+            if (provider != null && provider.Team == teamProvider.Team)
+                continue;
+
             var dmg = col.GetComponent<IDamageable>();
-            var coreComp = col.GetComponent<Core>();
+            var core = col.GetComponent<Core>();
             if (dmg != null && dmg.IsAlive())
-                dmg.RequestDamage(coreComp != null ? attackCoreDamage : attackDamage);
+                dmg.RequestDamage(core != null ? attackCoreDamage : attackDamage);
             (dmg as HealthComponent)?.ApplyImmediateDamage();
         }
     }
@@ -295,10 +313,8 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         return false;
     }
 
-    public bool IsAttacking()
-    {
-        return isAttackingFlag;
-    }
+    public bool IsAttacking() => isAttackingFlag;
+
 
     private void OnOwnerDeath()
     {
@@ -319,6 +335,8 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
     public bool isMagic => attackType == AttackType.Magic;
 
 #if UNITY_EDITOR
+    // Ony for Gizmo test
+
     private void OnDrawGizmosSelected()
     {
         if (_entityData == null) return;

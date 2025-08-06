@@ -3212,10 +3212,10 @@ MonoBehaviour:
   registerPanel: {fileID: 1032548103}
   registerEmailInput: {fileID: 1878477100}
   registerPasswordInput: {fileID: 369111319}
+  registerNicknameInput: {fileID: 1122252500}
   registerSubmitButton: {fileID: 812081961}
   registerCancelButton: {fileID: 1051792902}
   registerStatusText: {fileID: 823484150}
-  registerNicknameInput: {fileID: 1122252500}
 --- !u!1 &812081959
 GameObject:
   m_ObjectHideFlags: 0
@@ -7379,7 +7379,7 @@ GameObject:
   - component: {fileID: 1796823180}
   - component: {fileID: 1796823179}
   m_Layer: 0
-  m_Name: GameManager
+  m_Name: SessionManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8723,8 +8723,8 @@ SceneRoots:
   - {fileID: 330585546}
   - {fileID: 410087041}
   - {fileID: 832575519}
+  - {fileID: 605628853}
   - {fileID: 1796823180}
   - {fileID: 792751459}
-  - {fileID: 605628853}
   - {fileID: 468541730}
   - {fileID: 1278886872}

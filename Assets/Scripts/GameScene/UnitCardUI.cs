@@ -7,6 +7,10 @@ using TMPro;
 public class UnitCardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
     public string unitType;
+
+    [Header("프리팹 설정")]
+    public GameObject bluePrefab;
+    public GameObject redPrefab;
     private GameObject dragIcon;
     private RectTransform canvasTransform;
 
@@ -61,14 +65,24 @@ public class UnitCardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDr
             Debug.LogWarning("❌ 배치 시간이 끝났습니다. 유닛을 소환할 수 없습니다.");
             return;
         }
+        // entityData 가져오기
+        EntityData entityData = UnitManager.Instance.GetEntityData(unitType);
+        if (entityData == null)
+        {
+            Debug.LogError($"❌ EntityData 없음 또는 프리팹 누락. unitType: {unitType}");
+            return;
+        }
+
+        // 💰 골드 체크
+        if (!GoldManager.Instance.TrySpendGold((int)entityData.gold))
+        {
+            Debug.LogWarning($"❌ 골드 부족! 필요: {entityData.gold}");
+            return;
+        }
 
         if (TryGetWorldPosition(eventData, out Vector3 worldPos))
         {
             UnitManager.Instance.SpawnUnits(unitType, worldPos, UserNetwork.Instance.MyId);
-        }
-        else
-        {
-            Debug.LogWarning("❌ 드래그한 위치가 유효하지 않음 (Raycast 실패)");
         }
     }
 

@@ -15,7 +15,7 @@ public class MatchService : MonoBehaviour
     // 매칭 큐에 유저 등록
     public IEnumerator JoinMatchQueue(Action onSuccess, Action<string> onError)
     {
-        var userId = GameManager.Instance.profile.user_id;
+        var userId = SessionManager.Instance.profile.user_id;
         var req = new MatchRequest { userId = userId };
 
         yield return APIService.Instance.Post<MatchRequest, MatchJoinResponse>(
@@ -40,7 +40,7 @@ public class MatchService : MonoBehaviour
         Action onNotMatched,
         Action<string> onError)
     {
-        int userId = GameManager.Instance.profile.user_id;
+        int userId = SessionManager.Instance.profile.user_id;
         string url = APIEndpoints.MatchStatus + "?userId=" + userId;
 
         yield return APIService.Instance.Get<MatchStatusResponse>(
@@ -83,7 +83,7 @@ public class MatchService : MonoBehaviour
 
     public IEnumerator NotifyGameEnd(Action onSuccess, Action<string> onError)
     {
-        var userId = GameManager.Instance.profile.user_id;
+        var userId = SessionManager.Instance.profile.user_id;
         var req = new MatchRequest { userId = userId };
 
         yield return APIService.Instance.Post<MatchRequest, BasicResponse>(

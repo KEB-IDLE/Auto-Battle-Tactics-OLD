@@ -57,13 +57,42 @@ public class ProjectilePool : MonoBehaviour, IObjectPool
 #endif
     void Awake()
     {
+        if (projectilePrefab != null)
+        {
+            for (int i = 0; i < poolSize; i++)
+            {
+                var obj = Instantiate(projectilePrefab, transform);
+                obj.gameObject.SetActive(false);
+                pool.Enqueue(obj.gameObject);
+            }
+        }
+    }
 
+    /// <summary>
+    /// 런타임에 ProjectilePool을 초기화합니다.
+    /// </summary>
+    public void Initialize(string poolName, GameObject projectilePrefab, int poolSize)
+    {
+        this.poolName = poolName;
+        this.projectilePrefab = projectilePrefab.GetComponent<Projectile>();
+        this.poolSize = poolSize;
+
+        // 기존 오브젝트들 정리
+        for (int i = transform.childCount - 1; i >= 0; i--)
+        {
+            DestroyImmediate(transform.GetChild(i).gameObject);
+        }
+        pool.Clear();
+
+        // 새로운 풀 생성
         for (int i = 0; i < poolSize; i++)
         {
             var obj = Instantiate(projectilePrefab, transform);
-            obj.gameObject.SetActive(false);
-            pool.Enqueue(obj.gameObject);
+            obj.SetActive(false);
+            pool.Enqueue(obj);
         }
+
+        Debug.Log($"🚀 ProjectilePool '{poolName}' initialized with {poolSize} objects");
     }
 
     public GameObject Get(Vector3 pos, Quaternion rot)
@@ -73,7 +102,7 @@ public class ProjectilePool : MonoBehaviour, IObjectPool
         obj.transform.rotation = rot;
         obj.SetActive(true);
 
-        // Projectile ���� �ʱ�ȭ �ʿ�� ���⿡!
+        // Projectile ���� �ʱ�ȭ �ʿ�� ���⿡!
 
         return obj;
     }

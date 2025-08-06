@@ -4,7 +4,7 @@ public class CoreRegistry : MonoBehaviour
 {
     public static CoreRegistry Instance { get; private set; }
 
-    [Header("������ �巡��: RedCore, BlueCore")]
+    [Header("Core Transform : RedCore, BlueCore")]
     [SerializeField] private Transform redCoreTransform;
     [SerializeField] private Transform blueCoreTransform;
 
@@ -13,7 +13,6 @@ public class CoreRegistry : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            // (�ʿ��ϴٸ�) DontDestroyOnLoad(gameObject);
         }
         else Destroy(gameObject);
     }
@@ -29,11 +28,9 @@ public class CoreRegistry : MonoBehaviour
     }
 
 
-    /// <summary>���� ���� �ھ� Transform</summary>
     public Transform GetCore(Team team)
         => team == Team.Red ? redCoreTransform : blueCoreTransform;
 
-    /// <summary>�� ���� �ѱ�� ���� �ھ� ��ȯ</summary>
     public Transform GetEnemyCore(Team myTeam)
         => GetCore(myTeam == Team.Red ? Team.Blue : Team.Red);
 }
