@@ -284,13 +284,13 @@ public class UIManager : MonoBehaviour
 
         // 랭크 전적 텍스트
         if (rankMatchText != null)
-            rankMatchText.text = $"Matches: {record.rank_match_count}";
+            rankMatchText.text = $"{record.rank_match_count}";
         if (rankWinsText != null)
-            rankWinsText.text = $"Wins: {record.rank_wins}";
+            rankWinsText.text = $"{record.rank_wins}";
         if (rankPointText != null)
-            rankPointText.text = $"Points: {record.rank_point}";
+            rankPointText.text = $"{record.rank_point}";
         if (globalRankText != null)
-            globalRankText.text = $"Global Rank: {record.global_rank}";
+            globalRankText.text = $"{record.global_rank}";
 
         // 닉네임 텍스트 업데이트
         if (rankNicknameText != null)
