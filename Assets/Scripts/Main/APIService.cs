@@ -117,7 +117,7 @@ public class APIService : MonoBehaviour
 
     private void SetAuthHeader(UnityWebRequest req)
     {
-        string token = GameManager.Instance.accessToken;
+        string token = SessionManager.Instance.accessToken;
         if (!string.IsNullOrEmpty(token))
         {
             req.SetRequestHeader("Authorization", $"Bearer {token}");

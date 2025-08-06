@@ -19,12 +19,6 @@ public class LoginManager : MonoBehaviour
     public TMP_Text registerStatusText;
     public TMP_InputField registerNicknameInput;
 
-
-    void Start()
-    {
-
-    }
-
     public void OnLoginClicked()
     {
         string email = emailInput.text;
@@ -45,7 +39,7 @@ public class LoginManager : MonoBehaviour
             {
                 if (!string.IsNullOrEmpty(res.token))
                 {
-                    GameManager.Instance.accessToken = res.token;
+                    SessionManager.Instance.accessToken = res.token;
                     statusText.text = "Login Success!";
                     SceneManager.LoadScene("1-MainScene");
                 }

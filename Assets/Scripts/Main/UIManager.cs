@@ -1,9 +1,6 @@
 using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using System.Collections;
-using System.Linq;
 
 public class UIManager : MonoBehaviour
 {
@@ -34,9 +31,6 @@ public class UIManager : MonoBehaviour
     public TMP_Text[] rankNameTexts;     // 닉네임 텍스트
     public TMP_Text[] rankPointTexts;    // 점수 텍스트
 
-
-
-
     public static UIManager Instance;
 
     private void Awake()
@@ -58,7 +52,7 @@ public class UIManager : MonoBehaviour
     // 프로필 UI 갱신
     public void UpdateProfileUI()
     {
-        var profile = GameManager.Instance.profile;
+        var profile = SessionManager.Instance.profile;
 
         if (nicknameText != null) nicknameText.text = profile.nickname;
         if (levelText != null) levelText.text = $"Lv {profile.level}";
@@ -106,7 +100,7 @@ public class UIManager : MonoBehaviour
     // 프로필 아이콘 시각화
     public void RefreshIconButtonVisuals()
     {
-        var ownedIcons = GameManager.Instance.ownedProfileIcons;
+        var ownedIcons = SessionManager.Instance.ownedProfileIcons;
         for (int i = 0; i < profileIcons.Length; i++)
         {
             int iconId = i + 1;
@@ -118,14 +112,14 @@ public class UIManager : MonoBehaviour
     // 초기 아이콘 선택 반영 (UserDataLoader에서 LoadProfile 후 수동 호출)
     public void InitializeIconSelection()
     {
-        int iconIndex = GameManager.Instance.profile.profile_icon_id - 1;
+        int iconIndex = SessionManager.Instance.profile.profile_icon_id - 1;
         HighlightSelectedIcon(iconIndex);
     }
 
     // 메인캐릭터 선택 버튼
     public void ChangeProfileCharacter(int charId)
     {
-        StartCoroutine(UserManager.Instance.ChangeProfileCharacterCoroutine(
+        StartCoroutine(UserManager.Instance.SetProfileCharacterAndSpawn(
             charId,
             onComplete: UpdateProfileUI
         ));
@@ -134,7 +128,7 @@ public class UIManager : MonoBehaviour
     // 아이콘 버튼 클릭시
     public void OnClickIcon(int iconId)
     {
-        var ownedIcons = GameManager.Instance.ownedProfileIcons;
+        var ownedIcons = SessionManager.Instance.ownedProfileIcons;
 
         if (ownedIcons.Contains(iconId))
             ChangeProfileIcon(iconId);
@@ -145,17 +139,17 @@ public class UIManager : MonoBehaviour
     // 아이콘 구매 요청
     public void PurchaseProfileIcon(int iconId)
     {
-        StartCoroutine(UserService.Instance.PurchaseProfileIcon(
+        StartCoroutine(UserManager.Instance.PurchaseIcon(
             iconId,
             res =>
             {
                 if (res.success)
                 {
                     Debug.Log($"Icon {iconId} purchased successfully.");
-                    GameManager.Instance.profile.gold = res.gold;
+                    SessionManager.Instance.profile.gold = res.gold;
 
-                    if (!GameManager.Instance.ownedProfileIcons.Contains(iconId))
-                        GameManager.Instance.ownedProfileIcons.Add(iconId);
+                    if (!SessionManager.Instance.ownedProfileIcons.Contains(iconId))
+                        SessionManager.Instance.ownedProfileIcons.Add(iconId);
 
                     UpdateProfileUI();
                 }
@@ -171,11 +165,11 @@ public class UIManager : MonoBehaviour
     // 프로필 아이콘 변경
     public void ChangeProfileIcon(int iconId)
     {
-        StartCoroutine(UserService.Instance.ChangeProfileIcon(
+        StartCoroutine(UserManager.Instance.SetProfileIcon(
             iconId,
             profile =>
             {
-                GameManager.Instance.profile = profile;
+                SessionManager.Instance.profile = profile;
                 UpdateProfileUI();
                 GetGlobalRanking();
             },
@@ -184,14 +178,10 @@ public class UIManager : MonoBehaviour
     }
 
 
-
-
-
-
     // 레벨 변경
     public void ChangeLevel(int deltaLevel)
     {
-        StartCoroutine(UserManager.Instance.ChangeLevelCoroutine(
+        StartCoroutine(UserManager.Instance.AddLevel(
             deltaLevel,
             onComplete: UpdateProfileUI
         ));
@@ -200,7 +190,7 @@ public class UIManager : MonoBehaviour
     // 경험치 변경
     public void ChangeExp(int deltaExp)
     {
-        StartCoroutine(UserManager.Instance.ChangeExpCoroutine(
+        StartCoroutine(UserManager.Instance.AddExp(
             deltaExp,
             onComplete: UpdateProfileUI
         ));
@@ -209,7 +199,7 @@ public class UIManager : MonoBehaviour
     // 골드 변경
     public void ChangeGold(int deltaGold)
     {
-        StartCoroutine(UserManager.Instance.ChangeGoldCoroutine(
+        StartCoroutine(UserManager.Instance.AddGold(
             deltaGold,
             onComplete: UpdateProfileUI
         ));
@@ -221,7 +211,7 @@ public class UIManager : MonoBehaviour
     // 랭크 전적 변경 버튼
     public void UpdateUserRecord(int deltaMatch, int deltaWins, int deltaLosses, int deltaPoint)
     {
-        var record = GameManager.Instance.record;
+        var record = SessionManager.Instance.record;
 
         var req = new UserRecordUpdateRequest
         {
@@ -231,11 +221,11 @@ public class UIManager : MonoBehaviour
             rank_point = record.rank_point + deltaPoint
         };
 
-        StartCoroutine(UserService.Instance.UpdateUserRecord(
+        StartCoroutine(UserManager.Instance.UpdateRecord(
             req,
             updated =>
             {
-                GameManager.Instance.record = updated;
+                SessionManager.Instance.record = updated;
                 UpdateRecordUI();
                 GetGlobalRanking();
             },
@@ -252,7 +242,7 @@ public class UIManager : MonoBehaviour
     // 글로벌 랭킹 조회 요청
     public void GetGlobalRanking()
     {
-        StartCoroutine(UserService.Instance.GetGlobalRanking(
+        StartCoroutine(UserManager.Instance.GetGlobalRanking(
             entries => UpdateGlobalRankingUI(entries),
             err => Debug.LogError("Ranking API Error: " + err)
         ));
@@ -279,13 +269,11 @@ public class UIManager : MonoBehaviour
         }
     }
 
-
-
     // 랭크 전적 UI 갱신
     public void UpdateRecordUI()
     {
-        var record = GameManager.Instance.record;
-        var profile = GameManager.Instance.profile;
+        var record = SessionManager.Instance.record;
+        var profile = SessionManager.Instance.profile;
 
         // 랭크 전적 텍스트
         if (rankMatchText != null)
