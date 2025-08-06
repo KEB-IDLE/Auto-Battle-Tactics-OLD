@@ -1,20 +1,24 @@
-using UnityEngine;
-using System.Linq;
-using UnityEngine.AI;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+using UnityEngine.AI;
 
 public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
 {
-     private bool _isMine;
+    private bool _isMine;
     public event Action OnMove;
 
     Transform coreTransform;
+    IAttackNotifier _attackNotifier;
     NavMeshAgent _agent;
     IAttackable _attacker;
     IDamageable _health;
     ITeamProvider _teamProvider;
     private float moveSpeed;
     bool _isMoving;
+    private bool _isAttackLock;
+    private bool isGameEnded = false;
 
     private void Awake()
     {
@@ -22,21 +26,21 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
         _attacker = GetComponent<IAttackable>();
         _health = GetComponent<IDamageable>();
         _teamProvider = GetComponent<ITeamProvider>();
+        _attackNotifier = GetComponent<IAttackNotifier>();
     }
 
     private void Start()
     {
         coreTransform = CoreRegistry.Instance.GetEnemyCore(_teamProvider.Team);
+        _attackNotifier.OnAttackStateChanged += OnAttackStateChanged;
     }
 
     void Update()
     {
-        if (_attacker.IsAttacking() || !_health.IsAlive())
+        if ( isGameEnded || _isAttackLock || !_health.IsAlive())
         {
             if (_isMoving)
                 _isMoving = false;
-            _agent.isStopped = true;
-            _agent.ResetPath();
             return;
         }
         if (_agent.isStopped)
@@ -47,9 +51,8 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
         {
             var mb = target as MonoBehaviour;
             _agent.SetDestination(mb.transform.position);
-            LookAtTarget(target);
         }
-        else
+        else if(coreTransform != null) 
             _agent.SetDestination(coreTransform.position);
 
         if (!_isMoving)
@@ -68,13 +71,20 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
         _isMoving = false;
 
     }
+    private void OnAttackStateChanged(bool isAttacking)
+    {
+        _isAttackLock = isAttacking;
+        _agent.isStopped = isAttacking;
+        if (_attacker.IsAttacking())
+            _agent.ResetPath();
+    }
     public void LookAtTarget(IDamageable target)
     {
         var mb = target as MonoBehaviour;
         if (mb != null)
         {
             Vector3 targetPos = mb.transform.position;
-            targetPos.y = transform.position.y; // y 고정(수평 회전)
+            targetPos.y = transform.position.y;
             transform.LookAt(targetPos);
         }
     }
@@ -85,8 +95,6 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
         if (attackComponent == null || target == null)
             return false;
 
-        // 공격 타입별로 가시성 판정 커스텀 가능
-        // 예: 마법사는 무조건 true, 원거리/근접은 Raycast
         if (attackComponent.isMagic)
             return true;
 
@@ -98,9 +106,15 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
 
         return attackComponent.IsTargetVisible(firePoint, targetTransform);
     }
-    public void SetIsMine(bool isMine)
+
+    public void StopAllAction()
     {
-        _isMine = isMine;
+        isGameEnded = true;
+        _agent.isStopped = true;
     }
+
+    public void SetIsMine(bool isMine) => _isMine = isMine;
+
+
 
 }

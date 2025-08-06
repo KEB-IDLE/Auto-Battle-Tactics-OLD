@@ -7,10 +7,10 @@ using System.Runtime.CompilerServices;
 public class Projectile : MonoBehaviour
 {
     private Rigidbody _rb;
-    private string poolName; // ¾î¶² Ç®¿¡ ¼ÓÇÑ ¿ÀºêÁ§Æ®ÀÎÁö
+    private string poolName;
     private GameObject flightEffect;
 
-    [Header("Projectile Scriptable Object¸¦ ÇÒ´çÇÏ¼¼¿ä.")]
+    [Header("Projectile Scriptable Object.")]
     [SerializeField] private ProjectileData data;
 
     private Team team;
@@ -18,9 +18,8 @@ public class Projectile : MonoBehaviour
     private float lifeTime;
     private float damage;
     private float coreDamage;
-    private Transform target;
-    private float speedWeight;
-    private float verticalSpeedWeight;
+    private Transform targetEntity;
+    private Transform hitPoint;
     private float disengageRange = 100f;
 
     private void Awake()
@@ -29,11 +28,11 @@ public class Projectile : MonoBehaviour
         _rb.useGravity = true;
     }
 
-    // ObjectPoolManager¸¦ ÅëÇÑ ÃÊ±âÈ­
-    public void Initialize(Entity owner, float damage, float coreDamage, Transform target, string poolName, float disengageRange)
+    public void Initialize(Entity owner, float damage, float coreDamage, Transform targetEntity, Transform hitPoint, string poolName, float disengageRange)
     {
         this.damage = damage;
-        this.target = target;
+        this.targetEntity = targetEntity;
+        this.hitPoint = hitPoint;
         this.coreDamage = coreDamage;
         this.poolName = poolName;
         this.disengageRange = disengageRange;
@@ -42,19 +41,19 @@ public class Projectile : MonoBehaviour
         _rb.linearVelocity = Vector3.zero;
         _rb.angularVelocity = Vector3.zero;
 
-        
+
         SetTeam(owner);
         AttachFlightEffect();
 
-        if (target != null)
+        if (this.targetEntity != null)
         {
-            float distance = Vector3.Distance(transform.position, target.position);
+            float distance = Vector3.Distance(transform.position, this.targetEntity.position);
 
-            // °¡ÁßÄ¡(Weight)¿¡ µû¶ó ÀÚµ¿ º¸Á¤
-            float autoSpeed = Mathf.Max(distance * data.speedWeight, 4f);
+
+            float autoSpeed = Mathf.Max(distance * data.speedWeight, 10f);
             float autoVerticalSpeed = Math.Max(distance * data.verticalSpeedWeight, 4f);
 
-            Vector3 direction = (target.position - transform.position).normalized;
+            Vector3 direction = (this.targetEntity.position - transform.position).normalized;
             _rb.linearVelocity = direction * autoSpeed + Vector3.up * autoVerticalSpeed;
         }
     }
@@ -65,52 +64,69 @@ public class Projectile : MonoBehaviour
         if (teamComponent != null)
             this.team = teamComponent.Team;
         else
-            Debug.LogWarning("[Projectile] Owner¿¡ TeamComponent°¡ ¾ø½À´Ï´Ù!");
+            Debug.LogWarning("[Projectile] Ownerï¿½ï¿½ TeamComponentï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½!");
     }
 
     private void Update()
     {
         timer += Time.deltaTime;
-        if (target == null || timer > lifeTime)
-        {
-            ReturnFlightEffect();
-            ReturnToPool();
+        if (ShouldReturnToPool())
             return;
-        }
-        float dist = Vector3.Distance(transform.position, target.position);
-        if (dist > disengageRange)
-        {
-            ReturnFlightEffect();
-            ReturnToPool();
-            return;
-        }
+
         Move();
         CheckHit();
+    }
+
+    private bool ShouldReturnToPool()
+    {
+        if (targetEntity == null || timer >= lifeTime)
+            return ReturnProjectile();
+
+        var health = targetEntity.GetComponent<HealthComponent>();
+        if (health != null && !health.IsTargetable())
+            return ReturnProjectile();
+
+        float dist = Vector3.Distance(transform.position, targetEntity.position);
+        if (dist > disengageRange)
+            return ReturnProjectile();
+
+        return false;
+    }
+
+    private bool ReturnProjectile()
+    {
+        ReturnFlightEffect();
+        ReturnToPool();
+        return true;
     }
 
     private void Move()
     {
 
-        if (_rb == null || target == null) return;
-        Vector3 toTarget = (target.position - transform.position).normalized;
+        if (_rb == null || hitPoint == null) return;
+        Vector3 toTarget = (hitPoint.position - transform.position).normalized;
         float currentSpeed = _rb.linearVelocity.magnitude;
-
-        // »ìÂ¦ À¯µµ (0.08~0.18 »çÀÌ¿¡¼­ ½ÇÇè ÃßÃµ)
         _rb.linearVelocity = Vector3.Lerp(_rb.linearVelocity, toTarget * currentSpeed, 0.12f);
         if (_rb.linearVelocity.sqrMagnitude > 0.01f)
-            transform.forward = _rb.linearVelocity.normalized;
-
+        {
+            Quaternion forward = Quaternion.LookRotation(_rb.linearVelocity.normalized);
+            transform.rotation = forward * Quaternion.Euler(data.localRotationOffset);
+        }
     }
 
     protected virtual void CheckHit()
     {
-        if (target != null)
+        if (targetEntity != null && hitPoint != null)
         {
-            float dist = Vector3.Distance(transform.position, target.position);
+            float dist = Vector3.Distance(transform.position, hitPoint.position);
             if (dist <= data.detectionRadius)
             {
-                var hp = target.GetComponent<HealthComponent>();
-                if (hp != null) hp.RequestDamage(coreDamage != 0 ? coreDamage : damage);
+                var hp = targetEntity.GetComponent<HealthComponent>();
+                var core = targetEntity.GetComponent<Core>();
+
+                float damageToApply = (core != null) ? coreDamage : damage;
+
+                if (hp != null) hp.RequestDamage(damageToApply);
                 hp?.ApplyImmediateDamage();
                 if (data.explosionRadius > 0f)
                 {
@@ -126,9 +142,11 @@ public class Projectile : MonoBehaviour
                         if (teamComp == null || teamComp.Team == team) continue;
 
                         var otherHp = enemy.GetComponent<HealthComponent>();
+                        var otherCore = enemy.GetComponent<Core>();
+                        float explosionDamage = (otherCore != null) ? coreDamage : damage;
                         if (otherHp != null)
                         {
-                            otherHp.RequestDamage(coreDamage != 0 ? coreDamage : damage);
+                            otherHp.RequestDamage(explosionDamage);
                             otherHp?.ApplyImmediateDamage();
                         }
                     }
@@ -140,9 +158,7 @@ public class Projectile : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Ç® ÀÌ¸§À» Á÷Á¢ ÁöÁ¤ÇØÁÜ
-    /// </summary>
+
     public void SetPoolName(string poolName) => this.poolName = poolName;
 
     private void ReturnToPool()
@@ -160,7 +176,7 @@ public class Projectile : MonoBehaviour
     }
 
     /// <summary>
-    /// FlightEffect¸¦ EffectPool¿¡¼­ ¹Þ¾Æ¿Í ºÎÂø
+    /// FlightEffectï¿½ï¿½ EffectPoolï¿½ï¿½ï¿½ï¿½ ï¿½Þ¾Æ¿ï¿½ ï¿½ï¿½ï¿½ï¿½
     /// </summary>
     private void AttachFlightEffect()
     {
@@ -183,7 +199,7 @@ public class Projectile : MonoBehaviour
     }
 
     /// <summary>
-    /// ÇöÀç FlightEffect¸¦ ¹Ýµå½Ã Ç®·Î ¹ÝÈ¯/Á¦°Å
+    /// ï¿½ï¿½ï¿½ï¿½ FlightEffectï¿½ï¿½ ï¿½Ýµï¿½ï¿½ Ç®ï¿½ï¿½ ï¿½ï¿½È¯/ï¿½ï¿½ï¿½ï¿½
     /// </summary>
     private void ReturnFlightEffect()
     {
@@ -193,7 +209,7 @@ public class Projectile : MonoBehaviour
         var pool = ObjectPoolManager.Instance.GetPool(data.FlightEffectPrefab.name);
         if (pool != null)
         {
-            if(pool is MonoBehaviour poolObj)
+            if (pool is MonoBehaviour poolObj)
                 flightEffect.transform.SetParent(poolObj.transform, false);
             pool.Return(flightEffect);
         }

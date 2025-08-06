@@ -1,54 +1,49 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.SocialPlatforms;
 
 public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
 {
-    public float currentHP;
-    public float maxHP;
+    [HideInInspector] public float logical_maxHP;
+    [HideInInspector] public float logical_currentHP;
+    [HideInInspector] public float display_maxHP;
+    [HideInInspector] public float display_currentHP;
+    [HideInInspector] public float pendingDamage = 0f;
+    private bool isTargetable;
     private float deathAnimDuration;
-    public float pendingDamage = 0f;
-
 
 #pragma warning disable 67
     public event Action<Transform> OnTakeDamageEffect;
     public event Action<Transform> OnDeathEffect;
-    public event Action OnDeath; // 죽음 이벤트
+    public event Action OnDeath;
     public event Action<float, float> OnHealthChanged;
 #pragma warning restore 67
 
     private Coroutine damageRoutine;
 
-    public void Awake()
-    {
-        CombatManager.Instance?.Register(this);
-    }
-    public void OnDestroy()
-    {
-        CombatManager.Instance?.Unregister(this);
-    }
-
-
     public void Initialize(EntityData data)
     {
-        this.maxHP = data.maxHP;
-        currentHP = data.maxHP;
-
-        deathAnimDuration = data.deathClip != null ? data.deathClip.length : 0f;
-
+        logical_maxHP = data.maxHP;
+        display_maxHP = data.maxHP;
+        logical_currentHP = data.maxHP;
+        display_currentHP = data.maxHP;
+        deathAnimDuration = (data.deathClip != null) ? data.deathClip.length : 0f;
+        isTargetable = true;
         if (damageRoutine == null)
             damageRoutine = StartCoroutine(ApplyDamageEndOfFrame());
     }
 
     public void Initialize(float hp)
     {
-        currentHP = hp;
+        logical_maxHP = hp;
+        display_maxHP = hp;
+        logical_currentHP = hp;
+        display_currentHP = hp;
+        isTargetable = true;
         if (damageRoutine == null)
             damageRoutine = StartCoroutine(ApplyDamageEndOfFrame());
     }
-
-    public bool IsAlive() => currentHP > 0f;
-    public void RequestDamage(float dmg) => pendingDamage += dmg;
 
 
     private IEnumerator ApplyDamageEndOfFrame()
@@ -56,46 +51,69 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
         while (true)
         {
             yield return new WaitForEndOfFrame();
-            if (!IsAlive())
-            {
-                StartCoroutine(DeathRoutine());
-                break;
-            }
+            ApplyPendingDamage();
+            //if (!IsAlive())
+            //{
+            //    StartCoroutine(DeathRoutine());
+            //    break;
+            //}
         }
     }
 
     public void ApplyImmediateDamage()
     {
         if (pendingDamage <= 0f) return;
+
         OnTakeDamageEffect?.Invoke(transform);
-        currentHP -= pendingDamage;
-        pendingDamage = 0f;
-        OnHealthChanged?.Invoke(currentHP, maxHP);
+        display_currentHP -= pendingDamage;
+        OnHealthChanged?.Invoke(display_currentHP, display_maxHP);
     }
 
     public void ApplyPendingDamage()
     {
         if (pendingDamage > 0f && this.IsAlive())
         {
-            OnTakeDamageEffect?.Invoke(this.transform);
-            currentHP -= pendingDamage;
+            logical_currentHP -= pendingDamage;
             pendingDamage = 0f;
-            OnHealthChanged?.Invoke(currentHP, maxHP);
-
-
+            if(!IsAlive())
+                StartCoroutine(DeathRoutine());
         }
     }
-    private IEnumerator DeathRoutine()
+    public IEnumerator DeathRoutine()
     {
-        Debug.Log("deathRoutine Called");
-        OnDeath?.Invoke(); // 죽음 이밴트 알림
-        OnDeathEffect?.Invoke(this.transform);
-        yield return new WaitForSeconds(deathAnimDuration);
-        gameObject.GetComponent<Entity>().UnbindEvent();
+        isTargetable = false;
+        var coll = GetComponent<Collider>();
+        if (coll != null) coll.enabled = false;
 
-        Destroy(gameObject);
+        Debug.Log("Ondeath");
+        OnDeath?.Invoke();
+        Debug.Log("Ondeath Event is Called");
+        OnDeathEffect?.Invoke(this.transform);
+        
+        var entity = GetComponent<Entity>();
+        if(entity != null)
+        {
+            yield return new WaitForSeconds(deathAnimDuration);
+            entity.UnbindEvent();
+            gameObject.SetActive(false);
+            Destroy(gameObject);
+        }
+        else
+        {
+            var core = GetComponent<Core>();
+            if (core != null)
+            {
+                core.UnBindEvent();
+                gameObject.SetActive(false);
+                Destroy(gameObject);
+            }
+        }
+       
     }
-    public float CurrentHp => currentHP;
-    public float MaxHp => maxHP;
+    public bool IsAlive() => logical_currentHP > 0f;
+    public void RequestDamage(float dmg) => pendingDamage += dmg;
+    public bool IsTargetable() => isTargetable;
+    public float CurrentHp => logical_currentHP;
+    public float MaxHp => logical_maxHP;
 }
 

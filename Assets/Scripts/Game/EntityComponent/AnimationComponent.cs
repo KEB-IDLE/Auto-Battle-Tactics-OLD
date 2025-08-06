@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 
 [RequireComponent(typeof(Animator))]
-[RequireComponent (typeof(AudioSource))]
+[RequireComponent(typeof(AudioSource))]
 public class AnimationComponent : MonoBehaviour
 {
     private Animator _animator;
@@ -22,7 +22,7 @@ public class AnimationComponent : MonoBehaviour
     {
         if (_controller == null)
             _controller = new AnimatorOverrideController(data.animatorController);
-         
+
         _animator.runtimeAnimatorController = _controller;
 
         if (data.attackClip != null)
@@ -46,25 +46,23 @@ public class AnimationComponent : MonoBehaviour
         if (isAttacking)
         {
             _animator.SetBool("Attack", true);
-            if(this.attackSound != null)
+            if (this.attackSound != null)
                 _audioSource.PlayOneShot(attackSound);
         }
-        else
-            _animator.SetBool("Attack", false);
-    }
-            
-
-    public void HandleMove()
-    {
-        _animator.SetTrigger("Move");
+        else _animator.SetBool("Attack", false);
     }
 
     public void HandleDeath()
     {
-        Debug.Log("DeathAnimation is Called");
         _animator.SetTrigger("Death");
-        if(this.deathSound != null)
+        if (this.deathSound != null)
             _audioSource.PlayOneShot(deathSound);
+    }
+    public void HandleMove() => _animator.SetTrigger("Move");
+    public void StopAllAction()
+    {
+        _animator.SetBool("Attack", false);
+        _animator.SetTrigger("StopAllAction");
     }
 }
 

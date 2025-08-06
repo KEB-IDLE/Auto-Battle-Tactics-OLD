@@ -6,19 +6,23 @@ using UnityEngine.Networking;
 
 public class APIService : MonoBehaviour
 {
-    public static APIService Instance;
+    public static APIService Instance { get; private set; }
 
-    void Awake()
+    private string baseUrl = "http://localhost:3000/api";
+    //private string baseUrl = "https://jamsik.p-e.kr/api";
+
+    private void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
         }
-        else Destroy(gameObject);
+        else
+        {
+            Destroy(gameObject);
+        }
     }
-
-    private string baseUrl = "http://localhost:3000/api";
 
     public IEnumerator Post<TReq, TRes>(string endpoint, TReq request, Action<TRes> onSuccess, Action<string> onError = null)
     {
@@ -82,14 +86,11 @@ public class APIService : MonoBehaviour
         }
     }
 
-
     [System.Serializable]
     private class ListWrapper<T>
     {
         public List<T> list;
     }
-
-
 
     public IEnumerator Put<TReq, TRes>(string endpoint, TReq request, Action<TRes> onSuccess, Action<string> onError = null)
     {
@@ -116,7 +117,7 @@ public class APIService : MonoBehaviour
 
     private void SetAuthHeader(UnityWebRequest req)
     {
-        string token = GameManager.Instance.accessToken;
+        string token = SessionManager.Instance.accessToken;
         if (!string.IsNullOrEmpty(token))
         {
             req.SetRequestHeader("Authorization", $"Bearer {token}");
@@ -124,4 +125,3 @@ public class APIService : MonoBehaviour
     }
 
 }
-
