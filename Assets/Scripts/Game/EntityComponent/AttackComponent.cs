@@ -117,7 +117,6 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
             attackCoroutine = null;
         }
         isAttackingFlag = false;
-        OnAttackStateChanged?.Invoke(false);
         isDead = true;
     }
 
@@ -158,7 +157,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         if (mono == null) return false;
         float distance = Vector3.Distance(
             transform.position,
-            (target as MonoBehaviour).transform.position);
+            mono.transform.position);
         return distance <= attackRange;
     }
     private void TryAttack(IDamageable target)
@@ -327,7 +326,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
             attackCoroutine = null;
             lockedTarget = null;
             isAttackingFlag = false;
-            //OnAttackStateChanged?.Invoke(false);
+            OnAttackStateChanged?.Invoke(false);
         }
     }
 

@@ -14,7 +14,7 @@ public class CoreComponent : MonoBehaviour
     public void OnCoreDestroyed()
     {
         Debug.Log("💥 [CoreComponent] 코어 파괴! 게임 종료 처리");
-
+        CombatManager.EndGame();
         var teamComp = GetComponent<TeamComponent>();
 
         Team team = teamComp.Team;

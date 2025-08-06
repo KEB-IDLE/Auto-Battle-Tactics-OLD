@@ -25,7 +25,7 @@ MonoBehaviour:
   detectionRadius: 50
   attackRange: 5
   disengageRange: 5
-  attackPriority: 0
+  attackPriority: 2
   attackType: 0
   entityPrefab: {fileID: 6159849336836508998, guid: b0fad61085f0abe4d9d39873fbe11e69, type: 3}
   magicRadius: 0

@@ -4,15 +4,7 @@ using UnityEngine.UI;
 public class HealthBar : MonoBehaviour
 {
     public Image fillImage;
+    public void Initialize(HealthComponent hc) => UpdateBar(hc.display_currentHP, hc.display_maxHP);
+    public void UpdateBar(float cur, float max) => fillImage.fillAmount = cur / max;
 
-    // �ʱ�ȭ. Entity���� ���� �����ϰų�, Find�� ������ �� ����
-    public void Initialize(HealthComponent hc)
-    {
-        UpdateBar(hc.currentHP, hc.maxHP);
-    }
-
-    public void UpdateBar(float cur, float max)
-    {
-        fillImage.fillAmount = cur / max;
-    }
 }

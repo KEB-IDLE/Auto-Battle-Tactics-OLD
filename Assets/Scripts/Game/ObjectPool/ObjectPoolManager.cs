@@ -88,8 +88,6 @@ public class ObjectPoolManager : MonoBehaviour
     /// <summary>
     /// 풀이 등록되어 있는지 확인합니다.
     /// </summary>
-    public bool HasPool(string poolName)
-    {
-        return poolDict.ContainsKey(poolName);
-    }
+    public bool HasPool(string poolName) => poolDict.ContainsKey(poolName);
+
 }
