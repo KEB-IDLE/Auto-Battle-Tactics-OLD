@@ -10,6 +10,7 @@ public class MatchManager : MonoBehaviour, IMatchInterface
     private Coroutine matchTimerCoroutine;  // 타이머 코루틴 참조
 
     public static MatchManager Instance;
+    public int UserId => SessionManager.Instance.profile.user_id;
 
     private void Awake()
     {
@@ -95,6 +96,7 @@ public class MatchManager : MonoBehaviour, IMatchInterface
 
         ClearMatchUI();  // 씬 전환 전 UI 초기화
         SceneManager.LoadScene(2);
+         UnityEngine.SceneManagement.SceneManager.LoadScene("3-GameScene2");
     }
 
     public void StartMatchTimer()
