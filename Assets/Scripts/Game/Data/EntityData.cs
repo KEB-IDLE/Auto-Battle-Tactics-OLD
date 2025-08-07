@@ -46,11 +46,13 @@ public class EntityData : ScriptableObject
     [Tooltip("Attack type (Melee, Ranged, Magic)")]
     public AttackType attackType;
 
+    public AttackStrategyBaseSO attackStrategy;
+
     [Header("Entity Prefabs (By Team)")]
     public GameObject redPrefab;
     public GameObject bluePrefab;
 
-    [Header("Magic")] // ¸¶¹ý»çÀÇ ¸¶¹ý ÇÇÇØ ¹üÀ§
+    [Header("Magic")]
     public float magicRadius;
 
     [Header("Ranged")]

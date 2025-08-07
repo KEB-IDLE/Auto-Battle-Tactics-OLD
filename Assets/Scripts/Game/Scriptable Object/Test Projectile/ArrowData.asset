@@ -17,5 +17,5 @@ MonoBehaviour:
   speedWeight: 0.2
   verticalSpeedWeight: 1
   localRotationOffset: {x: -90, y: 0, z: 0}
-  detectionRadius: 0.2
+  detectionRadius: 0.5
   explosionRadius: 0
