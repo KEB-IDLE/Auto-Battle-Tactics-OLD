@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f5f00bcc7b7ace74197693563b238528, type: 3}
   m_Name: FireBallData
   m_EditorClassIdentifier: 
-  projectilePrefab: {fileID: 0}
+  projectilePrefab: {fileID: 1085649348315297137, guid: 68b8b649dba962f4db22a6043739049b, type: 3}
   FlightEffectPrefab: {fileID: 0}
   speedWeight: 0
   verticalSpeedWeight: 0

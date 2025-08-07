@@ -14,6 +14,8 @@ public class Core : MonoBehaviour
     private TeamComponent _team;
     private CoreComponent _core;
     private HealthBar healthBar;
+    public ObjectData GetObjectData() => objectData;
+
 
     void Awake()
     {
@@ -26,23 +28,6 @@ public class Core : MonoBehaviour
         {
             Debug.LogError($"{name} ObjectData is null!");
             return;
-        }
-    }
-
-    private void Start()
-    {
-        _health.Initialize(objectData.maxHP);
-        _healthBar.Initialize(_health);
-        BindEvent();
-
-        var fill = transform.Find("HealthBarCanvas/HealthBarBG/HealthBarFill");
-        if (fill != null)
-            healthBar = fill.GetComponent<HealthBar>();
-
-        if (healthBar != null)
-        {
-            healthBar.Initialize(_health);
-            _health.OnHealthChanged += (cur, max) => healthBar.UpdateBar(cur, max);
         }
     }
 

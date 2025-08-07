@@ -10,7 +10,8 @@ public class GoldManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI goldText;
 
     private int currentGold;
-    
+    public int GetCurrentGold() => currentGold;
+
 
     private void Awake()
     {
@@ -41,6 +42,11 @@ public class GoldManager : MonoBehaviour
         currentGold -= amount;
         UpdateGoldUI();
         return true;
+    }
+    public void SetGold(int amount)
+    {
+        currentGold = amount;
+        UpdateGoldUI();
     }
 
     public void AddGold(int amount)
