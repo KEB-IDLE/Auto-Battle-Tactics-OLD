@@ -30,9 +30,9 @@ MonoBehaviour:
   redPrefab: {fileID: 3731085052836040546, guid: 342346d02f603434cac7f47a4e5283f9, type: 3}
   bluePrefab: {fileID: 3865900570072927925, guid: 3ed81c8dfca06f44ab55e2815b7bbdd0, type: 3}
   magicRadius: 0
-  projectilePrefab: {fileID: 6623840121384637891, guid: 7e3d132b7dc843a4bbe5499eafe20e82, type: 3}
+  projectilePrefab: {fileID: 1942215709378787983, guid: 7e3d132b7dc843a4bbe5499eafe20e82, type: 3}
   projectilePoolName: Arrow
-  projectileData: {fileID: 0}
+  projectileData: {fileID: 11400000, guid: d9da3efaceb50294b90f4499ebab33f8, type: 2}
   summonEffectPrefab: {fileID: 0}
   attackEffectPrefab: {fileID: 0}
   takeDamageEffectPrefeb: {fileID: 0}
