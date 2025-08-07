@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 826a7d254cca7e547ab90347db98c1b9, type: 3}
+  m_Name: Test_M
+  m_EditorClassIdentifier: 
+  entityName: Mage
+  maxHP: 100
+  attackDamage: 20
+  attackCoreDamage: 5
+  attackImpactRatio: 0.7
+  moveSpeed: 5
+  entityScale: 0
+  gold: 10
+  unitType: Mage
+  layer: 14
+  detectionRadius: 25
+  attackRange: 25
+  disengageRange: 25
+  attackPriority: 0
+  attackType: 2
+  attackStrategy: {fileID: 11400000, guid: a6d8cb4be24dafd41bda1fe6fd8b6008, type: 2}
+  redPrefab: {fileID: 3760281847762428348, guid: 55e13ddd82ca1894faa4e652df5ff335, type: 3}
+  bluePrefab: {fileID: 3876098750152481945, guid: 7f9b069a340cf9c429780e018ce46296, type: 3}
+  magicRadius: 10
+  projectilePrefab: {fileID: 0}
+  projectilePoolName: 
+  projectileData: {fileID: 0}
+  summonEffectPrefab: {fileID: 0}
+  attackEffectPrefab: {fileID: 8378648546881499446, guid: 867c572a5be680d42a042d2349f10143, type: 3}
+  takeDamageEffectPrefeb: {fileID: 0}
+  deathEffectPrefab: {fileID: 0}
+  summonSound: {fileID: 0}
+  attackSound: {fileID: 0}
+  deathSound: {fileID: 0}
+  animatorController: {fileID: 9100000, guid: 978dfb3f95c533c4aa9742b18291eb77, type: 2}
+  attackClip: {fileID: 7400000, guid: 314cbbc2e7d7942438aaa24a8866c9f0, type: 3}
+  runClip: {fileID: 7400000, guid: 58b522b345a775d4a9b69ba407ac6165, type: 3}
+  deathClip: {fileID: 7400000, guid: 8a4ff3a854fe14b449c68d73693ddc38, type: 3}
+  idleClip: {fileID: 7400000, guid: 0f32bec07db70154dacf4fbc48ecf254, type: 3}

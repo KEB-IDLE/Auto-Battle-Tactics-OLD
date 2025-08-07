@@ -23,9 +23,23 @@ public class EntityEditor : Editor
     private void CreateEntityInScene(EntityData data)
     {
         GameObject go;
+        // 에디터 환경/런타임 분기
+        Team myTeam;
+#if UNITY_EDITOR
+        if (!Application.isPlaying)
+        {
+            // 에디터 환경에서는 강제 RED로 지정 (원하면 Blue 등으로 변경 가능)
+            myTeam = Team.Red;
+        }
+        else
+#endif
+        {
+            // 런타임에서는 실제 네트워크 값 사용
+            myTeam = UserNetwork.Instance != null ? UserNetwork.Instance.MyTeam : Team.Red;
+        }
 
         // ✅ 내 팀 가져오기
-        Team myTeam = UserNetwork.Instance.MyTeam;
+        //Team myTeam = UserNetwork.Instance.MyTeam;
         // ✅ 내 팀 프리팹 가져오기
         GameObject prefab = myTeam == Team.Red ? data.redPrefab : data.bluePrefab;
 

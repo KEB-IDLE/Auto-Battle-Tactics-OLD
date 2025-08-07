@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 public class LoginManager : MonoBehaviour
 {
+    public static LoginManager Instance { get; private set; }
+
     public TMP_InputField emailInput;
     public TMP_InputField passwordInput;
     public Button loginButton;
@@ -14,15 +16,22 @@ public class LoginManager : MonoBehaviour
     public GameObject registerPanel;
     public TMP_InputField registerEmailInput;
     public TMP_InputField registerPasswordInput;
+    public TMP_InputField registerNicknameInput;
     public Button registerSubmitButton;
     public Button registerCancelButton;
     public TMP_Text registerStatusText;
-    public TMP_InputField registerNicknameInput;
 
-
-    void Start()
+    private void Awake()
     {
-
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
     public void OnLoginClicked()
@@ -43,21 +52,24 @@ public class LoginManager : MonoBehaviour
             loginReq,
             res =>
             {
-                if (!string.IsNullOrEmpty(res.token))
+                if (string.IsNullOrEmpty(res.token))
                 {
-                    GameManager.Instance.accessToken = res.token;
-                    statusText.text = "Login Success!";
-                    SceneManager.LoadScene("1-MainScene");
+                    statusText.text = "Login failed: No token received.";
+                    return;
                 }
-                else
-                {
-                    statusText.text = "Login failed: No token received";
-                }
+
+                SessionManager.Instance.accessToken = res.token;
+                statusText.text = "Login Success!";
+                SceneManager.LoadScene("1-MainScene");
             },
-           err =>
+            err =>
             {
-                statusText.text = err.Contains("User not found") ? "User not found." :
-                 err.Contains("Incorrect password") ? "Incorrect password." : "Login failed: " + err;
+                if (err.Contains("User not found"))
+                    statusText.text = "User not found.";
+                else if (err.Contains("Incorrect password"))
+                    statusText.text = "Incorrect password.";
+                else
+                    statusText.text = "Login failed: " + err;
             }
         ));
     }
@@ -70,7 +82,7 @@ public class LoginManager : MonoBehaviour
 
         if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(nickname))
         {
-            registerStatusText.text = "모든 항목을 입력해주세요.";
+            registerStatusText.text = "Please fill in all fields.";
             return;
         }
 
@@ -86,19 +98,16 @@ public class LoginManager : MonoBehaviour
             registerReq,
             res =>
             {
-                if (res.success)
-                {
-                    registerStatusText.text = "Register Success!";
-                }
-                else
-                {
-                    registerStatusText.text = res.message;
-                }
+                registerStatusText.text = res.success ? "Register Success!" : res.message;
             },
             err =>
             {
-                registerStatusText.text = err.Contains("Email already exists") ? "Email already exists." :
-                err.Contains("Nickname already exists") ? "Nickname already exists." : "Register failed: " + err;
+                if (err.Contains("Email already exists"))
+                    registerStatusText.text = "Email already exists.";
+                else if (err.Contains("Nickname already exists"))
+                    registerStatusText.text = "Nickname already exists.";
+                else
+                    registerStatusText.text = "Register failed: " + err;
             }
         ));
     }
@@ -118,7 +127,6 @@ public class RegisterRequest
     public string password;
     public string nickname;
 }
-
 
 [System.Serializable]
 public class LoginResponse
