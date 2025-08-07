@@ -5,16 +5,16 @@ using UnityEngine;
 using UnityEngine.Networking;
 
 /// <summary>
-/// 이 클래스는 서버와의 HTTP 통신을 담당하는 싱글턴 클래스입니다.
-/// POST, GET, PUT 메서드를 통해 서버 API를 호출할 수 있습니다.
+/// 서버와의 HTTP 통신을 담당하는 싱글턴 클래스입니다.
+/// POST, GET, PUT 메서드를 통해 서버 API를 호출합니다.
 /// </summary>
 public class APIService : MonoBehaviour
 {
     public static APIService Instance { get; private set; }
 
-    // 상황에 맞게 아래 주석 해제
-    private string baseUrl = "http://localhost:3000/api";   // API 기본 URL (로컬 개발 서버용)
-    //private string baseUrl = "https://jamsik.p-e.kr/api"; // API 기본 URL (AWS에 배포 서버용)
+    // 상황에 맞게 둘 중 하나 사용
+    private string baseUrl = "http://localhost:3000/api";   // 로컬 개발용 API 기본 URL
+    //private string baseUrl = "https://jamsik.p-e.kr/api"; // 배포 서버용 API 기본 URL
 
     private void Awake()
     {
@@ -30,7 +30,7 @@ public class APIService : MonoBehaviour
     }
 
     /// <summary>
-    /// POST 요청을 보내고 응답을 처리하는 함수
+    /// POST 요청을 보내고 응답을 처리합니다.
     /// </summary>
     public IEnumerator Post<TReq, TRes>(string endpoint, TReq request, Action<TRes> onSuccess, Action<string> onError = null)
     {
@@ -40,7 +40,7 @@ public class APIService : MonoBehaviour
         req.uploadHandler = new UploadHandlerRaw(body);
         req.downloadHandler = new DownloadHandlerBuffer();
         req.SetRequestHeader("Content-Type", "application/json");
-        SetAuthHeader(req); // 토큰 설정
+        SetAuthHeader(req);
 
         yield return req.SendWebRequest();
 
@@ -56,12 +56,12 @@ public class APIService : MonoBehaviour
     }
 
     /// <summary>
-    /// GET 요청을 보내고 응답을 처리하는 함수
+    /// GET 요청을 보내고 응답을 처리합니다.
     /// </summary>
     public IEnumerator Get<TRes>(string endpoint, Action<TRes> onSuccess, Action<string> onError = null)
     {
         UnityWebRequest req = UnityWebRequest.Get($"{baseUrl}{endpoint}");
-        SetAuthHeader(req); // 토큰 설정
+        SetAuthHeader(req);
 
         yield return req.SendWebRequest();
 
@@ -77,12 +77,12 @@ public class APIService : MonoBehaviour
     }
 
     /// <summary>
-    /// GET 요청을 보내고 JSON 배열을 리스트로 받아오는 함수
+    /// GET 요청을 보내고 JSON 배열 응답을 리스트로 변환하여 처리합니다.
     /// </summary>
     public IEnumerator GetList<T>(string endpoint, Action<List<T>> onSuccess, Action<string> onError = null)
     {
         UnityWebRequest req = UnityWebRequest.Get($"{baseUrl}{endpoint}");
-        SetAuthHeader(req); // 토큰 설정
+        SetAuthHeader(req);
 
         yield return req.SendWebRequest();
 
@@ -100,9 +100,6 @@ public class APIService : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// JSON 배열을 감싸는 래퍼 클래스
-    /// </summary>
     [System.Serializable]
     private class ListWrapper<T>
     {
@@ -110,7 +107,7 @@ public class APIService : MonoBehaviour
     }
 
     /// <summary>
-    /// PUT 요청을 보내고 응답을 처리하는 함수
+    /// PUT 요청을 보내고 응답을 처리합니다.
     /// </summary>
     public IEnumerator Put<TReq, TRes>(string endpoint, TReq request, Action<TRes> onSuccess, Action<string> onError = null)
     {
@@ -120,7 +117,7 @@ public class APIService : MonoBehaviour
         req.uploadHandler = new UploadHandlerRaw(body);
         req.downloadHandler = new DownloadHandlerBuffer();
         req.SetRequestHeader("Content-Type", "application/json");
-        SetAuthHeader(req); // JWT 토큰 추가
+        SetAuthHeader(req);
 
         yield return req.SendWebRequest();
 
@@ -136,7 +133,7 @@ public class APIService : MonoBehaviour
     }
 
     /// <summary>
-    /// Authorization 헤더에 JWT 토큰 추가
+    /// Authorization 헤더에 JWT 토큰을 설정합니다.
     /// </summary>
     private void SetAuthHeader(UnityWebRequest req)
     {
