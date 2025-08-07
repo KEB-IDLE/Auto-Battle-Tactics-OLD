@@ -38,38 +38,6 @@ public class EffectComponent : MonoBehaviour
         PlayEffect(deathEffect, origin, "deathEffect");
     }
 
-    //private void PlayEffect(GameObject effectPrefab, Transform origin, string effectType)
-    //{
-    //    if (effectPrefab != null && origin != null)
-    //    {
-    //        var pool = EffectPoolManager.Instance.GetPool(effectPrefab.name);
-
-    //        if (pool != null)
-    //        {
-    //            var obj = pool.GetEffect(origin.position, Quaternion.identity);
-
-    //            var ps = obj.GetComponent<ParticleSystem>();
-    //            if (ps != null)
-    //                StartCoroutine(ReturnEffectWhenDone(pool, obj, ps.main.duration));
-    //            else
-    //                StartCoroutine(ReturnEffectAfterDelay(pool, obj, 1.0f)); // 기본 1초(수동 조절)
-    //        } 
-    //        else
-    //            Debug.LogWarning($"[EffectComponent] No pool for {effectType}: {effectPrefab.name}");
-    //    }
-    //}
-    //private IEnumerator ReturnEffectWhenDone(EffectPool pool, GameObject obj, float delay)
-    //{
-    //    yield return new WaitForSeconds(delay);
-    //    pool.ReturnEffect(obj);
-    //}
-
-    //private IEnumerator ReturnEffectAfterDelay(EffectPool pool, GameObject obj, float delay)
-    //{
-    //    yield return new WaitForSeconds(delay);
-    //    pool.ReturnEffect(obj);
-    //}
-
     private void PlayEffect(GameObject effectPrefab, Transform origin, string effectType)
     {
         if (effectPrefab != null && origin != null)
@@ -81,10 +49,18 @@ public class EffectComponent : MonoBehaviour
                 var obj = pool.Get(origin.position, Quaternion.identity);
 
                 var ps = obj.GetComponent<ParticleSystem>();
-                if (ps != null)
-                    StartCoroutine(ReturnEffectWhenDone(pool, obj, ps.main.duration));
-                else
-                    StartCoroutine(ReturnEffectAfterDelay(pool, obj, 1.0f)); // 기본 1초(수동 조절)
+                float duration = ps != null ? ps.main.duration : 1f;
+
+                //if (ps != null)
+                //    StartCoroutine(ReturnEffectWhenDone(pool, obj, ps.main.duration));
+                //else
+                //    StartCoroutine(ReturnEffectAfterDelay(pool, obj, 1.0f)); // 기본 1초(수동 조절)
+
+                var autoReturn = obj.GetComponent<EffectAutoReturn>();
+                if (autoReturn == null)
+                    autoReturn = obj.AddComponent<EffectAutoReturn>();
+                autoReturn.PlayAndReturn(pool, duration);
+
             }
             else
             {

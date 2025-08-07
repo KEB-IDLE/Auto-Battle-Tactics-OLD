@@ -1,3 +1,5 @@
+/*
+
 using System;
 using System.Collections;
 using Unity.VisualScripting;
@@ -8,8 +10,8 @@ using UnityEngine;
 public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
 {
     private EntityData _entityData; 
-    private float attackDamage;
-    private float attackCoreDamage;
+    public float attackDamage;
+    public float attackCoreDamage;
     private float attackImpactRatio;
     private float attackCooldown;
     private float attackAnimLength;
@@ -20,7 +22,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
     [HideInInspector] public Transform firePoint;
 
     private string projectilePoolName;
-    private IDamageable lockedTarget;
+    public IDamageable lockedTarget;
 
     private ITeamProvider teamProvider;
     private AttackType attackType;
@@ -39,7 +41,6 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
 
     public Transform LockedTargetTransform
         => (lockedTarget as MonoBehaviour)?.transform;
-
 
     private void Awake()
     {
@@ -313,7 +314,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         return false;
     }
 
-    public bool IsAttacking() => isAttackingFlag;
+
 
 
     private void OnOwnerDeath()
@@ -330,6 +331,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         }
     }
 
+    public bool IsAttacking() => isAttackingFlag;
     public bool isMelee => attackType == AttackType.Melee;
     public bool isRanged => attackType == AttackType.Ranged;
     public bool isMagic => attackType == AttackType.Magic;
@@ -358,3 +360,215 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
 }
 
 
+*/
+
+using System;
+using System.Collections;
+using UnityEngine;
+
+public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
+{
+    // 기존 필드
+    private EntityData _entityData;
+    [HideInInspector] public float attackDamage;
+    [HideInInspector] public float attackCoreDamage;
+    [HideInInspector] public float attackImpactRatio;
+    [HideInInspector] public float attackCooldown;
+    [HideInInspector] public float attackAnimLength;
+    [HideInInspector] public float detectionRadius;
+    [HideInInspector] public float attackRange;
+    [HideInInspector] public float disengageRange;
+    [HideInInspector] public float magicRadius;
+    [HideInInspector] public string projectilePoolName;
+    [HideInInspector] public ITeamProvider teamProvider;
+    [HideInInspector] public LayerMask targetLayer;
+    [HideInInspector] public IDamageable lockedTarget;
+    [HideInInspector] public IOrientable _orientable;
+    [HideInInspector] public Transform firePoint;
+
+    private AttackType attackType;
+    private Coroutine attackCoroutine;
+    private bool isAttackingFlag;
+    private bool isDead;
+    private bool isGameEnded = false;
+
+    // SO 전략 필드
+    private AttackStrategyBaseSO attackStrategy;
+
+#pragma warning disable 67
+    public event Action<bool> OnAttackStateChanged;
+    public event Action<Transform> OnAttackEffect;
+#pragma warning restore 67
+
+    public void Initialize(EntityData data)
+    {
+        _entityData = data;
+        attackDamage = data.attackDamage;
+        attackCoreDamage = data.attackCoreDamage;
+        if (data.attackClip != null)
+            attackAnimLength = data.attackClip.length;
+        attackCooldown = attackAnimLength;
+        attackImpactRatio = data.attackImpactRatio;
+        detectionRadius = data.detectionRadius;
+        attackRange = data.attackRange;
+        attackType = data.attackType;
+
+        disengageRange = data.disengageRange;
+        magicRadius = data.magicRadius;
+        isAttackingFlag = false;
+        isDead = false;
+        firePoint = transform.Find("FirePoint");
+        projectilePoolName = data.projectilePoolName;
+
+        teamProvider = GetComponent<ITeamProvider>();
+        _orientable = GetComponent<IOrientable>();
+
+        targetLayer = LayerMask.GetMask("Agent", "Tower", "Core");
+        switch (data.attackPriority)
+        {
+            case EntityData.AttackPriority.TowersOnly:
+                targetLayer = LayerMask.GetMask("Tower", "Core");
+                break;
+            case EntityData.AttackPriority.CoreOnly:
+                targetLayer = LayerMask.GetMask("Core");
+                break;
+            default: break;
+        }
+
+        attackStrategy = data.attackStrategy;
+    }
+
+    void Update()
+    {
+        if (attackCoroutine != null || isDead || isGameEnded) return;
+
+        var newTarget = DetectTarget();
+        if (newTarget != null)
+        {
+            var mono = newTarget as MonoBehaviour;
+            bool visible = true; // 예시, 필요시 개선
+            if (firePoint != null && mono != null)
+                visible = IsTargetVisible(firePoint, mono.transform);
+
+            lockedTarget = visible ? newTarget : null;
+        }
+        if (lockedTarget != null && CanAttack(lockedTarget))
+            attackCoroutine = StartCoroutine(AttackRoutine(lockedTarget));
+    }
+
+    public IDamageable DetectTarget()
+    {
+        Collider[] hits = Physics.OverlapSphere(
+            transform.position,
+            detectionRadius,
+            targetLayer);
+
+        IDamageable best = null;
+        float bestDist = float.MaxValue;
+
+        foreach (var col in hits)
+        {
+            if (col.gameObject == this.gameObject) continue;
+            var dmg = col.GetComponent<IDamageable>();
+            if (dmg == null || !dmg.IsAlive()) continue;
+            if (dmg is HealthComponent hc && !hc.IsTargetable()) continue;
+
+            var provider = col.GetComponent<ITeamProvider>();
+            if (provider == null || provider.Team == teamProvider.Team)
+                continue;
+            float dist = Vector3.Distance(transform.position, col.transform.position);
+
+            if (dist < bestDist)
+            {
+                bestDist = dist;
+                best = dmg;
+            }
+        }
+        return best;
+    }
+    private bool CanAttack(IDamageable target)
+    {
+        var mono = target as MonoBehaviour;
+        if (mono == null) return false;
+        float distance = Vector3.Distance(
+            transform.position,
+            mono.transform.position);
+        return distance <= attackRange;
+    }
+    private void TryAttack(IDamageable target)
+    {
+        if (!CanAttack(target)) return;
+        attackStrategy?.Attack(this, target); // SO 전략 호출
+    }
+
+    private IEnumerator AttackRoutine(IDamageable target)
+    {
+        isAttackingFlag = true;
+        OnAttackStateChanged?.Invoke(true);
+        float impactDelay = attackAnimLength * attackImpactRatio;
+        var myHealth = GetComponent<HealthComponent>();
+        var targetMono = target as MonoBehaviour;
+
+        while (myHealth != null &&
+                   myHealth.IsAlive() &&
+                   target != null &&
+                   target.IsAlive() &&
+                   targetMono != null &&
+                   Vector3.Distance(transform.position,
+                       (target as MonoBehaviour).transform.position) <= attackRange)
+        {
+            _orientable?.LookAtTarget(target);
+            yield return new WaitForSeconds(impactDelay);
+            TryAttack(target);
+            yield return new WaitForSeconds(attackCooldown - impactDelay);
+        }
+
+        if (!target.IsAlive() || target == null || targetMono == null ||
+            Vector3.Distance(transform.position,
+                targetMono.transform.position) > disengageRange)
+        {
+            lockedTarget = null;
+        }
+
+        attackCoroutine = null;
+        isAttackingFlag = false;
+        OnAttackStateChanged?.Invoke(false);
+    }
+
+    public bool IsTargetVisible(Transform fireOrigin, Transform target)
+    {
+        Vector3 origin = fireOrigin.position;
+        Vector3 dest = target.position;
+        Vector3 dir = (dest - origin).normalized;
+        float dist = Vector3.Distance(origin, dest);
+
+        int raycastMask = LayerMask.GetMask("Agent", "Tower", "Core", "Obstacle", "Structure");
+
+        if (Physics.Raycast(origin, dir, out RaycastHit hit, dist, raycastMask))
+            return hit.transform == target;
+
+        return false;
+    }
+
+    public void StopAllAction()
+    {
+        isGameEnded = true;
+        if (attackCoroutine != null)
+        {
+            StopCoroutine(attackCoroutine);
+            attackCoroutine = null;
+        }
+        isAttackingFlag = false;
+        isDead = true;
+    }
+
+    /// <summary>
+    /// 2025.8.6
+    /// </summary>
+    public void EventSender(Transform t) => OnAttackEffect?.Invoke(t);
+    public Transform LockedTargetTransform => (lockedTarget as MonoBehaviour)?.transform;
+    public bool IsAttacking() => isAttackingFlag;
+    public bool isMelee => attackType == AttackType.Melee;
+    public bool isRanged => attackType == AttackType.Ranged;
+    public bool isMagic => attackType == AttackType.Magic;
+}

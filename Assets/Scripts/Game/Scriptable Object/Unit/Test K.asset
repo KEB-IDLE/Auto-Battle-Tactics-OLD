@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 826a7d254cca7e547ab90347db98c1b9, type: 3}
+  m_Name: Test K
+  m_EditorClassIdentifier: 
+  entityName: Test+Knight
+  maxHP: 150
+  attackDamage: 25
+  attackCoreDamage: 5
+  attackImpactRatio: 0.5
+  moveSpeed: 5
+  entityScale: 0
+  gold: 0
+  unitType: Knight
+  layer: 14
+  detectionRadius: 50
+  attackRange: 5
+  disengageRange: 5
+  attackPriority: 2
+  attackType: 0
+  attackStrategy: {fileID: 11400000, guid: ab6e9dfcffec7cf4b994f4d8d7a03b45, type: 2}
+  redPrefab: {fileID: 6159849336836508998, guid: b0fad61085f0abe4d9d39873fbe11e69, type: 3}
+  bluePrefab: {fileID: 6159849336836508998, guid: b0fad61085f0abe4d9d39873fbe11e69, type: 3}
+  magicRadius: 0
+  projectilePrefab: {fileID: 0}
+  projectilePoolName: 
+  projectileData: {fileID: 0}
+  summonEffectPrefab: {fileID: 0}
+  attackEffectPrefab: {fileID: 0}
+  takeDamageEffectPrefeb: {fileID: 0}
+  deathEffectPrefab: {fileID: 0}
+  summonSound: {fileID: 0}
+  attackSound: {fileID: 0}
+  deathSound: {fileID: 0}
+  animatorController: {fileID: 9100000, guid: 978dfb3f95c533c4aa9742b18291eb77, type: 2}
+  attackClip: {fileID: 7400000, guid: 33bd65223d28b1c4cb76a7bebb02a099, type: 3}
+  runClip: {fileID: 7400000, guid: 3e26d22a6afd2244a9c4ecaf6b9adf6e, type: 3}
+  deathClip: {fileID: 7400000, guid: a2734260adfadb94ca2629af8af3c3bf, type: 3}
+  idleClip: {fileID: 7400000, guid: ee2d211244aad6943b091b16a3d94a27, type: 3}

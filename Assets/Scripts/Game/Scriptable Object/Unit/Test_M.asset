@@ -10,23 +10,24 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 826a7d254cca7e547ab90347db98c1b9, type: 3}
-  m_Name: MageData
+  m_Name: Test_M
   m_EditorClassIdentifier: 
   entityName: Mage
   maxHP: 100
   attackDamage: 20
   attackCoreDamage: 5
-  attackImpactRatio: 0.5
+  attackImpactRatio: 0.7
   moveSpeed: 5
   entityScale: 0
   gold: 10
   unitType: Mage
   layer: 14
-  detectionRadius: 50
-  attackRange: 50
-  disengageRange: 50
+  detectionRadius: 25
+  attackRange: 25
+  disengageRange: 25
   attackPriority: 0
   attackType: 2
+  attackStrategy: {fileID: 11400000, guid: a6d8cb4be24dafd41bda1fe6fd8b6008, type: 2}
   redPrefab: {fileID: 3760281847762428348, guid: 55e13ddd82ca1894faa4e652df5ff335, type: 3}
   bluePrefab: {fileID: 3876098750152481945, guid: 7f9b069a340cf9c429780e018ce46296, type: 3}
   magicRadius: 10
@@ -34,7 +35,7 @@ MonoBehaviour:
   projectilePoolName: 
   projectileData: {fileID: 0}
   summonEffectPrefab: {fileID: 0}
-  attackEffectPrefab: {fileID: 146768, guid: c1f7cd26d86e36c44921a1c45d23513b, type: 3}
+  attackEffectPrefab: {fileID: 8378648546881499446, guid: 867c572a5be680d42a042d2349f10143, type: 3}
   takeDamageEffectPrefeb: {fileID: 0}
   deathEffectPrefab: {fileID: 0}
   summonSound: {fileID: 0}
