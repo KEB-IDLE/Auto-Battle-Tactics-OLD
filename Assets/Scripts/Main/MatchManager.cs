@@ -4,7 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class MatchManager : MonoBehaviour
+public class MatchManager : MonoBehaviour, IMatchInterface
 {
     public TMP_Text matchTimerText;  // 매칭 대기 시간 표시 텍스트
     private Coroutine matchTimerCoroutine;  // 타이머 코루틴 참조

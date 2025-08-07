@@ -1,6 +1,7 @@
 using UnityEngine;
 using TMPro;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class TimerManager : MonoBehaviour
 {
@@ -98,6 +99,10 @@ public class TimerManager : MonoBehaviour
         }
 
         countdownText.text = "...";
+        if (SceneManager.GetActiveScene().name.Contains("Battle"))
+        {
+            GameManager2.Instance?.LockAllUnits();
+        }
 
         Debug.Log("📤 [UI] 준비 완료 전송");
         UserNetwork.Instance?.SendReady();
@@ -111,6 +116,7 @@ public class TimerManager : MonoBehaviour
                 battleManager.EndBattleByTimeout();
             }
         }
+
     }
 
     public void ResetUI()

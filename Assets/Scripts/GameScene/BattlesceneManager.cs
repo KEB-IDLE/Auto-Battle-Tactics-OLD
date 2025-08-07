@@ -55,7 +55,7 @@ public class BattleSceneManager : MonoBehaviour
             var entity = go.GetComponent<Entity>();
             entity.SetUnitId(msg.unitId);
             entity.SetOwnerId(msg.ownerId);
-            GameManager2.Instance.Register(entity);
+            GameManager2.Instance.RegisterBattleEntity(entity);
 
             go.GetComponent<TeamComponent>()?.SetTeam(parsedTeam);
 
@@ -73,6 +73,25 @@ public class BattleSceneManager : MonoBehaviour
 
         Debug.Log("🚩 [BattleSceneManager] 복원 완료 신호 전송됨");
         GameManager2.Instance?.NotifyBattleSceneReady();
+
+        // 🔁 코어 체력 복원 및 체력바 업데이트
+        var cores = UnityEngine.Object.FindObjectsByType<Core>(FindObjectsSortMode.None);
+        foreach (var core in cores)
+        {
+            var team = core.GetComponent<TeamComponent>().Team;
+            var hpComponent = core.GetComponent<HealthComponent>();
+            float restoredHp = UserNetwork.Instance.GetSavedCoreHp(team);
+
+            hpComponent.Initialize(restoredHp);
+
+            // ✅ 체력바 연결
+            var healthBar = core.GetComponentInChildren<HealthBar>();
+            if (healthBar != null)
+            {
+                healthBar.Initialize(hpComponent);
+                Debug.Log($"🖼️ [UI] {team} 코어 체력바 갱신 완료");
+            }
+        }
 
         yield return new WaitUntil(() => TimerManager.Instance != null && TimerManager.Instance.countdownText != null);
         Debug.Log("⏲ 전투씬에서 타이머 직접 시작함");
@@ -114,7 +133,7 @@ public class BattleSceneManager : MonoBehaviour
             var hp = core.GetComponent<HealthComponent>()?.CurrentHp ?? 0f;
             var team = core.GetComponent<TeamComponent>()?.Team ?? Team.Red;
             Debug.Log($"📤 {team} 코어 체력 서버 전송: {hp}");
-            UserNetwork.Instance?.SendCoreHp(team, hp);
+            UserNetwork.Instance?.SaveCoreHp(team, hp);
         }
 
         // 3. 준비 완료 전송

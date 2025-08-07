@@ -35,9 +35,13 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
         maxHP = hp;
         currentHP = hp;
         isTargetable = true;
+
         if (damageRoutine == null)
             damageRoutine = StartCoroutine(ApplyDamageEndOfFrame());
+        // ✅ UI에 체력 변화 알림
+        OnHealthChanged?.Invoke(currentHP, maxHP);
     }
+
 
 
     public bool IsAlive() => currentHP > 0f;
@@ -90,7 +94,7 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
         yield return new WaitForSeconds(deathAnimDuration);
 
         var entity = GetComponent<Entity>();
-        if(entity != null)
+        if (entity != null)
         {
             entity.UnbindEvent();
             Destroy(gameObject);
@@ -104,8 +108,13 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
                 Destroy(gameObject);
             }
         }
-       
     }
+    public void RestoreHP(float hp)
+    {
+        currentHP = Mathf.Clamp(hp, 0, maxHP);
+        OnHealthChanged?.Invoke(currentHP, maxHP);
+    }
+
     public bool IsTargetable() => isTargetable;
     public float CurrentHp => currentHP;
     public float MaxHp => maxHP;

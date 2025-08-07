@@ -34,7 +34,7 @@ MonoBehaviour:
   projectilePoolName: 
   projectileData: {fileID: 0}
   summonEffectPrefab: {fileID: 0}
-  attackEffectPrefab: {fileID: 146768, guid: c1f7cd26d86e36c44921a1c45d23513b, type: 3}
+  attackEffectPrefab: {fileID: 0}
   takeDamageEffectPrefeb: {fileID: 0}
   deathEffectPrefab: {fileID: 0}
   summonSound: {fileID: 0}
