@@ -2,7 +2,7 @@
 using UnityEngine;
 
 /// <summary>
-/// SessionManager는 로그인한 유저의 세션 정보를 저장하고 관리하는 싱글턴 클래스입니다.
+/// 로그인한 유저의 세션 정보를 저장하고 관리하는 싱글턴 클래스입니다.
 /// 유저 프로필, 기록, JWT 토큰 등을 전역에서 접근 가능하게 유지합니다.
 /// </summary>
 public class SessionManager : MonoBehaviour

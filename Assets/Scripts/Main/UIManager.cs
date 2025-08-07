@@ -10,25 +10,24 @@ using UnityEngine.UI;
 public class UIManager : MonoBehaviour
 {
     public static UIManager Instance;
-    public UserDataLoader userdataloader;
 
-    // 메인판넬 내 프로필
+    // MainPanel 내 프로필
     public TMP_Text nicknameText;
     public Image profileIcon;
     public Sprite[] profileIcons;
     public TMP_Text levelText;
     public TMP_Text goldText;
 
-    // 커스텀판넬 아이콘
+    // CustomPanel 아이콘
     public Image[] iconImages;
     Color enabledColor = Color.white;
     Color disabledColor = new Color(1f, 1f, 1f, 80f / 255f);
 
-    // 커스텀판넬 캐릭터
+    // CustomPanel 캐릭터
     public GameObject[] characterPrefabs;
     private GameObject currentCharacterInstance;
 
-    // 내 랭킹
+    // RankingPanel 내 랭킹
     public Image rankProfileIcon;
     public TMP_Text rankNicknameText;
     public TMP_Text globalRankText;
@@ -36,7 +35,7 @@ public class UIManager : MonoBehaviour
     public TMP_Text rankWinsText;
     public TMP_Text rankPointText;
 
-    // 글로벌 랭킹
+    // RankingPanel 글로벌 랭킹
     public TMP_Text[] rankNumberTexts;   // 순위 텍스트
     public Image[] rankIcons;            // 아이콘
     public TMP_Text[] rankNameTexts;     // 닉네임 텍스트
@@ -68,7 +67,7 @@ public class UIManager : MonoBehaviour
     /// </summary>
     private IEnumerator UpdateProfileCharacter(int charId)
     {
-        yield return UserManager.Instance.SetProfileCharacter(
+        yield return GameAPIClient.Instance.SetProfileCharacter(
             charId,
             profile => { SessionManager.Instance.profile = profile; },
             err => Debug.LogWarning("Main champion update failed: " + err)
@@ -111,12 +110,13 @@ public class UIManager : MonoBehaviour
         levelText.text = "Lv. " + profile.level.ToString();
         goldText.text = profile.gold.ToString();
 
-        int iconId = profile.profile_icon_id;
+        int iconId = profile.profile_icon_id - 1;
         if (iconId >= 0 && iconId < profileIcons.Length)
         {
             profileIcon.sprite = profileIcons[iconId];
         }
 
+        HighlightSelectedIcon(SessionManager.Instance.profile.profile_icon_id - 1);
         RefreshIconButton();
     }
 
@@ -172,7 +172,7 @@ public class UIManager : MonoBehaviour
     // 아이콘 구매 요청
     public void PurchaseProfileIcon(int iconId)
     {
-        StartCoroutine(UserManager.Instance.PurchaseIcon(
+        StartCoroutine(GameAPIClient.Instance.PurchaseIcon(
             iconId,
             res =>
             {
@@ -198,7 +198,7 @@ public class UIManager : MonoBehaviour
     // 프로필 아이콘 변경
     public void SetProfileIcon(int iconId)
     {
-        StartCoroutine(UserManager.Instance.SetProfileIcon(
+        StartCoroutine(GameAPIClient.Instance.SetProfileIcon(
             iconId,
             profile =>
             {
@@ -214,7 +214,7 @@ public class UIManager : MonoBehaviour
     // 레벨 변경
     public void ChangeLevel(int deltaLevel)
     {
-        StartCoroutine(UserManager.Instance.AddLevel(
+        StartCoroutine(GameAPIClient.Instance.AddLevel(
             deltaLevel,
             onComplete: UpdateProfile
         ));
@@ -223,7 +223,7 @@ public class UIManager : MonoBehaviour
     // 경험치 변경
     public void ChangeExp(int deltaExp)
     {
-        StartCoroutine(UserManager.Instance.AddExp(
+        StartCoroutine(GameAPIClient.Instance.AddExp(
             deltaExp,
             onComplete: UpdateProfile
         ));
@@ -232,7 +232,7 @@ public class UIManager : MonoBehaviour
     // 골드 변경
     public void ChangeGold(int deltaGold)
     {
-        StartCoroutine(UserManager.Instance.AddGold(
+        StartCoroutine(GameAPIClient.Instance.AddGold(
             deltaGold,
             onComplete: UpdateProfile
         ));
@@ -254,7 +254,7 @@ public class UIManager : MonoBehaviour
             rank_point = record.rank_point + deltaPoint
         };
 
-        StartCoroutine(UserManager.Instance.UpdateRecord(
+        StartCoroutine(GameAPIClient.Instance.UpdateRecord(
             req,
             updated =>
             {
@@ -275,7 +275,7 @@ public class UIManager : MonoBehaviour
     // 글로벌 랭킹 조회 요청
     public void GetGlobalRanking()
     {
-        StartCoroutine(UserManager.Instance.GetGlobalRanking(
+        StartCoroutine(GameAPIClient.Instance.GetGlobalRanking(
             entries => UpdateGlobalRankingUI(entries),
             err => Debug.LogError("Ranking API Error: " + err)
         ));
