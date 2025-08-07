@@ -8107,7 +8107,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1785153142}
         m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
-        m_MethodName: RecordButton
+        m_MethodName: TestRecord
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
