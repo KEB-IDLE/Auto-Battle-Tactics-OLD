@@ -4,42 +4,42 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 게임 클라이언트의 UI를 관리하는 싱글턴 클래스입니다.
-/// 유저 프로필, 커스터마이징, 랭킹, 재화 등의 UI를 서버와 연동하여 갱신하거나 처리합니다.
+/// MainScene UI 상태들을 관리하는 싱글턴 클래스입니다.
+/// 유저 프로필, 캐릭터 커스터마이징, 랭킹, 재화 등 UI 요소를 서버 데이터와 동기화하고 갱신합니다.
 /// </summary>
 public class UIManager : MonoBehaviour
 {
     public static UIManager Instance;
 
-    // MainPanel 내 프로필
-    public TMP_Text nicknameText;
-    public Image profileIcon;
-    public Sprite[] profileIcons;
-    public TMP_Text levelText;
-    public TMP_Text goldText;
+    // MainPanel - 유저 프로필 관련 UI 요소
+    public TMP_Text nicknameText;         // 닉네임 텍스트
+    public Image profileIcon;             // 프로필 아이콘 이미지
+    public Sprite[] profileIcons;         // 프로필 아이콘 스프라이트 배열
+    public TMP_Text levelText;            // 레벨 텍스트
+    public TMP_Text goldText;             // 골드 텍스트
 
-    // CustomPanel 아이콘
-    public Image[] iconImages;
-    Color enabledColor = Color.white;
-    Color disabledColor = new Color(1f, 1f, 1f, 80f / 255f);
+    // CustomPanel - 프로필 아이콘 관련 UI 요소
+    public Image[] iconImages;                                  // 아이콘 버튼 이미지 배열
+    Color enabledColor = Color.white;                           // 아이콘 활성화 색상
+    Color disabledColor = new Color(1f, 1f, 1f, 80f / 255f);    // 비활성화 색상(반투명)
 
-    // CustomPanel 캐릭터
-    public GameObject[] characterPrefabs;
-    private GameObject currentCharacterInstance;
+    // CustomPanel - 캐릭터 관련 UI 요소
+    public GameObject[] characterPrefabs;           // 캐릭터 프리팹 배열
+    private GameObject currentCharacterInstance;    // 현재 씬에 생성된 캐릭터 인스턴스
 
-    // RankingPanel 내 랭킹
-    public Image rankProfileIcon;
-    public TMP_Text rankNicknameText;
-    public TMP_Text globalRankText;
-    public TMP_Text rankMatchText;
-    public TMP_Text rankWinsText;
-    public TMP_Text rankPointText;
+    // RankingPanel - 단일 유저 랭킹 정보 UI 요소
+    public Image rankProfileIcon;         // 랭킹 프로필 아이콘
+    public TMP_Text rankNicknameText;     // 랭킹 닉네임 텍스트
+    public TMP_Text globalRankText;       // 글로벌 랭킹 텍스트
+    public TMP_Text rankMatchText;        // 매치 횟수 텍스트
+    public TMP_Text rankWinsText;         // 승리 횟수 텍스트
+    public TMP_Text rankPointText;        // 랭킹 점수 텍스트
 
-    // RankingPanel 글로벌 랭킹
-    public TMP_Text[] rankNumberTexts;   // 순위 텍스트
-    public Image[] rankIcons;            // 아이콘
-    public TMP_Text[] rankNameTexts;     // 닉네임 텍스트
-    public TMP_Text[] rankPointTexts;    // 점수 텍스트
+    // RankingPanel - 글로벌 랭킹 리스트 UI 요소
+    public TMP_Text[] rankNumberTexts;    // 순위 텍스트 배열
+    public Image[] rankIcons;             // 아이콘 이미지 배열
+    public TMP_Text[] rankNameTexts;      // 닉네임 텍스트 배열
+    public TMP_Text[] rankPointTexts;     // 점수 텍스트 배열
 
     private void Awake()
     {
@@ -55,22 +55,25 @@ public class UIManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 메인 캐릭터 선택 - 서버에 저장 후 UI 갱신
+    /// 메인 프로필 캐릭터를 서버에 저장하고 UI 갱신을 시작합니다.
     /// </summary>
+    /// <param name="charId">선택한 캐릭터 ID</param>
     public void SetProfileCharacter(int charId)
     {
         StartCoroutine(UpdateProfileCharacter(charId));
     }
 
     /// <summary>
-    /// 프로필 캐릭터 변경 요청 후, 세션/캐릭터/UI 갱신
+    /// 서버에 프로필 캐릭터 변경 요청을 보내고,
+    /// 성공 시 세션 데이터와 UI 캐릭터를 갱신합니다.
     /// </summary>
+    /// <param name="charId">변경할 캐릭터 ID</param>
     private IEnumerator UpdateProfileCharacter(int charId)
     {
         yield return GameAPIClient.Instance.SetProfileCharacter(
             charId,
             profile => { SessionManager.Instance.profile = profile; },
-            err => Debug.LogWarning("Main champion update failed: " + err)
+            err => Debug.LogWarning("메인 캐릭터 변경 실패: " + err)
         );
 
         yield return SpawnCharacter(charId);
@@ -78,15 +81,17 @@ public class UIManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 캐릭터 프리팹을 씬에 스폰
+    /// 캐릭터 프리팹을 씬에 생성(스폰)합니다.
+    /// 기존 캐릭터 인스턴스가 있으면 제거 후 새로 생성합니다.
     /// </summary>
+    /// <param name="charId">생성할 캐릭터 ID</param>
     private IEnumerator SpawnCharacter(int charId)
     {
         int prefabIndex = charId - 1;
 
         if (prefabIndex < 0 || prefabIndex >= characterPrefabs.Length)
         {
-            Debug.LogWarning("Invalid character ID: " + charId);
+            Debug.LogWarning("잘못된 캐릭터 ID: " + charId);
             yield break;
         }
 
@@ -100,7 +105,7 @@ public class UIManager : MonoBehaviour
     }
 
     /// <summary>
-    /// UI 요소를 SessionManager의 유저 정보로 갱신
+    /// 세션에 저장된 유저 프로필 정보를 UI 요소에 반영하여 갱신합니다.
     /// </summary>
     public void UpdateProfile()
     {
@@ -120,33 +125,36 @@ public class UIManager : MonoBehaviour
         RefreshIconButton();
     }
 
-    // 아이콘 크기 초기화 후 특정 아이콘만 강조
+    /// <summary>
+    /// 프로필 아이콘 버튼 UI에서 선택된 아이콘만 강조 표시합니다.
+    /// </summary>
+    /// <param name="iconIndex">선택된 아이콘 인덱스</param>
     public void HighlightSelectedIcon(int iconIndex)
     {
         if (iconImages == null || iconImages.Length == 0) return;
 
-        // 이전 선택 아이콘 크기 리셋
+        // 모든 아이콘 크기 초기화
         for (int i = 0; i < iconImages.Length; i++)
         {
             iconImages[i].transform.localScale = Vector3.one;
         }
 
-        // 현재 선택 아이콘 확대
+        // 선택된 아이콘만 크기 확대 및 버튼 선택 상태 적용
         if (iconIndex >= 0 && iconIndex < iconImages.Length)
         {
             iconImages[iconIndex].transform.localScale = new Vector3(1.2f, 1.2f, 1f);
 
-            // Button의 "Selected Color" 상태 적용
             Button selectedBtn = iconImages[iconIndex].GetComponent<Button>();
             if (selectedBtn != null)
             {
-                // 선택 상태를 강제로 트리거
-                selectedBtn.Select();
+                selectedBtn.Select(); // 강제로 선택 상태로 변경
             }
         }
     }
 
-    // 프로필 아이콘 시각화
+    /// <summary>
+    /// 프로필 아이콘 소유 여부에 따라 아이콘 버튼 색상을 갱신합니다.
+    /// </summary>
     public void RefreshIconButton()
     {
         var ownedIcons = SessionManager.Instance.ownedProfileIcons;
@@ -158,7 +166,11 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    // 아이콘 버튼 클릭시
+    /// <summary>
+    /// 프로필 아이콘 버튼 클릭 시 호출됩니다.
+    /// 소유한 아이콘이면 프로필 아이콘 변경, 그렇지 않으면 구매를 시도합니다.
+    /// </summary>
+    /// <param name="iconId">클릭한 아이콘 ID</param>
     public void OnClickIcon(int iconId)
     {
         var ownedIcons = SessionManager.Instance.ownedProfileIcons;
@@ -169,7 +181,10 @@ public class UIManager : MonoBehaviour
             PurchaseProfileIcon(iconId);
     }
 
-    // 아이콘 구매 요청
+    /// <summary>
+    /// 서버에 프로필 아이콘 구매 요청을 보내고 결과에 따라 UI 및 세션을 갱신합니다.
+    /// </summary>
+    /// <param name="iconId">구매할 아이콘 ID</param>
     public void PurchaseProfileIcon(int iconId)
     {
         StartCoroutine(GameAPIClient.Instance.PurchaseIcon(
@@ -178,7 +193,7 @@ public class UIManager : MonoBehaviour
             {
                 if (res.success)
                 {
-                    Debug.Log($"Icon {iconId} purchased successfully.");
+                    Debug.Log($"아이콘 {iconId} 구매 성공.");
                     SessionManager.Instance.profile.gold = res.gold;
 
                     if (!SessionManager.Instance.ownedProfileIcons.Contains(iconId))
@@ -188,14 +203,17 @@ public class UIManager : MonoBehaviour
                 }
                 else
                 {
-                    Debug.LogWarning("Purchase failed: " + res.message);
+                    Debug.LogWarning("구매 실패: " + res.message);
                 }
             },
-            err => Debug.LogError("Icon purchase error: " + err)
+            err => Debug.LogError("아이콘 구매 에러: " + err)
         ));
     }
 
-    // 프로필 아이콘 변경
+    /// <summary>
+    /// 서버에 프로필 아이콘 변경 요청을 보내고 UI와 세션을 갱신합니다.
+    /// </summary>
+    /// <param name="iconId">변경할 아이콘 ID</param>
     public void SetProfileIcon(int iconId)
     {
         StartCoroutine(GameAPIClient.Instance.SetProfileIcon(
@@ -204,14 +222,16 @@ public class UIManager : MonoBehaviour
             {
                 SessionManager.Instance.profile = profile;
                 UpdateProfile();
-                GetGlobalRanking();
+                UpdateGlobalRanking();
             },
-            err => Debug.LogWarning("Profile icon update failed: " + err)
+            err => Debug.LogWarning("프로필 아이콘 변경 실패: " + err)
         ));
     }
 
-
-    // 레벨 변경
+    /// <summary>
+    /// 레벨 값을 변경 요청하고, 완료 후 UI를 갱신합니다.
+    /// </summary>
+    /// <param name="deltaLevel">변경할 레벨 증감량</param>
     public void ChangeLevel(int deltaLevel)
     {
         StartCoroutine(GameAPIClient.Instance.AddLevel(
@@ -220,7 +240,10 @@ public class UIManager : MonoBehaviour
         ));
     }
 
-    // 경험치 변경
+    /// <summary>
+    /// 경험치 값을 변경 요청하고, 완료 후 UI를 갱신합니다.
+    /// </summary>
+    /// <param name="deltaExp">변경할 경험치 증감량</param>
     public void ChangeExp(int deltaExp)
     {
         StartCoroutine(GameAPIClient.Instance.AddExp(
@@ -229,7 +252,10 @@ public class UIManager : MonoBehaviour
         ));
     }
 
-    // 골드 변경
+    /// <summary>
+    /// 골드 값을 변경 요청하고, 완료 후 UI를 갱신합니다.
+    /// </summary>
+    /// <param name="deltaGold">변경할 골드 증감량</param>
     public void ChangeGold(int deltaGold)
     {
         StartCoroutine(GameAPIClient.Instance.AddGold(
@@ -238,11 +264,15 @@ public class UIManager : MonoBehaviour
         ));
     }
 
-
-
-
-    // 랭크 전적 변경 버튼
-    public void UpdateUserRecord(int deltaMatch, int deltaWins, int deltaLosses, int deltaPoint)
+    /// <summary>
+    /// 랭크 전적(매치 수, 승리, 패배, 점수) 변경 요청을 서버에 보내고,
+    /// 성공 시 UI와 글로벌 랭킹을 갱신합니다.
+    /// </summary>
+    /// <param name="deltaMatch">매치 수 증감량</param>
+    /// <param name="deltaWins">승리 수 증감량</param>
+    /// <param name="deltaLosses">패배 수 증감량</param>
+    /// <param name="deltaPoint">랭킹 점수 증감량</param>
+    public void ChangeRecord(int deltaMatch, int deltaWins, int deltaLosses, int deltaPoint)
     {
         var record = SessionManager.Instance.record;
 
@@ -259,56 +289,56 @@ public class UIManager : MonoBehaviour
             updated =>
             {
                 SessionManager.Instance.record = updated;
-                UpdateRecordUI();
-                GetGlobalRanking();
+                UpdateRecord();
+                UpdateGlobalRanking();
             },
-            err => Debug.LogWarning("Failed to update user record: " + err)
+            err => Debug.LogWarning("랭크 전적 업데이트 실패: " + err)
         ));
     }
 
-    // 테스트용
-    public void RecordButton()
+    /// <summary>
+    /// 테스트용 버튼 함수 - 랭크 전적 업데이트 시뮬레이션
+    /// </summary>
+    public void TestRecord()
     {
-        UpdateUserRecord(1, 1, 0, 10);
+        ChangeRecord(1, 1, 0, 10);
     }
 
-    // 글로벌 랭킹 조회 요청
-    public void GetGlobalRanking()
+    /// <summary>
+    /// 서버에서 글로벌 랭킹 데이터를 받아와 UI를 갱신합니다.
+    /// </summary>
+    public void UpdateGlobalRanking()
     {
         StartCoroutine(GameAPIClient.Instance.GetGlobalRanking(
-            entries => UpdateGlobalRankingUI(entries),
-            err => Debug.LogError("Ranking API Error: " + err)
+            entries =>
+            {
+                for (int i = 0; i < entries.Length && i < rankNumberTexts.Length; i++)
+                {
+                    var entry = entries[i];
+
+                    rankNumberTexts[i].text = entry.rank.ToString();
+                    rankNameTexts[i].text = entry.nickname;
+                    rankPointTexts[i].text = entry.rank_point.ToString();
+
+                    int iconIndex = entry.profile_icon_id - 1;
+                    if (iconIndex >= 0 && iconIndex < profileIcons.Length)
+                        rankIcons[i].sprite = profileIcons[iconIndex];
+                    else
+                        Debug.LogWarning($"잘못된 아이콘 ID: {entry.profile_icon_id}");
+                }
+            },
+            err => Debug.LogError("랭킹 API 오류: " + err)
         ));
     }
 
-    // 글로벌 랭킹 UI
-    public void UpdateGlobalRankingUI(GlobalRankEntry[] entries)
-    {
-        for (int i = 0; i < entries.Length && i < rankNumberTexts.Length; i++)
-        {
-            var entry = entries[i];
-
-            // 순위, 닉네임, 포인트 각각 매핑
-            rankNumberTexts[i].text = entry.rank.ToString();
-            rankNameTexts[i].text = entry.nickname;
-            rankPointTexts[i].text = entry.rank_point.ToString();
-
-            // 아이콘 설정
-            int iconIndex = entry.profile_icon_id - 1;
-            if (iconIndex >= 0 && iconIndex < profileIcons.Length)
-                rankIcons[i].sprite = profileIcons[iconIndex];
-            else
-                Debug.LogWarning($"잘못된 아이콘 ID: {entry.profile_icon_id}");
-        }
-    }
-
-    // 랭크 전적 UI 갱신
-    public void UpdateRecordUI()
+    /// <summary>
+    /// 랭크 전적 UI 요소(매치 수, 승리, 점수, 글로벌 랭킹 등)를 갱신합니다.
+    /// </summary>
+    public void UpdateRecord()
     {
         var record = SessionManager.Instance.record;
         var profile = SessionManager.Instance.profile;
 
-        // 랭크 전적 텍스트
         if (rankMatchText != null)
             rankMatchText.text = $"{record.rank_match_count}";
         if (rankWinsText != null)
@@ -318,18 +348,16 @@ public class UIManager : MonoBehaviour
         if (globalRankText != null)
             globalRankText.text = $"{record.global_rank}";
 
-        // 닉네임 텍스트 업데이트
         if (rankNicknameText != null)
             rankNicknameText.text = profile.nickname;
 
-        // 프로필 아이콘 업데이트
         if (rankProfileIcon != null)
         {
             int iconIndex = profile.profile_icon_id - 1;
             if (iconIndex >= 0 && iconIndex < profileIcons.Length)
                 rankProfileIcon.sprite = profileIcons[iconIndex];
             else
-                Debug.LogWarning($"Invalid profile icon ID: {profile.profile_icon_id}");
+                Debug.LogWarning($"잘못된 프로필 아이콘 ID: {profile.profile_icon_id}");
         }
     }
 }

@@ -14,11 +14,11 @@ public class SessionInitializer : MonoBehaviour
         {
             UIManager.Instance.UpdateProfile();
 
-            UIManager.Instance.UpdateRecordUI();
+            UIManager.Instance.UpdateRecord();
 
             
 
-            UIManager.Instance.GetGlobalRanking();
+            UIManager.Instance.UpdateGlobalRanking();
 
             UIManager.Instance.SetProfileCharacter(SessionManager.Instance.profile.profile_char_id);
         }
