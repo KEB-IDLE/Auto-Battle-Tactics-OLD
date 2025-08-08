@@ -8,16 +8,17 @@ public class CoreRegistry : MonoBehaviour
     [SerializeField] private Transform redCoreTransform;
     [SerializeField] private Transform blueCoreTransform;
 
-    void Awake()
+    private void Awake()
     {
         if (Instance == null)
-        {
             Instance = this;
+        else
+        {
+            Destroy(gameObject);
+            return;
         }
-        else Destroy(gameObject);
-    }
-    private void Start()
-    {
+
+        // ✅ 코어 팀 미리 설정
         if (redCoreTransform != null)
             redCoreTransform.GetComponent<TeamComponent>()?.SetTeam(Team.Red);
 
@@ -25,6 +26,11 @@ public class CoreRegistry : MonoBehaviour
             blueCoreTransform.GetComponent<TeamComponent>()?.SetTeam(Team.Blue);
 
         Debug.Log("✅ 코어 팀 정보 설정 완료 (CoreRegistry)");
+    }
+
+    private void Start()
+    {
+
     }
 
 

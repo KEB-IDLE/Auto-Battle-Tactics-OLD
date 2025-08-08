@@ -13,6 +13,7 @@ public class BattleSceneManager : MonoBehaviour
 
     IEnumerator Start()
     {
+        battleEnded = false;
         Debug.Log("🟢 [BattleSceneManager] 전투 씬 시작됨 → 유닛 복원 시도");
 
         while (GameManager2.Instance == null)
@@ -74,24 +75,7 @@ public class BattleSceneManager : MonoBehaviour
         Debug.Log("🚩 [BattleSceneManager] 복원 완료 신호 전송됨");
         GameManager2.Instance?.NotifyBattleSceneReady();
 
-        // 🔁 코어 체력 복원 및 체력바 업데이트
-        var cores = UnityEngine.Object.FindObjectsByType<Core>(FindObjectsSortMode.None);
-        foreach (var core in cores)
-        {
-            var team = core.GetComponent<TeamComponent>().Team;
-            var hpComponent = core.GetComponent<HealthComponent>();
-            float restoredHp = UserNetwork.Instance.GetSavedCoreHp(team);
-
-            hpComponent.Initialize(restoredHp);
-
-            // ✅ 체력바 연결
-            var healthBar = core.GetComponentInChildren<HealthBar>();
-            if (healthBar != null)
-            {
-                healthBar.Initialize(hpComponent);
-                Debug.Log($"🖼️ [UI] {team} 코어 체력바 갱신 완료");
-            }
-        }
+        GameManager2.Instance?.RestoreAllCoreHp();
 
         yield return new WaitUntil(() => TimerManager.Instance != null && TimerManager.Instance.countdownText != null);
         Debug.Log("⏲ 전투씬에서 타이머 직접 시작함");
@@ -119,24 +103,23 @@ public class BattleSceneManager : MonoBehaviour
 
     private void EndBattleAndReturn()
     {
-        // 1. 모든 유닛 제거
         foreach (var entity in GameManager2.Instance.GetBattleEntities())
         {
-            if (entity != null)
-                Destroy(entity.gameObject);
+            if (entity == null) continue;
+
+            // 코어는 파괴하지 않고 비활성화만
+            if (entity.GetComponent<Core>() != null)
+            {
+                entity.gameObject.SetActive(false); // ✅ 코어 숨기기만 함
+                continue;
+            }
+
+            // 유닛은 제거
+            Destroy(entity.gameObject);
         }
 
-        // 2. 코어 체력 서버 전송
-        var cores = UnityEngine.Object.FindObjectsByType<Core>(FindObjectsSortMode.None);
-        foreach (var core in cores)
-        {
-            var hp = core.GetComponent<HealthComponent>()?.CurrentHp ?? 0f;
-            var team = core.GetComponent<TeamComponent>()?.Team ?? Team.Red;
-            Debug.Log($"📤 {team} 코어 체력 서버 전송: {hp}");
-            UserNetwork.Instance?.SaveCoreHp(team, hp);
-        }
-
-        // 3. 준비 완료 전송
+        GameManager2.Instance?.SaveAllCoreHp();
+        // 준비 완료 전송
         UserNetwork.Instance?.ResetReadyState();
         UserNetwork.Instance?.SendReady();
     }

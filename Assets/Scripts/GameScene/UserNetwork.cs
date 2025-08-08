@@ -195,18 +195,4 @@ public class UserNetwork : MonoBehaviour
 
         Debug.Log("🧹 [UserNetwork] 대기 중인 init 메시지 처리 완료");
     }
-
-    public void SaveCoreHp(Team team, float hp)
-    {
-        savedCoreHp[team] = hp;
-        Debug.Log($"💾 [UserNetwork] 코어 체력 로컬 저장됨: {team} → {hp}");
-    }
-
-    public float GetSavedCoreHp(Team team)
-    {
-        if (savedCoreHp.TryGetValue(team, out float hp))
-            return hp;
-
-        return 100f; // 기본값 (원하는 기본 체력으로 조정 가능)
-    }
 }

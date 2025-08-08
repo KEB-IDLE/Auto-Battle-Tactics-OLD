@@ -1,10 +1,8 @@
 using System.Collections;
 using UnityEngine;
 
-public class UserDataLoader : MonoBehaviour
+public class SessionInitializer : MonoBehaviour
 {
-    public UIManager uiManager;
-
     public IEnumerator LoadAllUserDataCoroutine()
     {
         yield return LoadProfile();
@@ -12,16 +10,17 @@ public class UserDataLoader : MonoBehaviour
         yield return LoadRecord();
         //yield return LoadMatchHistory();
 
-        if (uiManager != null)
+        if (UIManager.Instance != null)
         {
-            uiManager.UpdateProfileUI();    // �̱��� ����ϱ�
-            uiManager.UpdateRecordUI();
+            UIManager.Instance.UpdateProfile();
 
-            uiManager.InitializeIconSelection();
+            UIManager.Instance.UpdateRecord();
 
-            uiManager.GetGlobalRanking();
+            
 
-            StartCoroutine(UserManager.Instance.SpawnCharacter(SessionManager.Instance.profile.profile_char_id));   // usermanager ��� x �����ϱ�
+            UIManager.Instance.UpdateGlobalRanking();
+
+            UIManager.Instance.SetProfileCharacter(SessionManager.Instance.profile.profile_char_id);
         }
     }
 

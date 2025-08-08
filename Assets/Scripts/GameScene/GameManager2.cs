@@ -10,14 +10,14 @@ public class GameManager2 : MonoBehaviour
 
     public bool BattleStarted { get; private set; } = false;
     public bool IsPlacementPhase { get; private set; } = true;
-    private List<InitMessage> myInitMessages = new();
     private List<Entity> registeredEntities = new();
     private List<Entity> myUnits = new();
     private List<Entity> battleEntities = new List<Entity>();
-    private bool isSceneReady = false;
     private List<InitMessage> allInitMessages = new();
-    private List<InitMessage> latestPlacementInitMessages = new(); // 전투 전 저장된 배치 유닛 상태
 
+    private Dictionary<Team, float> coreHpByTeam = new();
+
+    private bool isSceneReady = false;
     public int CurrentRound { get; private set; } = 0;
     public int currentGold = 0;
 
@@ -87,12 +87,6 @@ public class GameManager2 : MonoBehaviour
 
         Debug.Log("✅ 전투 시작!");
     }
-
-    public void SaveInitMessage(InitMessage msg)
-    {
-        myInitMessages.Add(msg);
-        Debug.Log($"🧾 [GameManager2] InitMessage 저장됨: {msg.unitType} at ({msg.position[0]}, {msg.position[1]}, {msg.position[2]})");
-    }
     public void LockAllUnits()
     {
         foreach (var entity in registeredEntities.ToList())
@@ -150,10 +144,6 @@ public class GameManager2 : MonoBehaviour
     {
         return new List<InitMessage>(allInitMessages); // ✅ 전체 유닛 반환
     }
-    public void ClearInitMessages()
-    {
-        myInitMessages.Clear();
-    }
     public bool IsUnitRegistered(string unitId)
     {
         return registeredEntities.Any(e => e.UnitId == unitId);
@@ -184,7 +174,16 @@ public class GameManager2 : MonoBehaviour
 
         SendInitMessages();
 
-        yield return new WaitForSeconds(1f); // 최소 1초 이상 기다리기
+        yield return new WaitForSeconds(1f);
+
+        // ✅ 코어가 다 로드될 때까지 기다리기
+        yield return new WaitUntil(() =>
+        {
+            var cores = UnityEngine.Object.FindObjectsByType<Core>(FindObjectsSortMode.None);
+            return cores != null && cores.Length > 0;
+        });
+
+        SaveAllCoreHp();
 
         DeactivateAllMyUnits();
 
@@ -194,6 +193,7 @@ public class GameManager2 : MonoBehaviour
 
         StartBattle();
     }
+
 
     public void NotifyBattleSceneReady()
     {
@@ -205,7 +205,6 @@ public class GameManager2 : MonoBehaviour
 
         IsPlacementPhase = true;
         BattleStarted = false;
-        ClearInitMessages();
         CurrentRound++;
 
         SceneManager.LoadScene("3-GameScene2");
@@ -215,7 +214,7 @@ public class GameManager2 : MonoBehaviour
     }
     private IEnumerator RestoreScene()
     {
-        yield return null; // 씬 로딩 대기
+        yield return null;
 
         while (UnitManager.Instance == null)
             yield return null;
@@ -230,48 +229,14 @@ public class GameManager2 : MonoBehaviour
             }
         }
 
-        // 🔁 코어 체력 복원
-        // 🔁 코어 체력 복원 및 체력바 업데이트
-        var cores = Object.FindObjectsByType<Core>(FindObjectsSortMode.None);
-        foreach (var core in cores)
-        {
-            var team = core.GetComponent<TeamComponent>().Team;
-            var hpComponent = core.GetComponent<HealthComponent>();
-
-            // ✅ objectData에서 maxHP 가져오기
-            var coreData = core.GetComponent<Core>()?.GetObjectData();
-            if (coreData == null)
-            {
-                Debug.LogError($"❌ Core의 ObjectData가 비어 있음: {team}");
-                continue;
-            }
-
-            float maxHP = coreData.maxHP;
-            float restoredHp = UserNetwork.Instance.GetSavedCoreHp(team);
-
-            // ✅ 체력 컴포넌트 초기화 + 복원
-            hpComponent.Initialize(maxHP);     // maxHP 설정
-            hpComponent.RestoreHP(restoredHp); // currentHP 복원
-
-            // ✅ 체력바 연결
-            var healthBar = core.GetComponentInChildren<HealthBar>();
-            if (healthBar != null)
-            {
-                healthBar.Initialize(hpComponent);
-                healthBar.UpdateBar(hpComponent.CurrentHp, hpComponent.MaxHp);
-                Debug.Log($"🖼️ [UI] {team} 코어 체력바 갱신 완료 (배치 씬)");
-            }
-
-            Debug.Log($"🩺 {team} 코어 체력 복원됨: {restoredHp}/{maxHP}");
-        }
-
+        RestoreAllCoreHp();
 
         int updatedGold = currentGold + 50;
         GoldManager.Instance?.SetGold(updatedGold);
         Debug.Log($"💰 배치 골드 복원: {currentGold} + 50 → {updatedGold}");
 
-        TimerManager.Instance?.ResetUI(); // UI 초기화
-        TimerManager.Instance?.BeginCountdown(); // 🔥 수동 시작
+        TimerManager.Instance?.ResetUI();
+        TimerManager.Instance?.BeginCountdown();
 
         var teamController = Object.FindFirstObjectByType<TeamUIController>();
         if (teamController != null)
@@ -281,9 +246,80 @@ public class GameManager2 : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("⚠️ TeamUIController 찾지 못함");
+            Debug.LogWarning("⚠️ TeamUIController 못 찾음");
         }
     }
+
+    public void SaveAllCoreHp()
+    {
+        coreHpByTeam.Clear();
+
+        var cores = Object.FindObjectsByType<Core>(FindObjectsSortMode.None);
+        foreach (var core in cores)
+        {
+            var hp = core.GetComponent<HealthComponent>()?.CurrentHp ?? 0f;
+            var team = core.GetComponent<TeamComponent>()?.Team ?? Team.Red;
+
+            coreHpByTeam[team] = hp;
+            Debug.Log($"💾 [GameManager2] 코어 체력 저장됨: {team} → {hp}");
+        }
+    }
+    public void RestoreAllCoreHp()
+    {
+        if (!IsPlacementPhase)
+        {
+            Debug.LogWarning("❌ 전투 중에는 RestoreAllCoreHp 실행 금지됨");
+            return;
+        }
+
+        Debug.Log("📌 [검사용] RestoreAllCoreHp() 호출됨");
+
+        var cores = Object.FindObjectsByType<Core>(FindObjectsSortMode.None);
+        foreach (var core in cores)
+        {
+            var team = core.GetComponent<TeamComponent>()?.Team ?? Team.Red;
+            var hpComponent = core.GetComponent<HealthComponent>();
+            var coreData = core.GetObjectData();
+
+            if (coreData == null)
+            {
+                Debug.LogError($"❌ Core의 ObjectData가 비어 있음: {team}");
+                continue;
+            }
+
+            float maxHP = coreData.maxHP;
+            float restoredHp = coreHpByTeam.TryGetValue(team, out var savedHp) ? savedHp : maxHP;
+
+            // ✅ HealthComponent 초기화
+            if (!hpComponent.IsInitialized)
+            {
+                hpComponent.Initialize(maxHP);
+                Debug.Log($"⚙️ {team} Core HealthComponent 초기화 (최초 1회)");
+            }
+
+            // ✅ 체력 복원
+            hpComponent.RestoreHP(restoredHp);
+            Debug.Log($"🩺 {team} 코어 체력 복원됨: {restoredHp}/{maxHP}");
+
+            // ✅ 체력바 UI 연결 및 갱신
+            var healthBar = core.GetComponentInChildren<HealthBar>();
+            if (healthBar != null)
+            {
+                healthBar.Initialize(hpComponent);
+                Debug.Log($"🖼️ [UI] {team} 코어 체력바 갱신 완료");
+            }
+            else
+            {
+                Debug.LogWarning($"⚠️ {team} 코어에 HealthBar 컴포넌트 없음");
+            }
+
+            // ✅ 이벤트 재바인딩
+            core.BindEvent();
+        }
+    }
+
+
+
 
     public List<Entity> GetBattleEntities()
     {
