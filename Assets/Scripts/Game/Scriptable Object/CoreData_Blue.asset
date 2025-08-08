@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: CoreData_Blue
   m_EditorClassIdentifier: 
   maxHP: 100
-  objectPrefab: {fileID: 0}
+  objectPrefab: {fileID: 100000, guid: 637b3bb1a53fd584b8b2f29eddb05290, type: 3}
   takeDamageEffectPrefab: {fileID: 0}
   deathEffectPrefab: {fileID: 0}
   takeDamageSound: {fileID: 0}

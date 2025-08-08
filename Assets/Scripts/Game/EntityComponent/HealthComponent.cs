@@ -12,6 +12,7 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
     [HideInInspector] public float pendingDamage = 0f;
     private bool isTargetable;
     private float deathAnimDuration;
+    private bool isInitialized = false;
 
 #pragma warning disable 67
     public event Action<Transform> OnTakeDamageEffect;
@@ -36,6 +37,8 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
 
     public void Initialize(float hp)
     {
+        if (isInitialized) return;
+
         logical_maxHP = hp;
         display_maxHP = hp;
         logical_currentHP = hp;
@@ -43,6 +46,8 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
         isTargetable = true;
         if (damageRoutine == null)
             damageRoutine = StartCoroutine(ApplyDamageEndOfFrame());
+
+        isInitialized = true;
     }
 
 
@@ -112,7 +117,13 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
     public void RestoreHP(float hp)
     {
         logical_currentHP = Mathf.Clamp(hp, 0, logical_maxHP);
+        display_currentHP = logical_currentHP;
         OnHealthChanged?.Invoke(logical_currentHP, logical_maxHP);
+    }
+    public void ForceInitialize(float hp)
+    {
+        isInitialized = false;
+        Initialize(hp);
     }
 
     public bool IsAlive() => logical_currentHP > 0f;
@@ -120,4 +131,6 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
     public bool IsTargetable() => isTargetable;
     public float CurrentHp => logical_currentHP;
     public float MaxHp => logical_maxHP;
+    public bool IsInitialized => isInitialized;
+
 }

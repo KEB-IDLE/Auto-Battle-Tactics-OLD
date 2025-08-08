@@ -27,7 +27,7 @@ MonoBehaviour:
   disengageRange: 50
   attackPriority: 0
   attackType: 2
-  attackStrategy: {fileID: 0}
+  attackStrategy: {fileID: 11400000, guid: a6d8cb4be24dafd41bda1fe6fd8b6008, type: 2}
   redPrefab: {fileID: 3760281847762428348, guid: 55e13ddd82ca1894faa4e652df5ff335, type: 3}
   bluePrefab: {fileID: 3876098750152481945, guid: 7f9b069a340cf9c429780e018ce46296, type: 3}
   magicRadius: 10

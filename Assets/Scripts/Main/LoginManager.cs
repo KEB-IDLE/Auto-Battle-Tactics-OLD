@@ -3,24 +3,27 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
+/// <summary>
+/// 로그인 및 회원가입 UI를 관리하고, 서버와의 인증 통신을 수행하는 매니저 클래스입니다.
+/// </summary>
 public class LoginManager : MonoBehaviour
 {
     public static LoginManager Instance { get; private set; }
 
-    public TMP_InputField emailInput;
-    public TMP_InputField passwordInput;
-    public Button loginButton;
-    public Button openRegisterButton;
-    public TMP_Text statusText;
+    // === 로그인 UI 요소 ===
+    public TMP_InputField emailInput;        // 로그인 이메일 입력 필드
+    public TMP_InputField passwordInput;     // 로그인 비밀번호 입력 필드
+    public TMP_Text statusText;              // 로그인 상태 메시지 출력 텍스트
 
-    public GameObject registerPanel;
-    public TMP_InputField registerEmailInput;
-    public TMP_InputField registerPasswordInput;
-    public TMP_InputField registerNicknameInput;
-    public Button registerSubmitButton;
-    public Button registerCancelButton;
-    public TMP_Text registerStatusText;
+    // === 회원가입 UI 요소 ===
+    public TMP_InputField registerEmailInput;    // 회원가입 이메일 입력 필드
+    public TMP_InputField registerPasswordInput; // 회원가입 비밀번호 입력 필드
+    public TMP_InputField registerNicknameInput; // 회원가입 닉네임 입력 필드
+    public TMP_Text registerStatusText;          // 회원가입 상태 메시지 출력 텍스트
 
+    /// <summary>
+    /// 싱글턴 인스턴스를 초기화합니다.
+    /// </summary>
     private void Awake()
     {
         if (Instance == null)
@@ -34,6 +37,10 @@ public class LoginManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 로그인 버튼 클릭 시 호출됩니다. 입력값을 검증하고 서버에 로그인 요청을 보냅니다.
+    /// 성공 시 토큰을 저장하고 메인 씬으로 전환합니다.
+    /// </summary>
     public void OnLoginClicked()
     {
         string email = emailInput.text;
@@ -74,6 +81,10 @@ public class LoginManager : MonoBehaviour
         ));
     }
 
+    /// <summary>
+    /// 회원가입 제출 버튼 클릭 시 호출됩니다. 입력값을 검증하고 서버에 회원가입 요청을 보냅니다.
+    /// 성공 여부에 따라 상태 메시지를 갱신합니다.
+    /// </summary>
     public void OnRegisterSubmit()
     {
         string email = registerEmailInput.text;

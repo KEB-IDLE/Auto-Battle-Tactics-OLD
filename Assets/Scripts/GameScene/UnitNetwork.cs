@@ -67,7 +67,6 @@ public class UnitNetwork : MonoBehaviour
         string json = JsonUtility.ToJson(msg);
         socket.SendText(json);
 
-        GameManager2.Instance?.SaveInitMessage(msg);
         hasInitSent = true;
         Debug.Log($"\uD83D\uDCE4 [SendInit] {_entity.UnitId} 정보 서버 전송 완료");
     }
