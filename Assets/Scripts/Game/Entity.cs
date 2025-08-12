@@ -14,7 +14,7 @@ using UnityEngine.AI;
 
 public class Entity : MonoBehaviour
 {
-    [SerializeField] private EntityData entityData;
+    [HideInInspector] public EntityData entityData;
 
     private HealthComponent _health;
     private AttackComponent _attack;
@@ -141,8 +141,7 @@ public class Entity : MonoBehaviour
     }
 
 
-    public void SetData(EntityData data) => entityData = data;
-    public void SetOwnership(bool isMine) => _move.SetIsMine(isMine);
+
 
 
     public void BindEvent()
@@ -185,8 +184,7 @@ public class Entity : MonoBehaviour
         Debug.Log($"[Entity] SetUnitId: {id}");
     }
 
-    public void SetOwnerId(string id)
-    {
-        OwnerId = id;
-    }
+    public void SetData(EntityData data) => entityData = data;
+    public void SetOwnership(bool isMine) => _move.SetIsMine(isMine);
+    public void SetOwnerId(string id) => OwnerId = id;
 }

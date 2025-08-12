@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 826a7d254cca7e547ab90347db98c1b9, type: 3}
   m_Name: Mage_Fire
   m_EditorClassIdentifier: 
-  entityName: Mage
+  entityName: Wizard_Fire
   maxHP: 100
   attackDamage: 20
   attackCoreDamage: 5
@@ -27,7 +27,7 @@ MonoBehaviour:
   disengageRange: 50
   attackPriority: 0
   attackType: 2
-  attackStrategy: {fileID: 11400000, guid: a6d8cb4be24dafd41bda1fe6fd8b6008, type: 2}
+  attackStrategy: {fileID: 11400000, guid: 20cb2e38087831c41aec53361d105567, type: 2}
   redPrefab: {fileID: 3760281847762428348, guid: 55e13ddd82ca1894faa4e652df5ff335, type: 3}
   bluePrefab: {fileID: 3876098750152481945, guid: 7f9b069a340cf9c429780e018ce46296, type: 3}
   magicRadius: 10
@@ -42,7 +42,7 @@ MonoBehaviour:
   attackSound: {fileID: 0}
   deathSound: {fileID: 0}
   animatorController: {fileID: 9100000, guid: 978dfb3f95c533c4aa9742b18291eb77, type: 2}
-  attackClip: {fileID: 7400000, guid: 314cbbc2e7d7942438aaa24a8866c9f0, type: 3}
+  attackClip: {fileID: 7400000, guid: f653247add3aab64bb8f0b4c6465a742, type: 3}
   runClip: {fileID: 7400000, guid: 58b522b345a775d4a9b69ba407ac6165, type: 3}
   deathClip: {fileID: 7400000, guid: 8a4ff3a854fe14b449c68d73693ddc38, type: 3}
   idleClip: {fileID: 7400000, guid: 0f32bec07db70154dacf4fbc48ecf254, type: 3}

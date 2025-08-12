@@ -45,11 +45,9 @@ public class EffectPool : MonoBehaviour, IObjectPool
         this.effectPrefab = effectPrefab;
         this.poolSize = poolSize;
 
-        // 기존 오브젝트들 정리
         for (int i = transform.childCount - 1; i >= 0; i--)
-        {
             DestroyImmediate(transform.GetChild(i).gameObject);
-        }
+
         pool.Clear();
 
         // 새로운 풀 생성
@@ -65,7 +63,6 @@ public class EffectPool : MonoBehaviour, IObjectPool
         Debug.Log($"✨ EffectPool '{poolName}' initialized with {poolSize} objects");
     }
 
-    // IObjectPool ����
     public GameObject Get(Vector3 position, Quaternion rotation)
     {
         GameObject obj = null;
@@ -76,9 +73,8 @@ public class EffectPool : MonoBehaviour, IObjectPool
             else obj = null;
         }
         if (obj == null)
-        {
             obj = Instantiate(effectPrefab, transform);
-        }
+
 
         obj.transform.position = position;
         obj.transform.rotation = rotation;
@@ -99,9 +95,7 @@ public class EffectPool : MonoBehaviour, IObjectPool
         if (obj == null || obj.Equals(null)) return;
         var particle = obj.GetComponent<ParticleSystem>();
         if (particle != null)
-        {
             particle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-        }
         obj.SetActive(false);
         pool.Enqueue(obj);
     }
