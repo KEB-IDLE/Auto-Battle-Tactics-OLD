@@ -104,7 +104,7 @@ public class LoginManager : MonoBehaviour
             nickname = nickname
         };
 
-        StartCoroutine(APIService.Instance.Post<RegisterRequest, ResponseData>(
+        StartCoroutine(APIService.Instance.Post<RegisterRequest, RegisterResponse>(
             APIEndpoints.Register,
             registerReq,
             res =>
@@ -132,6 +132,12 @@ public class LoginRequest
 }
 
 [System.Serializable]
+public class LoginResponse
+{
+    public string token;
+}
+
+[System.Serializable]
 public class RegisterRequest
 {
     public string email;
@@ -140,13 +146,7 @@ public class RegisterRequest
 }
 
 [System.Serializable]
-public class LoginResponse
-{
-    public string token;
-}
-
-[System.Serializable]
-public class ResponseData
+public class RegisterResponse
 {
     public bool success;
     public string message;
