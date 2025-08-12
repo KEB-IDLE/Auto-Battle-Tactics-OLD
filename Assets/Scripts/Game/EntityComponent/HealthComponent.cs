@@ -77,7 +77,11 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
         if (pendingDamage <= 0f) return;
 
         OnTakeDamageEffect?.Invoke(transform);
-        display_currentHP -= pendingDamage;
+
+        // 핵심: 디스플레이 HP는 '미리보기'로 산출 (중복 차감 방지)
+        float previewHp = Mathf.Max(0f, logical_currentHP - pendingDamage);
+        display_currentHP = previewHp;
+        
         OnHealthChanged?.Invoke(display_currentHP, display_maxHP);
     }
 
