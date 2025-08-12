@@ -37,6 +37,8 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
 
     void Update()
     {
+        if (!_agent.isOnNavMesh) return;
+
         if ( isGameEnded || _isAttackLock || !_health.IsAlive())
         {
             if (_isMoving)
@@ -69,6 +71,42 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
         _agent.acceleration = moveSpeed;
         _agent.autoBraking = false;
         _isMoving = false;
+
+        //////
+        ///20250808
+        //////
+        ///
+        switch (data.entityScale)
+        {
+            case EntityScale.Small:
+                transform.localScale = Vector3.one * 1f;
+                _agent.radius = 0.3f;
+                _agent.height = 1.0f;
+                _agent.agentTypeID = GetAgentTypeIDForScale(data.entityScale);
+                break;
+            case EntityScale.Medium:
+                transform.localScale = Vector3.one * 2f;
+                _agent.radius = 0.5f;
+                _agent.height = 2.0f;
+                _agent.agentTypeID = GetAgentTypeIDForScale(data.entityScale);
+                break;
+            case EntityScale.Large:
+                transform.localScale = Vector3.one * 3f;
+                _agent.radius = 1.0f;
+                _agent.height = 3.0f;
+                _agent.agentTypeID = GetAgentTypeIDForScale(data.entityScale);
+                break;
+        }
+        NavMeshHit hit;
+        if (NavMesh.SamplePosition(transform.position, out hit, 2f, NavMesh.AllAreas))
+        {
+            _agent.Warp(hit.position); // NavMesh 위로 이동
+        }
+
+        // 3. 경로 재설정
+        _agent.ResetPath();
+        if (coreTransform != null)
+            _agent.SetDestination(coreTransform.position);
 
     }
     private void OnAttackStateChanged(bool isAttacking)
@@ -115,6 +153,16 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
 
     public void SetIsMine(bool isMine) => _isMine = isMine;
 
+    int GetAgentTypeIDForScale(EntityScale scale)
+    {
+        switch (scale)
+        {
+            case EntityScale.Small: return 1479372276; // Small
+            case EntityScale.Medium: return -1923039037; // Medium
+            case EntityScale.Large: return -902729914; // large
+            default: return 1479372276;
+        }
+    }
 
 
 }

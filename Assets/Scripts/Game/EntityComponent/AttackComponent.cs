@@ -364,12 +364,12 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
 
 using System;
 using System.Collections;
+using JetBrains.Annotations;
 using UnityEngine;
 
 public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
 {
     // 기존 필드
-    private EntityData _entityData;
     [HideInInspector] public float attackDamage;
     [HideInInspector] public float attackCoreDamage;
     [HideInInspector] public float attackImpactRatio;
@@ -402,7 +402,6 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
 
     public void Initialize(EntityData data)
     {
-        _entityData = data;
         attackDamage = data.attackDamage;
         attackCoreDamage = data.attackCoreDamage;
         if (data.attackClip != null)
@@ -446,7 +445,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         if (newTarget != null)
         {
             var mono = newTarget as MonoBehaviour;
-            bool visible = true; // 예시, 필요시 개선
+            bool visible = true;
             if (firePoint != null && mono != null)
                 visible = IsTargetVisible(firePoint, mono.transform);
 
@@ -498,7 +497,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
     private void TryAttack(IDamageable target)
     {
         if (!CanAttack(target)) return;
-        attackStrategy?.Attack(this, target); // SO 전략 호출
+        attackStrategy?.Attack(this, target);
     }
 
     private IEnumerator AttackRoutine(IDamageable target)
@@ -535,6 +534,8 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         OnAttackStateChanged?.Invoke(false);
     }
 
+
+    public void ExecuteStrategyCoroutine(IEnumerator routine) => StartCoroutine(routine);
     public bool IsTargetVisible(Transform fireOrigin, Transform target)
     {
         Vector3 origin = fireOrigin.position;
@@ -549,7 +550,6 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
 
         return false;
     }
-
     public void StopAllAction()
     {
         isGameEnded = true;
@@ -561,14 +561,33 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         isAttackingFlag = false;
         isDead = true;
     }
-
-    /// <summary>
-    /// 2025.8.6
-    /// </summary>
     public void EventSender(Transform t) => OnAttackEffect?.Invoke(t);
     public Transform LockedTargetTransform => (lockedTarget as MonoBehaviour)?.transform;
     public bool IsAttacking() => isAttackingFlag;
     public bool isMelee => attackType == AttackType.Melee;
     public bool isRanged => attackType == AttackType.Ranged;
     public bool isMagic => attackType == AttackType.Magic;
+
+
+
+    private void OnDrawGizmosSelected()
+    {
+        EntityData data = GetComponent<Entity>().entityData;
+#if UNITY_EDITOR
+
+        if (data == null) return;
+
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, data.detectionRadius);
+
+        //Gizmos.color = Color.red;
+        //Gizmos.DrawWireSphere(transform.position, data.attackRange);
+
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawWireSphere(transform.position, data.disengageRange);
+
+        data.attackStrategy?.DrawGizmos(this, data);
+
+#endif
+    }
 }

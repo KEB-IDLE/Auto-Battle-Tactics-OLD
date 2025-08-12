@@ -8,7 +8,6 @@ public class EffectComponent : MonoBehaviour
     private GameObject attackEffect;
     private GameObject takeDamageEffect;
     private GameObject deathEffect;
-    private GameObject projectileAttackingEffect;
 
     public void Initialize(EntityData data)
     {
@@ -22,21 +21,9 @@ public class EffectComponent : MonoBehaviour
             this.deathEffect = data.deathEffectPrefab;
     }
 
-
-    public void PlayAttackEffect(Transform origin)
-    {
-        PlayEffect(attackEffect, origin, "attackEffect");
-    }
-
-    public void PlayTakeDamageEffect(Transform origin)
-    {
-        PlayEffect(takeDamageEffect, origin, "takeDamageEffect");
-    }
-
-    public void PlayDeathEffect(Transform origin)
-    {
-        PlayEffect(deathEffect, origin, "deathEffect");
-    }
+    public void PlayAttackEffect(Transform origin) => PlayEffect(attackEffect, origin, "attackEffect");
+    public void PlayTakeDamageEffect(Transform origin) => PlayEffect(takeDamageEffect, origin, "takeDamageEffect");
+    public void PlayDeathEffect(Transform origin) => PlayEffect(deathEffect, origin, "deathEffect");
 
     private void PlayEffect(GameObject effectPrefab, Transform origin, string effectType)
     {
@@ -46,7 +33,8 @@ public class EffectComponent : MonoBehaviour
 
             if (pool != null)
             {
-                var obj = pool.Get(origin.position, Quaternion.identity);
+                //var obj = pool.Get(origin.position, Quaternion.identity);
+                var obj = pool.Get(origin.position, origin.rotation * Quaternion.Euler(0, -90, 0));
 
                 var ps = obj.GetComponent<ParticleSystem>();
                 float duration = ps != null ? ps.main.duration : 1f;
