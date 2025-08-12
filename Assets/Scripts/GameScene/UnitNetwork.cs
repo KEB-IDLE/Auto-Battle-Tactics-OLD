@@ -22,6 +22,7 @@ public class UnitNetwork : MonoBehaviour
     private Entity _entity;
     private bool _isMyUnit = false;
     private bool hasInitSent = false;
+    public void ResetInitFlag() { hasInitSent = false; } 
 
     public void InitializeNetwork(bool isMine)
     {

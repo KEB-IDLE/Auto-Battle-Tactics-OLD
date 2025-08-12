@@ -57,16 +57,22 @@ public class GameManager2 : MonoBehaviour
     {
         if (entity == null || entity.gameObject == null) return;
 
-        if (battleEntities.Any(e => e.UnitId == entity.UnitId))
+        // 지난 라운드 잔재 제거
+        battleEntities.RemoveAll(e => e == null || e.gameObject == null);
+
+        // 같은 UnitId가 이미 있으면 새로 생성된 전투 유닛으로 참조 교체
+        int idx = battleEntities.FindIndex(e => e.UnitId == entity.UnitId);
+        if (idx >= 0)
         {
-            Debug.LogWarning($"⚠️ 유닛({entity.UnitId})은 이미 전투 유닛으로 등록됨 → 생략");
-            return;
+            battleEntities[idx] = entity;
+            Debug.Log($"♻️ 전투 유닛 참조 갱신: {entity.UnitId}");
         }
-
-        battleEntities.Add(entity);
-        Debug.Log($"✅ 전투 유닛 등록 완료: {entity.UnitId}");
+        else
+        {
+            battleEntities.Add(entity);
+            Debug.Log($"✅ 전투 유닛 등록 완료: {entity.UnitId}");
+        }
     }
-
 
     public void Unregister(Entity entity)
     {
@@ -89,27 +95,25 @@ public class GameManager2 : MonoBehaviour
     }
     public void LockAllUnits()
     {
-        foreach (var entity in registeredEntities.ToList())
+        // 배치 중이면 registeredEntities, 전투 중이면 battleEntities 잠금
+        var list = IsPlacementPhase ? registeredEntities : battleEntities;
+
+        foreach (var entity in list.ToList())
         {
             if (entity == null || entity.gameObject == null) continue;
 
-            // 이동 정지
             var move = entity.GetComponent<MoveComponent>();
             if (move != null) move.enabled = false;
 
-            // 공격 정지
             var atk = entity.GetComponent<AttackComponent>();
-            if (atk != null) atk.StopAllAction();  // isGameEnded 등 내부도 정리
+            if (atk != null) atk.StopAllAction();
 
-            // 애니메이션 정지 (즉시 멈춤)
             var animator = entity.GetComponent<Animator>();
             if (animator != null) animator.enabled = false;
         }
 
         Debug.Log("🛑 모든 유닛 행동 정지 완료");
     }
-
-
 
     public void SendInitMessages()
     {
@@ -170,7 +174,15 @@ public class GameManager2 : MonoBehaviour
 
     public IEnumerator GoToBattleScene()
     {
+        allInitMessages.Clear();
+
         currentGold = GoldManager.Instance?.GetCurrentGold() ?? 0;
+
+        foreach (var u in myUnits) u?.GetComponent<UnitNetwork>()?.ResetInitFlag();
+
+        // ★ 전송 전에 드래그/판매 비활성화(레이스 방지)
+        var drags = UnityEngine.Object.FindObjectsByType<DraggableUnit>(FindObjectsSortMode.None);
+        foreach (var d in drags) d.enabled = false;
 
         SendInitMessages();
 
@@ -224,6 +236,13 @@ public class GameManager2 : MonoBehaviour
             if (unit != null)
             {
                 unit.gameObject.SetActive(true);
+                // 🔹 DraggableUnit 보장 (있으면 패스, 없으면 붙임)
+                if (!unit.gameObject.TryGetComponent<DraggableUnit>(out _))
+                    unit.gameObject.AddComponent<DraggableUnit>();
+
+                // 🔹 OnMouse 이벤트용 Collider 보장(없을 때만)
+                if (!unit.gameObject.TryGetComponent<Collider>(out _))
+                    unit.gameObject.AddComponent<BoxCollider>();
                 Register(unit);
                 Debug.Log($"♻️ 유닛 복원됨: {unit.UnitId}");
             }
@@ -317,8 +336,13 @@ public class GameManager2 : MonoBehaviour
             core.BindEvent();
         }
     }
-
-
+    public void RemoveInitMessageByUnitId(string unitId)
+    {
+        int before = allInitMessages.Count;
+        allInitMessages.RemoveAll(m => m.unitId == unitId);
+        if (before != allInitMessages.Count)
+            Debug.Log($"🧹 init 메시지 제거: {unitId}");
+    }
 
 
     public List<Entity> GetBattleEntities()
@@ -329,6 +353,10 @@ public class GameManager2 : MonoBehaviour
     public bool IsSceneReady()
     {
         return isSceneReady;
+    }
+    public void ClearBattleEntities()
+    {
+        battleEntities.Clear();
     }
 }
 

@@ -119,6 +119,9 @@ public class BattleSceneManager : MonoBehaviour
         }
 
         GameManager2.Instance?.SaveAllCoreHp();
+
+        // ✅ 다음 라운드를 위해 전투 유닛 리스트 비우기
+        GameManager2.Instance?.ClearBattleEntities();
         // 준비 완료 전송
         UserNetwork.Instance?.ResetReadyState();
         UserNetwork.Instance?.SendReady();
