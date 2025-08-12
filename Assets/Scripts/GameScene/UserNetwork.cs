@@ -81,6 +81,7 @@ public class UserNetwork : MonoBehaviour
     async void Start()
     {
         socket = new WebSocket("ws://localhost:3000");
+        //socket = new WebSocket("ws://localhost:7979");
 
         socket.OnOpen += () => Debug.Log("🟢 [UserNetwork] 서버에 연결됨");
 
