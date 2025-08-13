@@ -54,6 +54,7 @@ public class BattleSceneManager : MonoBehaviour
 
             var go = Instantiate(prefab, position, Quaternion.identity);
             var entity = go.GetComponent<Entity>();
+            
             entity.SetUnitId(msg.unitId);
             entity.SetOwnerId(msg.ownerId);
             GameManager2.Instance.RegisterBattleEntity(entity);

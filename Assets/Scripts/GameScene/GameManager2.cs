@@ -199,7 +199,7 @@ public class GameManager2 : MonoBehaviour
 
         DeactivateAllMyUnits();
 
-        SceneManager.LoadScene("4-BattleScene");
+        SceneManager.LoadScene("3-BattleScene");
 
         yield return null;
 
@@ -219,7 +219,7 @@ public class GameManager2 : MonoBehaviour
         BattleStarted = false;
         CurrentRound++;
 
-        SceneManager.LoadScene("3-GameScene2");
+        SceneManager.LoadScene("2-GameScene");
 
         // ✅ 씬 로드 후 복원하는 코루틴 시작
         StartCoroutine(RestoreScene());
