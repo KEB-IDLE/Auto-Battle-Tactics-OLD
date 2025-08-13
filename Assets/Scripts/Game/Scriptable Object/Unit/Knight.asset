@@ -18,17 +18,17 @@ MonoBehaviour:
   attackCoreDamage: 5
   attackImpactRatio: 0.5
   moveSpeed: 5
-  entityScale: 0
+  entityScale: 1
   gold: 0
   unitType: Knight
   layer: 14
-  detectionRadius: 50
-  attackRange: 5
-  disengageRange: 10
-  attackPriority: 2
+  detectionRadius: 10
+  attackRange: 2
+  disengageRange: 5
+  attackPriority: 0
   attackType: 0
   attackStrategy: {fileID: 11400000, guid: ab6e9dfcffec7cf4b994f4d8d7a03b45, type: 2}
-  redPrefab: {fileID: 6159849336836508998, guid: b0fad61085f0abe4d9d39873fbe11e69, type: 3}
+  redPrefab: {fileID: 6159849336836508998, guid: 0414c6baeda086e47a9c31450d79af78, type: 3}
   bluePrefab: {fileID: 6159849336836508998, guid: b0fad61085f0abe4d9d39873fbe11e69, type: 3}
   magicRadius: 0
   projectilePrefab: {fileID: 0}
