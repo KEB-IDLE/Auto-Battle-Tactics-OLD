@@ -15,10 +15,9 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
     IAttackable _attacker;
     IDamageable _health;
     ITeamProvider _teamProvider;
-    private float moveSpeed;
     bool _isMoving;
     private bool _isAttackLock;
-    private bool isGameEnded = false;
+    private bool _isGameEnded;
 
     private void Awake()
     {
@@ -37,25 +36,35 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
 
     void Update()
     {
-        if (!_agent.isOnNavMesh) return;
+        if (!_agent.isOnNavMesh)
+        {
+            Debug.LogError("unit is not on navmesh.");
+            return;
+        }
 
-        if ( isGameEnded || _isAttackLock || !_health.IsAlive())
+        if ( _isGameEnded || _isAttackLock || !_health.IsAlive())
         {
             if (_isMoving)
                 _isMoving = false;
             return;
         }
         if (_agent.isStopped)
+        {
             _agent.isStopped = false;
-
+        }
+            
         var target = _attacker.DetectTarget();
+
         if (target != null && target.IsAlive() && CanSee(target))
         {
             var mb = target as MonoBehaviour;
             _agent.SetDestination(mb.transform.position);
         }
-        else if(coreTransform != null) 
+        else if (coreTransform != null)
+        {
             _agent.SetDestination(coreTransform.position);
+        }
+            
 
         if (!_isMoving)
         {
@@ -66,16 +75,13 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
 
     public void Initialize(EntityData data)
     {
-        moveSpeed = data.moveSpeed;
-        _agent.speed = moveSpeed;
-        _agent.acceleration = moveSpeed;
+        _agent.speed = data.moveSpeed;
+        _agent.acceleration = data.moveSpeed;
         _agent.autoBraking = false;
         _isMoving = false;
+        _isAttackLock = false;
+        _isGameEnded = false;
 
-        //////
-        ///20250808
-        //////
-        ///
         switch (data.entityScale)
         {
             case EntityScale.Small:
@@ -85,13 +91,13 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
                 _agent.agentTypeID = GetAgentTypeIDForScale(data.entityScale);
                 break;
             case EntityScale.Medium:
-                transform.localScale = Vector3.one * 2f;
+                transform.localScale = Vector3.one * 1.2f;
                 _agent.radius = 0.5f;
                 _agent.height = 2.0f;
                 _agent.agentTypeID = GetAgentTypeIDForScale(data.entityScale);
                 break;
             case EntityScale.Large:
-                transform.localScale = Vector3.one * 3f;
+                transform.localScale = Vector3.one * 1.5f;
                 _agent.radius = 1.0f;
                 _agent.height = 3.0f;
                 _agent.agentTypeID = GetAgentTypeIDForScale(data.entityScale);
@@ -147,7 +153,7 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
 
     public void StopAllAction()
     {
-        isGameEnded = true;
+        _isGameEnded = true;
         _agent.isStopped = true;
     }
 
@@ -160,7 +166,7 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
             case EntityScale.Small: return 1479372276; // Small
             case EntityScale.Medium: return -1923039037; // Medium
             case EntityScale.Large: return -902729914; // large
-            default: return 1479372276;
+            default: return 0;
         }
     }
 
