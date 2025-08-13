@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 using TMPro;
-
+using UnityEngine.AI;
 
 public class UnitCardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
@@ -11,11 +11,19 @@ public class UnitCardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDr
     [Header("프리팹 설정")]
     public GameObject bluePrefab;
     public GameObject redPrefab;
+
+    [Header("배치 필터")]
+    [SerializeField] private LayerMask placementMask;     // ← Ground만 체크
+    [SerializeField] private float raycastMaxDistance = 500f;
+    [SerializeField] private float navSampleMaxDist = 1.0f;
+
     private GameObject dragIcon;
     private RectTransform canvasTransform;
 
     void Start()
     {
+        if (placementMask.value == 0)
+            placementMask = LayerMask.GetMask("Ground");
         var canvas = GetComponentInParent<Canvas>();
         if (canvas == null)
         {
@@ -56,8 +64,7 @@ public class UnitCardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDr
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        if (dragIcon != null)
-            Destroy(dragIcon);
+        if (dragIcon != null) Destroy(dragIcon);
 
         // ❗ 전투 시작되었으면 무시
         if (!GameManager2.Instance.IsPlacementPhase)
@@ -88,17 +95,35 @@ public class UnitCardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDr
 
     private bool TryGetWorldPosition(PointerEventData eventData, out Vector3 worldPos)
     {
-        worldPos = Vector3.zero;
-        Ray ray = Camera.main.ScreenPointToRay(eventData.position);
+        worldPos = default;
 
-        if (Physics.Raycast(ray, out RaycastHit hit))
+        var cam = Camera.main;
+        if (cam == null)
         {
-            worldPos = hit.point;
-            Debug.Log($"✅ Raycast 성공! 맞은 대상: {hit.collider.name}, 위치: {worldPos}");
-            return true;
+            Debug.LogError("❌ Camera.main 없음");
+            return false;
         }
 
-        Debug.LogWarning($"❌ Raycast 실패. 마우스 화면 좌표: {eventData.position}");
+        var ray = cam.ScreenPointToRay(eventData.position);
+
+        // 1) Ground 레이어에만 맞추기
+        if (Physics.Raycast(ray, out var hit, raycastMaxDistance, placementMask, QueryTriggerInteraction.Ignore))
+        {
+            // 2) 맞은 점을 NavMesh 내부 좌표로 스냅
+            if (NavMesh.SamplePosition(hit.point, out var navHit, navSampleMaxDist, NavMesh.AllAreas))
+            {
+                worldPos = navHit.position;
+                Debug.Log($"✅ Raycast 성공(Ground+NavMesh): {hit.collider.name}, 위치: {worldPos}");
+                return true;
+            }
+            else
+            {
+                Debug.LogWarning($"❌ NavMesh 없음: {hit.collider.name} @ {hit.point}");
+                return false;
+            }
+        }
+
+        Debug.LogWarning($"❌ Raycast 실패(placementMask={placementMask.value}). 화면좌표: {eventData.position}");
         return false;
     }
 

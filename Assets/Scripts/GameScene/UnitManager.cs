@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using UnityEngine.AI;
 
 public class UnitManager : MonoBehaviour
 {
@@ -67,15 +68,12 @@ public class UnitManager : MonoBehaviour
         GameObject go = Instantiate(prefab, position, Quaternion.identity);
         var entity = go.GetComponent<Entity>();
 
+        entity.SetData(data);
+
         string generatedId = System.Guid.NewGuid().ToString();
         entity.SetUnitId(generatedId);
         entity.SetOwnerId(ownerId);
         GameManager2.Instance.Register(entity);
-
-        // 공통 컴포넌트 초기화
-        go.GetComponent<HealthComponent>()?.Initialize(data);
-        go.GetComponent<AnimationComponent>()?.Initialize(data);
-        go.GetComponent<EffectComponent>()?.Initialize(data);
 
         // 네트워크 초기화
         bool isMine = (ownerId == UserNetwork.Instance.MyId);

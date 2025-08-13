@@ -20,7 +20,7 @@ MonoBehaviour:
   moveSpeed: 5
   entityScale: 0
   gold: 10
-  unitType: Mage
+  unitType: Mage_Lightning
   layer: 14
   detectionRadius: 50
   attackRange: 50
@@ -29,7 +29,7 @@ MonoBehaviour:
   attackType: 2
   attackStrategy: {fileID: 0}
   redPrefab: {fileID: 3760281847762428348, guid: 55e13ddd82ca1894faa4e652df5ff335, type: 3}
-  bluePrefab: {fileID: 3876098750152481945, guid: 7f9b069a340cf9c429780e018ce46296, type: 3}
+  bluePrefab: {fileID: 3104066098313752856, guid: d686a08376c59d043aa7a743f9811e4f, type: 3}
   magicRadius: 10
   projectilePrefab: {fileID: 0}
   projectilePoolName: 

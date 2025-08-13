@@ -91,7 +91,7 @@ public class MatchButton : MonoBehaviour
 
         // 5) 게임(배치) 씬으로 이동
         SetStatus("게임 진입…");
-        SceneManager.LoadScene("3-GameScene2");
+        SceneManager.LoadScene("2-GameScene");
 
         Done("");
     }
