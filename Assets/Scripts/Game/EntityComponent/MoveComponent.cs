@@ -91,13 +91,15 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
                 _agent.agentTypeID = GetAgentTypeIDForScale(data.entityScale);
                 break;
             case EntityScale.Medium:
-                transform.localScale = Vector3.one * 1.2f;
+                //transform.localScale = Vector3.one * 1.2f;
+                transform.localScale = Vector3.one * 1f;
                 _agent.radius = 0.5f;
                 _agent.height = 2.0f;
                 _agent.agentTypeID = GetAgentTypeIDForScale(data.entityScale);
                 break;
             case EntityScale.Large:
-                transform.localScale = Vector3.one * 1.5f;
+                //transform.localScale = Vector3.one * 1.5f;
+                transform.localScale = Vector3.one * 1f;
                 _agent.radius = 1.0f;
                 _agent.height = 3.0f;
                 _agent.agentTypeID = GetAgentTypeIDForScale(data.entityScale);
