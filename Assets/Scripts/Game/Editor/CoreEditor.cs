@@ -41,7 +41,7 @@ public class CoreEditor : Editor
         if (collider == null)
             collider = parent.AddComponent<CapsuleCollider>();
 
-        collider.center = new Vector3(0, 4.4f, 0);
+        collider.center = new Vector3(-3f, 4.4f, 0);
         collider.radius = 4f;
         collider.height = 11f;
 
@@ -56,7 +56,7 @@ public class CoreEditor : Editor
         {
             var healthBarCanvas = new GameObject("HealthBarCanvas", typeof(Canvas), typeof(CanvasRenderer));
             healthBarCanvas.transform.SetParent(parent.transform);
-            healthBarCanvas.transform.localPosition = new Vector3(0, 12f, 0);
+            healthBarCanvas.transform.localPosition = new Vector3(-3f, 12f, 0);
             healthBarCanvas.transform.localRotation = Quaternion.Euler(0, 90, 0);
 
             var canvas = healthBarCanvas.GetComponent<Canvas>();
