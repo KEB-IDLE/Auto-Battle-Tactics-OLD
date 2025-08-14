@@ -20,7 +20,7 @@ MonoBehaviour:
   moveSpeed: 1
   entityScale: 1
   gold: 0
-  unitType: Knight
+  unitType: Knight1
   layer: 14
   detectionRadius: 10
   attackRange: 2
