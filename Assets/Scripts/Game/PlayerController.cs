@@ -4,130 +4,63 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     [Header("Camera")]
-    [SerializeField] Camera mainCam;                  // ï¿½ï¿½ï¿½ï¿½Î¸ï¿½ Awakeï¿½ï¿½ï¿½ï¿½ ï¿½Úµï¿½ ï¿½Ò´ï¿½
-    [SerializeField] bool useOrthographic = true;     // ï¿½ï¿½ï¿½ï¿½ Ä«ï¿½Ş¶ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½ï¿½Æ²ï¿½ï¿½ ï¿½ï¿½Å¸ï¿½ï¿½)
+    [SerializeField] Camera mainCam;                  // ºñ¿ì¸é Awake¿¡¼­ Camera.main ÀÚµ¿ ÇÒ´ç
+    [SerializeField] bool useOrthographic = true;     // ¿ÀÅä¹èÆ²·¯ ½ºÅ¸ÀÏÀÌ¸é Á÷±³ ±ÇÀå
 
-    [Header("Placement View")]
-    [SerializeField] float placementPitch = 60f;      // ìœ„ì—ì„œ ë‚´ë ¤ë‹¤ë³´ëŠ” ê°ë„
-    [SerializeField] float orthoCameraDistance = 40f; // ì •ì‚¬ì˜ì¼ ë•Œ ì¹´ë©”ë¼-ë¦¬ê·¸ ê±°ë¦¬(ì¶©ëŒ íšŒí”¼ìš© ê¸°ì¤€)
-
-    [Header("Pan / Move")]
-    [SerializeField] float panSpeed = 30f;            // Å°ï¿½ï¿½ï¿½ï¿½/ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å©ï¿½ï¿½ ï¿½Óµï¿½ (ï¿½ï¿½ï¿½ï¿½/ï¿½ï¿½)
-    [SerializeField] float dragSpeed = 1.0f;          // ï¿½ï¿½ï¿½ì½º ï¿½å·¡ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    [Header("Pan / Move (Keyboard only)")]
+    [SerializeField] float panSpeed = 30f;            // ÀÌµ¿ ¼Óµµ(À¯´Ö/ÃÊ)
     [SerializeField] KeyCode fastModifier = KeyCode.LeftShift;
     [SerializeField] float fastMultiplier = 2.0f;
 
-    [Header("Mouse Drag")]
-    [SerializeField] int dragMouseButton = 2;         // 0:ï¿½ï¿½, 1:ï¿½ï¿½, 2:ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½)
-    [SerializeField] bool invertDrag = true;
-
-    [Header("Edge Scroll")]
-    [SerializeField] bool edgeScroll = true;
-    [SerializeField] int edgeThickness = 12;          // È­ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ú¸ï¿½ ï¿½È¼ï¿½
-    [SerializeField] bool lockCursorWhileDrag = false;
-
     [Header("Zoom")]
-    [SerializeField] float zoomSpeed = 8f;            // ï¿½ï¿½ï¿½ì½º ï¿½ï¿½ ï¿½Î°ï¿½ï¿½ï¿½
-    [SerializeField] Vector2 orthoZoomRange = new Vector2(5f, 30f);   // orthographicSize ï¿½ï¿½ï¿½ï¿½
-    [SerializeField] Vector2 perspZoomDistance = new Vector2(10f, 80f); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Å¸ï¿½
+    [SerializeField] float zoomSpeed = 8f;            // ¸¶¿ì½º ÈÙ ¹Î°¨µµ
+    [SerializeField] Vector2 orthoZoomRange = new Vector2(5f, 30f);     // orthographicSize ¹üÀ§
+    [SerializeField] Vector2 perspZoomDistance = new Vector2(10f, 80f); // ¿ø±ÙÀÏ ¶§ rig-Ä«¸Ş¶ó °Å¸®
 
-    [Header("Rotation (optional)")]
-    [SerializeField] bool allowRotate = false;
+    [Header("Rotation (Q/E)")]
+    [SerializeField] bool allowRotate = true;
     [SerializeField] float rotateSpeed = 120f;
     [SerializeField] KeyCode rotateLeft = KeyCode.Q;
     [SerializeField] KeyCode rotateRight = KeyCode.E;
 
     [Header("Bounds")]
-    [Tooltip("ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ç¥ ï¿½ï¿½ï¿½ï¿½ ï¿½Ìµï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ç°¢ï¿½ï¿½(ï¿½ß½ï¿½/ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½). Ä«ï¿½Ş¶ï¿½ ï¿½ï¿½ ï¿½Ú½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê°ï¿½ Å¬ï¿½ï¿½ï¿½ï¿½.")]
+    [Tooltip("¿ùµå ÁÂÇ¥ ±âÁØ ÀÌµ¿ °¡´É Á÷»ç°¢Çü(Áß½É/»çÀÌÁî). Rect.y´Â Z·Î »ç¿ë.")]
     [SerializeField] Rect worldBounds = new Rect(-50, -50, 100, 100);
 
-    [Header("Collision (ì¹´ë©”ë¼ ë‚´ë¶€ ë¹„ì¹¨ ë°©ì§€)")]
-    [SerializeField] LayerMask collisionMask = ~0;    // Ground/Default/Environment ë“±
-    [SerializeField] float collisionRadius = 0.6f; // ìŠ¤í”¼ì–´ìºìŠ¤íŠ¸ ë°˜ê²½
-    [SerializeField] float collisionBuffer = 0.25f;// íˆíŠ¸ ì§€ì ì—ì„œ ì‚´ì§ ë„ìš°ê¸°
+    [Header("Zoom confinement")]
+    [SerializeField] bool confineZoomToBounds = true; // ÁÜÀ¸·Î ¸Ê ¹ÛÀÌ º¸ÀÌÁö ¾Êµµ·Ï Á¦ÇÑ(Á÷±³)
+    [SerializeField] float edgePadding = 0.5f;        // È­¸é °¡ÀåÀÚ¸® ¿©¹é(¿ùµå À¯´Ö)
 
     [Header("Smoothing")]
-    [SerializeField] float moveSmooth = 0.08f;        // 0=ï¿½ï¿½ï¿½, 0.1~0.2 ï¿½Îµå·¯ï¿½ï¿½
+    [SerializeField] float moveSmooth = 0.08f;        // 0=Áï½Ã, 0.1~0.2 ºÎµå·¯¿ò
     [SerializeField] float zoomSmooth = 0.08f;
 
-    [Header("Start Pose (ì²˜ìŒ ìœ„ì¹˜/í™•ëŒ€ ê³ ì •)")]
-    [SerializeField] bool useCustomStartPose = true;
-    [SerializeField] Vector3 startRigPosition = new Vector3(0, 0, 0);
-    [SerializeField] float startYaw = 0f;         // Yaw(ì¢Œìš° íšŒì „)
-    [SerializeField] float startOrthoSize = 18f;  // ì •ì‚¬ì˜ ì‹œì‘ í™•ëŒ€
-    [SerializeField] float startDistance = 35f;  // ì›ê·¼ ì‹œì‘ ê±°ë¦¬
-
-
-    // internal
-
+    // internal state
+    Transform rig;           // ÀÌ ½ºÅ©¸³Æ®°¡ ´Ş¸° ºó ¿ÀºêÁ§Æ®(CameraRig)
     Vector3 targetPos;
     Vector3 moveVel;
     float targetOrtho;
-    float targetRigDistance; // perspectiveï¿½ï¿½
-    float targetPitch;
-
-    Transform rig;           // ï¿½ï¿½ ï¿½ï¿½Å©ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½Ş¸ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® (CameraRig)
+    float targetRigDistance; // perspective¿ë
 
     void Awake()
     {
         rig = transform;
         if (!mainCam) mainCam = Camera.main;
 
-        // â˜… ë¦¬ê·¸ì˜ í”¼ì¹˜/ë¡¤ ì œê±° (ìˆ˜í‰ íšŒì „ë§Œ ë‚¨ê¹€)
-        Vector3 e = rig.localEulerAngles;
-        rig.localRotation = Quaternion.Euler(0f, e.y, 0f);
-
-        // ë°°ì¹˜ ë·° ê¸°ë³¸ ì„¸íŒ…
-        targetPitch = placementPitch;
-        mainCam.nearClipPlane = 0.2f;
-
         if (useOrthographic)
         {
-            mainCam.orthographic = true;
-            // â˜… ì‹œì‘ ì¤Œì„ ì¤‘ê°„ê°’ìœ¼ë¡œ ê°•ì œ (ì²˜ìŒ ê³¼í™•ëŒ€ ë°©ì§€)
-            if (mainCam.orthographicSize <= 0.01f)
-                mainCam.orthographicSize = Mathf.Lerp(orthoZoomRange.x, orthoZoomRange.y, 0.5f);
-            targetOrtho = Mathf.Clamp(mainCam.orthographicSize, orthoZoomRange.x, orthoZoomRange.y);
-
-            // ì •ì‚¬ì˜ì´ë¼ë„ ì¶©ëŒ/ê°„ì„­ ê³„ì‚°ìš© ê±°ë¦¬ ê¸°ì¤€
-            targetRigDistance = orthoCameraDistance;
+            if (!mainCam.orthographic) mainCam.orthographic = true;
+            targetOrtho = mainCam.orthographicSize;
         }
         else
         {
-            mainCam.orthographic = false;
+            if (mainCam.orthographic) mainCam.orthographic = false;
+            // Ä«¸Ş¶ó¸¦ rigÀÇ ÀÚ½ÄÀ¸·Î µÎ°í Z-Àü¹æ(-localZ) °Å¸®·Î °ü¸®
             float cur = -Vector3.Dot(mainCam.transform.localPosition, Vector3.forward);
-            targetRigDistance = Mathf.Clamp(cur <= 0 ? 30f : cur, perspZoomDistance.x, perspZoomDistance.y);
-        }
-        if (useCustomStartPose)
-        {
-            rig.position = startRigPosition;
-            rig.rotation = Quaternion.Euler(0f, startYaw, 0f);
-
-            if (useOrthographic)
-            {
-                mainCam.orthographic = true;
-                mainCam.orthographicSize = Mathf.Clamp(startOrthoSize, orthoZoomRange.x, orthoZoomRange.y);
-                targetOrtho = mainCam.orthographicSize;
-                targetRigDistance = orthoCameraDistance; // ì •ì‚¬ì˜ì€ ê±°ë¦¬ ê³ ì •(ì¶©ëŒê³„ì‚°ìš©)
-            }
-            else
-            {
-                mainCam.orthographic = false;
-                targetRigDistance = Mathf.Clamp(startDistance, perspZoomDistance.x, perspZoomDistance.y);
-            }
-        }
-
-        // â˜… ì²˜ìŒë¶€í„° í”¼ì¹˜ ì ìš© + ê·¸ í”¼ì¹˜ì— ë§ëŠ” ì¹´ë©”ë¼ ìœ„ì¹˜ë¡œ "ì¦‰ì‹œ" ë°°ì¹˜
-        mainCam.transform.localRotation = Quaternion.Euler(targetPitch, 0f, 0f);
-        {
-            float rad = targetPitch * Mathf.Deg2Rad;
-            float dist = useOrthographic ? orthoCameraDistance : targetRigDistance;
-            Vector3 local = new Vector3(0f, Mathf.Sin(rad) * dist, -Mathf.Cos(rad) * dist);
-            mainCam.transform.localPosition = local;
+            targetRigDistance = (cur > 0f) ? cur : 30f;
         }
 
         targetPos = rig.position;
-        ApplySmoothingAndCollision(Time.unscaledDeltaTime, true); // ì²« í”„ë ˆì„ ì¦‰ì‹œ ë°˜ì˜
     }
 
     void Update()
@@ -136,89 +69,58 @@ public class PlayerController : MonoBehaviour
         HandleRotate(dt);
         HandleMove(dt);
         HandleZoom(dt);
-        ApplySmoothingAndCollision(dt);
+        ApplySmoothing(dt);
     }
 
     void HandleMove(float dt)
     {
         Vector3 move = Vector3.zero;
 
-        // 1) Å°ï¿½ï¿½ï¿½ï¿½ (WASD / È­ï¿½ï¿½Ç¥)
-        float h = Input.GetAxisRaw("Horizontal"); // A/D, ï¿½ï¿½/ï¿½ï¿½
-        float v = Input.GetAxisRaw("Vertical");   // W/S, ï¿½ï¿½/ï¿½ï¿½
+        // Å°º¸µå (WASD / ¹æÇâÅ°)
+        float h = Input.GetAxisRaw("Horizontal");
+        float v = Input.GetAxisRaw("Vertical");
         move += new Vector3(h, 0f, v);
 
-        // 2) ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å©ï¿½ï¿½
-        if (edgeScroll && Application.isFocused)
-        {
-            Vector3 mp = Input.mousePosition;
-            if (mp.x <= edgeThickness) move += Vector3.left;
-            else if (mp.x >= Screen.width - edgeThickness) move += Vector3.right;
-
-            if (mp.y <= edgeThickness) move += Vector3.back;
-            else if (mp.y >= Screen.height - edgeThickness) move += Vector3.forward;
-        }
-
-        // 3) ï¿½ï¿½ï¿½ì½º ï¿½å·¡ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½)
-        if (Input.GetMouseButtonDown(dragMouseButton) && lockCursorWhileDrag) Cursor.lockState = CursorLockMode.Locked;
-        if (Input.GetMouseButtonUp(dragMouseButton) && lockCursorWhileDrag) Cursor.lockState = CursorLockMode.None;
-
-        if (Input.GetMouseButton(dragMouseButton))
-        {
-            float dx = Input.GetAxisRaw("Mouse X");
-            float dy = Input.GetAxisRaw("Mouse Y");
-            Vector3 drag = new Vector3(dx, 0f, dy);
-            if (invertDrag) drag *= -1f;
-
-            // Ä«ï¿½Ş¶ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È¯ (Y È¸ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
-            Vector3 right = Vector3.ProjectOnPlane(mainCam.transform.right, Vector3.up).normalized;
-            Vector3 forward = Vector3.ProjectOnPlane(mainCam.transform.forward, Vector3.up).normalized;
-            Vector3 dragWorld = (right * drag.x + forward * drag.z) * dragSpeed;
-            targetPos += dragWorld;
-        }
-
-        // ï¿½Óµï¿½/ï¿½ï¿½ï¿½ï¿½
+        // ¼Óµµ/°¡¼Ó
         float speed = panSpeed * (Input.GetKey(fastModifier) ? fastMultiplier : 1f);
         if (move.sqrMagnitude > 0.001f)
         {
-            // Ä«ï¿½Ş¶ï¿½ï¿½ï¿½ Y È¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ìµï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½È­
             Vector3 dir = CameraForwardOnPlane(move);
-            targetPos += dir * speed * dt;
+            targetPos += dir * speed * Time.unscaledDeltaTime;
         }
 
-        // ï¿½ï¿½ï¿½ Å¬ï¿½ï¿½ï¿½ï¿½
+        // À§Ä¡ °æ°è Å¬·¥ÇÁ
         targetPos = ClampToBounds(targetPos);
+
+        // Á÷±³ Ä«¸Ş¶ó: ÇöÀç À§Ä¡¿¡¼­ °¡´ÉÇÑ ÃÖ´ë ÁÜ º¸´Ù Å©Áö ¾Ê°Ô º¸Á¤
+        if (useOrthographic && confineZoomToBounds)
+            targetOrtho = Mathf.Min(targetOrtho, ComputeMaxOrthoAt(targetPos));
     }
 
     void HandleZoom(float dt)
     {
-        // íœ  ì…ë ¥ í†µí•©: mouseScrollDelta â†’ (ëŒ€ì²´) Mouse ScrollWheel axis
-        float wheel = Input.mouseScrollDelta.y;
-        if (Mathf.Abs(wheel) < 0.0001f)
-            wheel = Input.GetAxis("Mouse ScrollWheel") * 120f; // í´ë°±
+        float scroll = Input.mouseScrollDelta.y;
+        if (Mathf.Abs(scroll) < 0.0001f) return;
 
-        if (Mathf.Abs(wheel) < 0.0001f) return;
-
-        // ì²´ê° ë¹ ë¥´ê²Œ: target ê°’ì„ ì§ì ‘ í¬ê²Œ ì›€ì§ì„
         if (useOrthographic)
         {
-            // ì¤Œ ìŠ¤ì¼€ì¼ ë³´ì • (ì¤Œì´ ì»¤ì§ˆìˆ˜ë¡ ì¡°ê¸ˆ ë” ì›€ì§ì´ê²Œ)
-            float scale = Mathf.Max(0.5f, mainCam.orthographicSize * 0.06f);
             targetOrtho = Mathf.Clamp(
-                targetOrtho - wheel * zoomSpeed * scale,
+                mainCam.orthographicSize - scroll * zoomSpeed,
                 orthoZoomRange.x, orthoZoomRange.y
             );
+
+            if (confineZoomToBounds)
+                targetOrtho = Mathf.Min(targetOrtho, ComputeMaxOrthoAt(targetPos));
         }
         else
         {
-            float scale = Mathf.Max(0.5f, targetRigDistance * 0.04f);
+            // ¿ø±Ù: ¼öÇĞÀû È­¸é °æ°è °è»êÀÌ º¹Àâ?Cinemachine Confiner ±ÇÀå
             targetRigDistance = Mathf.Clamp(
-                targetRigDistance - wheel * zoomSpeed * scale,
+                targetRigDistance - scroll * zoomSpeed,
                 perspZoomDistance.x, perspZoomDistance.y
             );
         }
     }
-
 
     void HandleRotate(float dt)
     {
@@ -232,84 +134,89 @@ public class PlayerController : MonoBehaviour
             rig.Rotate(Vector3.up, rot * rotateSpeed * dt, Space.World);
     }
 
-    void ApplySmoothingAndCollision(float dt, bool instant = false)
+    void ApplySmoothing(float dt)
     {
-        // ë¦¬ê·¸ ìœ„ì¹˜ ìŠ¤ë¬´ë”©
+        // À§Ä¡ º¸°£
         Vector3 newPos = Vector3.SmoothDamp(rig.position, targetPos, ref moveVel, moveSmooth);
         rig.position = newPos;
 
-        // ì¹´ë©”ë¼ ëª©í‘œ ë¡œì»¬ ìœ„ì¹˜(í”¼ì¹˜/ê±°ë¦¬ë¡œ ê³„ì‚°)
-        float t = 1f - Mathf.Exp(-dt / Mathf.Max(zoomSmooth, 0.0001f));
+        // ÁÜ º¸°£
         if (useOrthographic)
-            mainCam.orthographicSize = Mathf.Lerp(mainCam.orthographicSize, targetOrtho, t);
-        float rad = targetPitch * Mathf.Deg2Rad;
-        float dist = useOrthographic ? orthoCameraDistance : targetRigDistance;
-
-        Vector3 desiredLocal =
-            new Vector3(0f, Mathf.Sin(rad) * dist, -Mathf.Cos(rad) * dist);
-
-        // ìŠ¤í”¼ì–´ìºìŠ¤íŠ¸ë¡œ ì¶©ëŒ ì²´í¬(ë¦¬ê·¸ ì›ì  -> ëª©í‘œ ì¹´ë©”ë¼ ìœ„ì¹˜)
-        Vector3 origin = rig.position;
-        Vector3 desiredWorld = rig.TransformPoint(desiredLocal);
-        Vector3 dir = desiredWorld - origin;
-        float maxDist = dir.magnitude;
-
-        if (maxDist > 0.0001f) dir /= maxDist;
-
-        Vector3 finalWorld = desiredWorld;
-        if (Physics.SphereCast(origin, collisionRadius, dir, out RaycastHit hit, maxDist, collisionMask, QueryTriggerInteraction.Ignore))
         {
-            finalWorld = hit.point - dir * collisionBuffer; // ì‚´ì§ ì•ìœ¼ë¡œ ë‹¹ê²¨ì„œ ë°•í˜ ë°©ì§€
+            mainCam.orthographicSize = Mathf.Lerp(
+                mainCam.orthographicSize,
+                targetOrtho,
+                1f - Mathf.Exp(-dt / Mathf.Max(zoomSmooth, 0.0001f))
+            );
         }
-
-        Vector3 finalLocal = rig.InverseTransformPoint(finalWorld);
-
-        // ìœ„ì¹˜/íšŒì „ ì ìš©
-        if (instant)
-            mainCam.transform.localPosition = finalLocal;
         else
-            mainCam.transform.localPosition = Vector3.Lerp(mainCam.transform.localPosition, finalLocal, t);
-
-        Quaternion targetRot = Quaternion.Euler(targetPitch, 0f, 0f);
-        mainCam.transform.localRotation = instant
-            ? targetRot
-            : Quaternion.Slerp(mainCam.transform.localRotation, targetRot, t);
-
-        // ë‚´ë¶€ê°€ ë³´ì´ëŠ” í˜„ìƒ ì¤„ì´ê¸°
-        mainCam.nearClipPlane = 0.2f;
+        {
+            Vector3 local = mainCam.transform.localPosition;
+            float curDist = -Vector3.Dot(local, Vector3.forward);
+            float next = Mathf.Lerp(
+                curDist,
+                targetRigDistance,
+                1f - Mathf.Exp(-dt / Mathf.Max(zoomSmooth, 0.0001f))
+            );
+            mainCam.transform.localPosition = new Vector3(local.x, local.y, -next);
+        }
     }
 
+    // ===== Helpers =====
 
+    // ÀÔ·Â º¤ÅÍ(ÁÂ/¿ì/¾Õ/µÚ)¸¦ Ä«¸Ş¶ó YÈ¸Àü ±âÁØ Æò¸é ¹æÇâÀ¸·Î º¯È¯
     Vector3 CameraForwardOnPlane(Vector3 input)
     {
-        // ï¿½Ô·ï¿½ ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½/ï¿½ï¿½/ï¿½ï¿½/ï¿½ï¿½)ï¿½ï¿½ Ä«ï¿½Ş¶ï¿½ YÈ¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È¯
         Vector3 fwd = Vector3.ProjectOnPlane(mainCam.transform.forward, Vector3.up).normalized;
         Vector3 right = Vector3.ProjectOnPlane(mainCam.transform.right, Vector3.up).normalized;
         Vector3 dir = (right * input.x + fwd * input.z);
-        return dir.sqrMagnitude > 0.0001f ? dir.normalized : Vector3.zero;
+        return dir.sqrMagnitude > 0f ? dir.normalized : Vector3.zero;
     }
 
+    // ÇöÀç Å¸°Ù À§Ä¡¿¡¼­ È­¸éÀÌ ¸Ê ¹ÛÀ¸·Î ³ª°¡Áö ¾Ê°Ô Çã¿ë °¡´ÉÇÑ ÃÖ´ë orthographicSize
+    float ComputeMaxOrthoAt(Vector3 pos)
+    {
+        float xMin = worldBounds.xMin + edgePadding;
+        float xMax = worldBounds.xMax - edgePadding;
+        float zMin = worldBounds.yMin + edgePadding; // Rect.y¸¦ Z·Î »ç¿ë
+        float zMax = worldBounds.yMax - edgePadding;
+
+        float availX = Mathf.Max(0f, Mathf.Min(pos.x - xMin, xMax - pos.x));
+        float availZ = Mathf.Max(0f, Mathf.Min(pos.z - zMin, zMax - pos.z));
+
+        float byZ = availZ; // halfH
+        float byX = availX / Mathf.Max(0.0001f, mainCam.aspect); // halfW = halfH * aspect <= availX
+
+        float maxOrthoByBounds = Mathf.Min(byZ, byX);
+        float clampedToRange = Mathf.Clamp(maxOrthoByBounds, orthoZoomRange.x, orthoZoomRange.y);
+        return clampedToRange;
+    }
+
+    // Ä«¸Ş¶ó Áß½É(rig.position)ÀÌ °æ°è¸¦ ³ÑÁö ¾Êµµ·Ï Å¬·¥ÇÁ
     Vector3 ClampToBounds(Vector3 pos)
     {
-        // ï¿½ï¿½ï¿½ï¿½ Ä«ï¿½Ş¶ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ È­ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½/ï¿½İ³ï¿½ï¿½Ì¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ Å¸ï¿½ï¿½Æ®ï¿½Ï°ï¿½ Å¬ï¿½ï¿½ï¿½ï¿½
         if (useOrthographic)
         {
-            float halfH = mainCam.orthographicSize;
+            float effectiveOrtho = confineZoomToBounds ? targetOrtho : mainCam.orthographicSize;
+            float halfH = effectiveOrtho;
             float halfW = halfH * mainCam.aspect;
 
-            float minX = worldBounds.xMin + halfW;
-            float maxX = worldBounds.xMax - halfW;
-            float minZ = worldBounds.yMin + halfH; // Rect.yï¿½ï¿½ Zï¿½ï¿½ ï¿½ï¿½ï¿½
-            float maxZ = worldBounds.yMax - halfH;
+            float minX = worldBounds.xMin + halfW + edgePadding;
+            float maxX = worldBounds.xMax - halfW - edgePadding;
+            float minZ = worldBounds.yMin + halfH + edgePadding; // Rect.y¸¦ Z·Î »ç¿ë
+            float maxZ = worldBounds.yMax - halfH - edgePadding;
+
+            // ¸ÊÀÌ È­¸éº¸´Ù ÀÛÀº ±Ø´Ü »óÈ² ¹æÁö
+            if (minX > maxX) { float midX = (worldBounds.xMin + worldBounds.xMax) * 0.5f; minX = maxX = midX; }
+            if (minZ > maxZ) { float midZ = (worldBounds.yMin + worldBounds.yMax) * 0.5f; minZ = maxZ = midZ; }
 
             pos.x = Mathf.Clamp(pos.x, minX, maxX);
             pos.z = Mathf.Clamp(pos.z, minZ, maxZ);
         }
         else
         {
-            // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½: rig ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½ï¿½ï¿½ç°¢ï¿½ï¿½ ï¿½Ú½ï¿½ï¿½ï¿½ Å¬ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ì°ï¿½ï¿½ï¿½)
-            pos.x = Mathf.Clamp(pos.x, worldBounds.xMin, worldBounds.xMax);
-            pos.z = Mathf.Clamp(pos.z, worldBounds.yMin, worldBounds.yMax);
+            pos.x = Mathf.Clamp(pos.x, worldBounds.xMin + edgePadding, worldBounds.xMax - edgePadding);
+            pos.z = Mathf.Clamp(pos.z, worldBounds.yMin + edgePadding, worldBounds.yMax - edgePadding);
         }
         return pos;
     }
@@ -317,7 +224,7 @@ public class PlayerController : MonoBehaviour
 #if UNITY_EDITOR
     void OnDrawGizmosSelected()
     {
-        // Bounds ï¿½Ã°ï¿½È­ (XZ ï¿½ï¿½ï¿½)
+        // Bounds ½Ã°¢È­ (XZ Æò¸é)
         Gizmos.color = new Color(0.2f, 0.8f, 1f, 0.35f);
         Vector3 center = new Vector3(worldBounds.center.x, transform.position.y, worldBounds.center.y);
         Vector3 size = new Vector3(worldBounds.size.x, 0.1f, worldBounds.size.y);
