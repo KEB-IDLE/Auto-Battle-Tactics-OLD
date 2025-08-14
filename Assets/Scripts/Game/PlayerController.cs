@@ -7,31 +7,26 @@ public class PlayerController : MonoBehaviour
     [SerializeField] Camera mainCam;                  // 비워두면 Awake에서 자동 할당
     [SerializeField] bool useOrthographic = true;     // 직교 카메라일 때 권장 (오토배틀러 스타일)
 
-    [Header("Pan / Move")]
-    [SerializeField] float panSpeed = 30f;            // 키보드/엣지 스크롤 속도 (유닛/초)
-    [SerializeField] float dragSpeed = 1.0f;          // 마우스 드래그 감도
+    [Header("Pan / Move (Keyboard only)")]
+    [SerializeField] float panSpeed = 30f;            // 키보드 이동 속도 (유닛/초)
     [SerializeField] KeyCode fastModifier = KeyCode.LeftShift;
     [SerializeField] float fastMultiplier = 2.0f;
 
-    [Header("Mouse Drag")]
-    [SerializeField] int dragMouseButton = 2;         // 0:좌, 1:우, 2:휠(권장)
-    [SerializeField] bool invertDrag = true;
-
-    [Header("Edge Scroll")]
-    [SerializeField] bool edgeScroll = true;
-    [SerializeField] int edgeThickness = 12;          // 화면 가장자리 픽셀
-    [SerializeField] bool lockCursorWhileDrag = false;
-
     [Header("Zoom")]
-    [SerializeField] float zoomSpeed = 8f;            // 마우스 휠 민감도
+    [SerializeField] float zoomSpeed = 8f;            // 마우스 휠 민감도 (줌만 유지)
     [SerializeField] Vector2 orthoZoomRange = new Vector2(5f, 30f);   // orthographicSize 범위
     [SerializeField] Vector2 perspZoomDistance = new Vector2(10f, 80f); // 원근일 때 리그 기준 거리
 
-    [Header("Rotation (optional)")]
-    [SerializeField] bool allowRotate = false;
+    [Header("Rotation (Q/E)")]
+    [SerializeField] bool allowRotate = true;
     [SerializeField] float rotateSpeed = 120f;
     [SerializeField] KeyCode rotateLeft = KeyCode.Q;
     [SerializeField] KeyCode rotateRight = KeyCode.E;
+
+    [Header("Zoom confinement")]
+    [SerializeField] bool confineZoomToBounds = true; // 줌 시 맵 밖 노출 방지
+    [SerializeField] float edgePadding = 0.5f;        // 여백(월드 유닛)
+
 
     [Header("Bounds")]
     [Tooltip("월드 좌표 기준 이동 가능 직사각형(중심/사이즈). 카메라가 이 박스 밖으로 나가지 않게 클램프.")]
@@ -82,53 +77,23 @@ public class PlayerController : MonoBehaviour
     void HandleMove(float dt)
     {
         Vector3 move = Vector3.zero;
-
-        // 1) 키보드 (WASD / 화살표)
-        float h = Input.GetAxisRaw("Horizontal"); // A/D, ←/→
-        float v = Input.GetAxisRaw("Vertical");   // W/S, ↑/↓
+        float h = Input.GetAxisRaw("Horizontal");
+        float v = Input.GetAxisRaw("Vertical");
         move += new Vector3(h, 0f, v);
 
-        // 2) 엣지 스크롤
-        if (edgeScroll && Application.isFocused)
-        {
-            Vector3 mp = Input.mousePosition;
-            if (mp.x <= edgeThickness) move += Vector3.left;
-            else if (mp.x >= Screen.width - edgeThickness) move += Vector3.right;
-
-            if (mp.y <= edgeThickness) move += Vector3.back;
-            else if (mp.y >= Screen.height - edgeThickness) move += Vector3.forward;
-        }
-
-        // 3) 마우스 드래그(지면 기준 평면)
-        if (Input.GetMouseButtonDown(dragMouseButton) && lockCursorWhileDrag) Cursor.lockState = CursorLockMode.Locked;
-        if (Input.GetMouseButtonUp(dragMouseButton) && lockCursorWhileDrag) Cursor.lockState = CursorLockMode.None;
-
-        if (Input.GetMouseButton(dragMouseButton))
-        {
-            float dx = Input.GetAxisRaw("Mouse X");
-            float dy = Input.GetAxisRaw("Mouse Y");
-            Vector3 drag = new Vector3(dx, 0f, dy);
-            if (invertDrag) drag *= -1f;
-
-            // 카메라의 평면 기준으로 변환 (Y 회전만 고려)
-            Vector3 right = Vector3.ProjectOnPlane(mainCam.transform.right, Vector3.up).normalized;
-            Vector3 forward = Vector3.ProjectOnPlane(mainCam.transform.forward, Vector3.up).normalized;
-            Vector3 dragWorld = (right * drag.x + forward * drag.z) * dragSpeed;
-            targetPos += dragWorld;
-        }
-
-        // 속도/가속
         float speed = panSpeed * (Input.GetKey(fastModifier) ? fastMultiplier : 1f);
         if (move.sqrMagnitude > 0.001f)
         {
-            // 카메라의 Y 회전 기준으로 이동 방향 정규화
             Vector3 dir = CameraForwardOnPlane(move);
             targetPos += dir * speed * Time.unscaledDeltaTime;
         }
 
-        // 경계 클램프
         targetPos = ClampToBounds(targetPos);
+
+        if (useOrthographic && confineZoomToBounds)
+            targetOrtho = Mathf.Min(targetOrtho, ComputeMaxOrthoAt(targetPos));
     }
+
 
     void HandleZoom(float dt)
     {
@@ -137,13 +102,23 @@ public class PlayerController : MonoBehaviour
 
         if (useOrthographic)
         {
-            targetOrtho = Mathf.Clamp(mainCam.orthographicSize - scroll * zoomSpeed, orthoZoomRange.x, orthoZoomRange.y);
+            targetOrtho = Mathf.Clamp(
+                mainCam.orthographicSize - scroll * zoomSpeed,
+                orthoZoomRange.x, orthoZoomRange.y
+            );
+            if (confineZoomToBounds)
+                targetOrtho = Mathf.Min(targetOrtho, ComputeMaxOrthoAt(targetPos));
         }
         else
         {
-            targetRigDistance = Mathf.Clamp(targetRigDistance - scroll * zoomSpeed, perspZoomDistance.x, perspZoomDistance.y);
+            // (원근 카메라면 Cinemachine Confiner 사용 권장)
+            targetRigDistance = Mathf.Clamp(
+                targetRigDistance - scroll * zoomSpeed,
+                perspZoomDistance.x, perspZoomDistance.y
+            );
         }
     }
+
 
     void HandleRotate(float dt)
     {
@@ -166,13 +141,21 @@ public class PlayerController : MonoBehaviour
         // 줌 보간
         if (useOrthographic)
         {
-            mainCam.orthographicSize = Mathf.Lerp(mainCam.orthographicSize, targetOrtho, 1f - Mathf.Exp(-dt / Mathf.Max(zoomSmooth, 0.0001f)));
+            mainCam.orthographicSize = Mathf.Lerp(
+                mainCam.orthographicSize,
+                targetOrtho,
+                1f - Mathf.Exp(-dt / Mathf.Max(zoomSmooth, 0.0001f))
+            );
         }
         else
         {
             Vector3 local = mainCam.transform.localPosition;
             float curDist = -Vector3.Dot(local, Vector3.forward);
-            float next = Mathf.Lerp(curDist, targetRigDistance, 1f - Mathf.Exp(-dt / Mathf.Max(zoomSmooth, 0.0001f)));
+            float next = Mathf.Lerp(
+                curDist,
+                targetRigDistance,
+                1f - Mathf.Exp(-dt / Mathf.Max(zoomSmooth, 0.0001f))
+            );
             mainCam.transform.localPosition = new Vector3(local.x, local.y, -next);
         }
     }
@@ -188,7 +171,6 @@ public class PlayerController : MonoBehaviour
 
     Vector3 ClampToBounds(Vector3 pos)
     {
-        // 직교 카메라일 때는 화면 반폭/반높이를 고려해 더 타이트하게 클램프
         if (useOrthographic)
         {
             float halfH = mainCam.orthographicSize;
@@ -204,12 +186,36 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            // 간단 버전: rig 위치만 직사각형 박스에 클램프 (프러스텀 미고려)
             pos.x = Mathf.Clamp(pos.x, worldBounds.xMin, worldBounds.xMax);
             pos.z = Mathf.Clamp(pos.z, worldBounds.yMin, worldBounds.yMax);
         }
         return pos;
     }
+    float ComputeMaxOrthoAt(Vector3 pos)
+    {
+        // 카메라 반화면: halfH = orthoSize, halfW = halfH * aspect
+        // 화면이 박스 밖으로 나가지 않으려면:
+        //   halfW <= min(pos.x - xMin, xMax - pos.x) - padding
+        //   halfH <= min(pos.z - yMin, yMax - pos.z) - padding  (Rect.y를 Z로 사용)
+        float xMin = worldBounds.xMin + edgePadding;
+        float xMax = worldBounds.xMax - edgePadding;
+        float zMin = worldBounds.yMin + edgePadding;
+        float zMax = worldBounds.yMax - edgePadding;
+
+        float availX = Mathf.Max(0f, Mathf.Min(pos.x - xMin, xMax - pos.x));
+        float availZ = Mathf.Max(0f, Mathf.Min(pos.z - zMin, zMax - pos.z));
+
+        // halfH는 availZ 이하여야 하고, halfW(=halfH*aspect)는 availX 이하여야 함
+        float byZ = availZ;
+        float byX = availX / Mathf.Max(0.0001f, mainCam.aspect);
+
+        // 둘 중 작은 값이 가능한 최대 halfH(=orthographicSize)
+        float maxOrtho = Mathf.Max(orthoZoomRange.x, Mathf.Min(byZ, byX));
+        // 전체 상한도 함께 고려
+        return Mathf.Min(maxOrtho, orthoZoomRange.y);
+    }
+
+
 
 #if UNITY_EDITOR
     void OnDrawGizmosSelected()
