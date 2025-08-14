@@ -10,6 +10,7 @@ public class GameManager2 : MonoBehaviour
 
     public bool BattleStarted { get; private set; } = false;
     public bool IsPlacementPhase { get; private set; } = true;
+    public bool CanPlaceUnits { get; private set; } = false;
     private List<Entity> registeredEntities = new();
     private List<Entity> myUnits = new();
     private List<Entity> battleEntities = new List<Entity>();
@@ -20,6 +21,8 @@ public class GameManager2 : MonoBehaviour
     private bool isSceneReady = false;
     public int CurrentRound { get; private set; } = 0;
     public int currentGold = 0;
+    public void OpenPlacementWindow() { CanPlaceUnits = true; }
+    public void ClosePlacementWindow() { CanPlaceUnits = false; }
 
     private void Awake()
     {
@@ -90,6 +93,7 @@ public class GameManager2 : MonoBehaviour
 
         BattleStarted = true;
         IsPlacementPhase = false;
+        
 
         Debug.Log("✅ 전투 시작!");
     }
@@ -199,7 +203,7 @@ public class GameManager2 : MonoBehaviour
 
         DeactivateAllMyUnits();
 
-        SceneManager.LoadScene("4-BattleScene");
+        SceneManager.LoadScene("3-BattleScene");
 
         yield return null;
 
@@ -219,7 +223,7 @@ public class GameManager2 : MonoBehaviour
         BattleStarted = false;
         CurrentRound++;
 
-        SceneManager.LoadScene("3-GameScene2");
+        SceneManager.LoadScene("2-GameScene");
 
         // ✅ 씬 로드 후 복원하는 코루틴 시작
         StartCoroutine(RestoreScene());
