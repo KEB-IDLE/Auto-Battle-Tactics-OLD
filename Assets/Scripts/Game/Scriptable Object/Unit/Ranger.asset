@@ -22,9 +22,9 @@ MonoBehaviour:
   gold: 5
   unitType: Ranger
   layer: 14
-  detectionRadius: 50
-  attackRange: 40
-  disengageRange: 30
+  detectionRadius: 20
+  attackRange: 20
+  disengageRange: 20
   attackPriority: 0
   attackType: 1
   attackStrategy: {fileID: 11400000, guid: 6eefaf16b2417374eb5f22c274965255, type: 2}
@@ -39,7 +39,7 @@ MonoBehaviour:
   takeDamageEffectPrefeb: {fileID: 0}
   deathEffectPrefab: {fileID: 0}
   summonSound: {fileID: 0}
-  attackSound: {fileID: 8300000, guid: f7ef2fa267735db46bca7db1b9ebce60, type: 3}
+  attackSound: {fileID: 0}
   deathSound: {fileID: 0}
   animatorController: {fileID: 9100000, guid: 978dfb3f95c533c4aa9742b18291eb77, type: 2}
   attackClip: {fileID: 7400000, guid: 2f2a39086989dc44b8d626d1c663ed0d, type: 3}
