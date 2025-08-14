@@ -17,7 +17,7 @@ MonoBehaviour:
   attackDamage: 25
   attackCoreDamage: 5
   attackImpactRatio: 0.5
-  moveSpeed: 5
+  moveSpeed: 1
   entityScale: 2
   gold: 0
   unitType: Knight

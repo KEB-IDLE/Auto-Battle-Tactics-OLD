@@ -13,7 +13,6 @@ public class Core : MonoBehaviour
     private HealthBar _healthBar;
     private TeamComponent _team;
     private CoreComponent _core;
-    private HealthBar healthBar;
     public ObjectData GetObjectData() => objectData;
 
 

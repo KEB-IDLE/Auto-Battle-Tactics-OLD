@@ -42,7 +42,7 @@ public class CoreEditor : Editor
             collider = parent.AddComponent<CapsuleCollider>();
 
         collider.center = new Vector3(-3f, 4.4f, 0);
-        collider.radius = 4f;
+        collider.radius = 5f;
         collider.height = 11f;
 
         if (parent.transform.Find("HitPoint") == null)
