@@ -19,7 +19,7 @@ MonoBehaviour:
   attackImpactRatio: 0.5
   moveSpeed: 5
   entityScale: 0
-  gold: 5
+  gold: 10
   unitType: Ranger
   layer: 14
   detectionRadius: 20

@@ -10,26 +10,26 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 826a7d254cca7e547ab90347db98c1b9, type: 3}
-  m_Name: Mounted_Knight
+  m_Name: Mount_Knight
   m_EditorClassIdentifier: 
-  entityName: Mounted_Knight
-  maxHP: 200
-  attackDamage: 30
-  attackCoreDamage: 8
-  attackImpactRatio: 0.5
+  entityName: Mount_Knight
+  maxHP: 150
+  attackDamage: 25
+  attackCoreDamage: 3
+  attackImpactRatio: 0.6
   moveSpeed: 5
   entityScale: 0
-  gold: 0
-  unitType: Mounted_Knight
+  gold: 20
+  unitType: Mount_Knight
   layer: 14
-  detectionRadius: 10
-  attackRange: 2
-  disengageRange: 5
+  detectionRadius: 12
+  attackRange: 6
+  disengageRange: 6
   attackPriority: 0
   attackType: 0
   attackStrategy: {fileID: 11400000, guid: ab6e9dfcffec7cf4b994f4d8d7a03b45, type: 2}
-  redPrefab: {fileID: 6159849336836508998, guid: 0414c6baeda086e47a9c31450d79af78, type: 3}
-  bluePrefab: {fileID: 6159849336836508998, guid: b0fad61085f0abe4d9d39873fbe11e69, type: 3}
+  redPrefab: {fileID: 158504, guid: ddf6f4b328aee7e4295f67f8a2bbd207, type: 3}
+  bluePrefab: {fileID: 8273930586231845636, guid: 92987f8766c8f764c9f16bd815d9b141, type: 3}
   magicRadius: 0
   projectilePrefab: {fileID: 0}
   projectilePoolName: 
@@ -42,7 +42,7 @@ MonoBehaviour:
   attackSound: {fileID: 0}
   deathSound: {fileID: 0}
   animatorController: {fileID: 9100000, guid: 978dfb3f95c533c4aa9742b18291eb77, type: 2}
-  attackClip: {fileID: 7400000, guid: 19d8aada1614f424185ea2797f004c77, type: 3}
-  runClip: {fileID: 7400000, guid: 3e26d22a6afd2244a9c4ecaf6b9adf6e, type: 3}
-  deathClip: {fileID: 7400000, guid: a2734260adfadb94ca2629af8af3c3bf, type: 3}
-  idleClip: {fileID: 7400000, guid: ee2d211244aad6943b091b16a3d94a27, type: 3}
+  attackClip: {fileID: 7400000, guid: aa6cdda78d38703469f148b320e00cf3, type: 3}
+  runClip: {fileID: 7400000, guid: 2afc493d6390a174893669952965c2c5, type: 3}
+  deathClip: {fileID: 7400000, guid: 4173e1d014fbc534ea62018e0d1de92c, type: 3}
+  idleClip: {fileID: 7400000, guid: 679722b7761318d4ba117deb8e2f6875, type: 3}

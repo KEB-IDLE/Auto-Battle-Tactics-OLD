@@ -31,8 +31,8 @@ public class DraggableUnit : MonoBehaviour
     {
         if (!GameManager2.Instance.IsPlacementPhase) return;
 
-        if (cam == null) cam = Camera.main;      // ★ 추가
-        if (cam == null) return;                 // ★ 추가: 카메라 없으면 안전 탈출
+        if (cam == null) cam = Camera.main;      
+        if (cam == null) return;                
 
         Ray ray = cam.ScreenPointToRay(Input.mousePosition);
         if (groundPlane.Raycast(ray, out float enter))

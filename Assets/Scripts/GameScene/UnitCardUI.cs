@@ -49,7 +49,10 @@ public class UnitCardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDr
 
         // 인스펙터 미설정이면 화이트리스트로 마스크 구성
         if (placementMask.value == 0)
-            placementMask = LayerMask.GetMask(allowedLayerNames);
+        {
+            // placementMask를 모든 레이어 허용으로 설정
+            placementMask = ~0; // 모든 레이어 허용
+        }
 
         // 혹시라도 섞여 들어간 블랙리스트 레이어는 강제 제거
         foreach (var bn in blockedLayerNames)
@@ -105,6 +108,13 @@ public class UnitCardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDr
             image.sprite = srcImg.sprite;
             image.raycastTarget = false;
             dragIcon.GetComponent<RectTransform>().sizeDelta = srcImg.rectTransform.sizeDelta;
+        }
+
+        // 드래그 시작 시 UI 크기 줄이기
+        var dragIconRect = dragIcon.GetComponent<RectTransform>();
+        if (dragIconRect != null)
+        {
+            dragIconRect.localScale = new Vector3(0.5f, 0.5f, 1); // 크기 반으로 줄이기
         }
     }
 
@@ -177,17 +187,17 @@ public class UnitCardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDr
         Debug.DrawRay(ray.origin, ray.direction * 100f, Color.yellow, 2f);
 
         // A) 허용 레이어 마스크로 1차 시도 (Structure 등은 아예 무시되므로 통과)
-        if (Physics.Raycast(ray, out var hit, raycastMaxDistance, placementMask.value, QueryTriggerInteraction.Ignore))
+        if (Physics.Raycast(ray, out var hit, raycastMaxDistance, ~0, QueryTriggerInteraction.Ignore))
         {
             if (NavMesh.SamplePosition(hit.point, out var navHit, navSampleMaxDist, NavMesh.AllAreas))
             {
                 worldPos = navHit.position;
-                Debug.Log($"✅ Raycast 성공(mask:{placementMask.value}) → {hit.collider.name} @ {worldPos}");
+                Debug.Log($"✅ Raycast 성공 → {hit.collider.name} @ {worldPos}");
                 return true;
             }
             else
             {
-                Debug.LogWarning($"❌ NavMesh 없음(mask:{placementMask.value}): {hit.collider.name} @ {hit.point}");
+               Debug.LogWarning($"❌ NavMesh 없음: {hit.collider.name} @ {hit.point}");
                 // 계속 폴백
             }
         }

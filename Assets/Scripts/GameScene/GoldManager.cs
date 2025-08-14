@@ -58,6 +58,6 @@ public class GoldManager : MonoBehaviour
     private void UpdateGoldUI()
     {
         if (goldText != null)
-            goldText.text = "Gold: " + currentGold.ToString();
+            goldText.text = currentGold.ToString();
     }
 }
