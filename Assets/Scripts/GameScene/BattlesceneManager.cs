@@ -52,17 +52,27 @@ public class BattleSceneManager : MonoBehaviour
                 continue;
             }
 
-            var go = Instantiate(prefab, position, Quaternion.identity);
+            var go = Instantiate(prefab);
+            go.SetActive(false);
+
+            // NavMesh 스냅
+            Vector3 spawnPos = position;
+            if (UnityEngine.AI.NavMesh.SamplePosition(position, out var navHit, 2.5f, UnityEngine.AI.NavMesh.AllAreas))
+                spawnPos = navHit.position;
+            go.transform.SetPositionAndRotation(spawnPos, Quaternion.identity);
+
+            // ⚠️ 데이터 먼저 주입
             var entity = go.GetComponent<Entity>();
-            
+            entity.SetData(data);
+
             entity.SetUnitId(msg.unitId);
             entity.SetOwnerId(msg.ownerId);
             GameManager2.Instance.RegisterBattleEntity(entity);
-
             go.GetComponent<TeamComponent>()?.SetTeam(parsedTeam);
-
             int parsedLayer = LayerMask.NameToLayer(msg.layer);
             if (parsedLayer != -1) go.layer = parsedLayer;
+
+            go.SetActive(true);
 
             go.GetComponent<HealthComponent>()?.Initialize(data);
             go.GetComponent<AnimationComponent>()?.Initialize(data);
