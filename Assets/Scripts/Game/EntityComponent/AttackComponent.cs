@@ -446,7 +446,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         {
             var mono = newTarget as MonoBehaviour;
             bool visible = true;
-            if (firePoint != null && mono != null)
+            if (attackType == AttackType.Ranged && firePoint != null && mono != null)
                 visible = IsTargetVisible(firePoint, mono.transform);
 
             lockedTarget = visible ? newTarget : null;
@@ -457,13 +457,14 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
 
     public IDamageable DetectTarget()
     {
-        Collider[] hits = Physics.OverlapSphere(
+        var hits = Physics.OverlapSphere(
             transform.position,
             detectionRadius,
             targetLayer);
 
         IDamageable best = null;
         float bestDist = float.MaxValue;
+        Vector3 origin = (firePoint != null ? firePoint.position : transform.position);
 
         foreach (var col in hits)
         {
@@ -473,9 +474,10 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
             if (dmg is HealthComponent hc && !hc.IsTargetable()) continue;
 
             var provider = col.GetComponent<ITeamProvider>();
-            if (provider == null || provider.Team == teamProvider.Team)
-                continue;
-            float dist = Vector3.Distance(transform.position, col.transform.position);
+            if (provider == null || provider.Team == teamProvider.Team) continue;
+
+            Vector3 closest = (col != null) ? col.ClosestPoint(origin) : col.transform.position;
+            float dist = Vector3.Distance(origin, closest);
 
             if (dist < bestDist)
             {
@@ -489,9 +491,12 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
     {
         var mono = target as MonoBehaviour;
         if (mono == null) return false;
-        float distance = Vector3.Distance(
-            transform.position,
-            mono.transform.position);
+
+        Vector3 origin = (firePoint != null? firePoint.position : transform.position);
+        var collider = mono.GetComponent<Collider>();
+        Vector3 closest = (collider != null ? collider.ClosestPoint(origin) : mono.transform.position);
+
+        float distance = Vector3.Distance(origin, closest);
         return distance <= attackRange;
     }
     private void TryAttack(IDamageable target)
@@ -513,8 +518,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
                    target != null &&
                    target.IsAlive() &&
                    targetMono != null &&
-                   Vector3.Distance(transform.position,
-                       (target as MonoBehaviour).transform.position) <= attackRange)
+                   SurfaceDistanceTo(target) <= attackRange)
         {
             _orientable?.LookAtTarget(target);
             yield return new WaitForSeconds(impactDelay);
@@ -523,8 +527,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         }
 
         if (!target.IsAlive() || target == null || targetMono == null ||
-            Vector3.Distance(transform.position,
-                targetMono.transform.position) > disengageRange)
+            SurfaceDistanceTo(target) > disengageRange)
         {
             lockedTarget = null;
         }
@@ -546,10 +549,31 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         int raycastMask = LayerMask.GetMask("Agent", "Tower", "Core", "Obstacle", "Structure");
 
         if (Physics.Raycast(origin, dir, out RaycastHit hit, dist, raycastMask))
-            return hit.transform == target;
+        {
+            var ht = hit.transform;
+            if (ht == target || ht.IsChildOf(target) || target.IsChildOf(ht))
+            {
+                Debug.Log("true");
+                return true;
+            }
 
+        }
+
+        Debug.Log("false");
         return false;
     }
+
+    private float SurfaceDistanceTo(IDamageable target)
+    {
+        var tMono = target as MonoBehaviour;
+        if (tMono == null) return float.MaxValue;
+
+        Vector3 origin = (firePoint != null ? firePoint.position : transform.position);
+        var col = tMono.GetComponent<Collider>();
+        Vector3 closest = (col != null ? col.ClosestPoint(origin) : tMono.transform.position);
+        return Vector3.Distance(origin, closest);
+    }
+
     public void StopAllAction()
     {
         isGameEnded = true;
