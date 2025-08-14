@@ -129,11 +129,11 @@ public class UserNetwork : MonoBehaviour
                 {
                     string scene = SceneManager.GetActiveScene().name;
 
-                    if (scene == "3-GameScene2")
+                    if (scene == "2-GameScene")
                     {
                         GameManager2.Instance?.OnAllPlayersReadyFromServer();
                     }
-                    else if (scene == "4-BattleScene")
+                    else if (scene == "3-BattleScene")
                     {
 
                         GameManager2.Instance?.ReturnToPlacementScene();

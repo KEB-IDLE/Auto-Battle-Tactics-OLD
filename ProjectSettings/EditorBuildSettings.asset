@@ -5,17 +5,17 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/0-LoginScene.unity
     guid: 99c9720ab356a0642a771bea13969a05
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/1-MainScene.unity
     guid: 68ef3181a11795744843afa50c7d49f2
   - enabled: 1
-    path: Assets/Scenes/3-GameScene2.unity
-    guid: b6fc6da903bc7fa4db5f66e3f45bb6fe
+    path: Assets/Scenes/2-GameScene.unity
+    guid: 57eb5fe3a66854646b86519e5163edcf
   - enabled: 1
-    path: Assets/Scenes/4-BattleScene.unity
-    guid: bb552582acc9a2149b918aee3be2bd31
+    path: Assets/Scenes/3-BattleScene.unity
+    guid: 115e761a55ad4464ca5776d556434431
   m_configObjects: {}
   m_UseUCBPForAssetBundles: 0

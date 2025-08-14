@@ -56,6 +56,8 @@ public class TimerManager : MonoBehaviour
 
     public void BeginCountdown()
     {
+        GameManager2.Instance?.OpenPlacementWindow();
+
         if (countdownStarted)
         {
             Debug.Log("⏭ [UI] 카운트다운 이미 진행 중 → 무시됨");
