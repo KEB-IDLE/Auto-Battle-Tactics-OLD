@@ -113,8 +113,12 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
             yield return new WaitForSeconds(deathAnimDuration);
             entity.UnbindEvent();
         }
-        else if (core != null) 
+        else if (core != null)
+        {
             core.UnBindEvent();
+            CombatManager.EndGame();
+        }
+            
 
         gameObject.SetActive(false);
         Destroy(gameObject);
