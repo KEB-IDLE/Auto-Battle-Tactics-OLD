@@ -963,7 +963,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 179124, guid: 676a5135885cfb34491fc8e09b3d740f, type: 3}
       propertyPath: m_Name
-      value: RangerRed
+      value: Ranger_Red
       objectReference: {fileID: 0}
     - target: {fileID: 179124, guid: 676a5135885cfb34491fc8e09b3d740f, type: 3}
       propertyPath: m_Layer
@@ -1470,8 +1470,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 35ca92b7dbf81bc438b66983e695b8e9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentHP: 0
-  maxHP: 0
+  logical_maxHP: 0
+  logical_currentHP: 0
+  display_maxHP: 0
+  display_currentHP: 0
   pendingDamage: 0
 --- !u!114 &3212381508257722517
 MonoBehaviour:
@@ -1485,6 +1487,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1b4a5f3d37e23844a1860a6874b059b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  attackDamage: 0
+  attackCoreDamage: 0
+  attackImpactRatio: 0
+  attackCooldown: 0
+  attackAnimLength: 0
+  detectionRadius: 0
+  attackRange: 0
+  disengageRange: 0
+  magicRadius: 0
+  projectilePoolName: 
+  targetLayer:
+    serializedVersion: 2
+    m_Bits: 0
   firePoint: {fileID: 0}
 --- !u!114 &8223440833426793073
 MonoBehaviour:
@@ -1506,7 +1521,7 @@ NavMeshAgent:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3731085052836040546}
   m_Enabled: 1
-  m_AgentTypeID: 0
+  m_AgentTypeID: 1479372276
   m_Radius: 0.5
   m_Speed: 3.5
   m_Acceleration: 8

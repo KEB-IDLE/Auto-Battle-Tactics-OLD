@@ -81,7 +81,7 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
         // 핵심: 디스플레이 HP는 '미리보기'로 산출 (중복 차감 방지)
         float previewHp = Mathf.Max(0f, logical_currentHP - pendingDamage);
         display_currentHP = previewHp;
-        
+
         OnHealthChanged?.Invoke(display_currentHP, display_maxHP);
     }
 
@@ -118,7 +118,7 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
             core.UnBindEvent();
             CombatManager.EndGame();
         }
-            
+
 
         gameObject.SetActive(false);
         Destroy(gameObject);
@@ -126,8 +126,23 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
 
     public void RestoreHP(float hp)
     {
+        // HealthComponent는 Core.Awake()에서 이미 Initialize(max)로 초기화됨.
+        // 여기서 저장된 현재 HP만 덮어씁니다.
+        if (!isInitialized)
+        {
+            // 혹시 Initialize가 아직 안 됐다면 안전하게 초기화 상태로 전환
+            logical_maxHP = Mathf.Max(logical_maxHP, hp);
+            display_maxHP = logical_maxHP;
+            isInitialized = true;
+        }
 
+        logical_currentHP = Mathf.Clamp(hp, 0f, logical_maxHP);
+        display_currentHP = logical_currentHP;
+
+        // UI 갱신을 위해 이벤트 쏘기
+        OnHealthChanged?.Invoke(display_currentHP, display_maxHP);
     }
+
 
     public bool IsAlive() => logical_currentHP > 0f;
     public void RequestDamage(float dmg) => pendingDamage += dmg;

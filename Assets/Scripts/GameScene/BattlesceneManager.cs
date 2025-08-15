@@ -1,6 +1,7 @@
 using UnityEngine;
-using System;
 using System.Collections;
+using UnityEngine.AI;
+using System;
 
 public class BattleSceneManager : MonoBehaviour
 {
@@ -11,129 +12,122 @@ public class BattleSceneManager : MonoBehaviour
         CoreComponent.OnAnyCoreDestroyed += EndBattleByCoreDeath;
     }
 
-    IEnumerator Start()
+    private IEnumerator Start()
     {
         battleEnded = false;
-        Debug.Log("🟢 [BattleSceneManager] 전투 씬 시작됨 → 유닛 복원 시도");
 
-        while (GameManager2.Instance == null)
+        // 배틀 시작 신호 대기
+        while (!GameManager2.Instance || !GameManager2.Instance.BattleStarted)
             yield return null;
-
-        float timeout = 5f;
-        while (timeout > 0f)
-        {
-            var msgs = GameManager2.Instance.GetInitMessages();
-            if (msgs.Count > 0)
-                break;
-
-            timeout -= Time.deltaTime;
-            yield return null;
-        }
 
         var initMessages = GameManager2.Instance.GetInitMessages();
-
         Debug.Log($"📦 [BattleScene] 복원할 InitMessage 개수: {initMessages.Count}");
 
         foreach (var msg in initMessages)
         {
-            Vector3 position = new Vector3(msg.position[0], msg.position[1], msg.position[2]);
+            // 1) 데이터/팀/프리팹
             var data = UnitManager.Instance.GetEntityData(msg.unitType);
+            if (data == null) { Debug.LogError($"❌ EntityData 없음: {msg.unitType}"); continue; }
 
-            if (!Enum.TryParse(msg.team, out Team parsedTeam))
-            {
-                Debug.LogError($"❌ [복원 실패] 팀 파싱 오류: {msg.team}");
-                continue;
-            }
+            if (!Enum.TryParse(msg.team, out Team teamParsed)) teamParsed = Team.Blue;
 
-            var prefab = UnitManager.Instance.GetTeamPrefab(msg.unitType, parsedTeam);
-            if (data == null || prefab == null)
-            {
-                Debug.LogError($"❌ [복원 실패] 프리팹 없음: {msg.unitType}");
-                continue;
-            }
+            var prefab = UnitManager.Instance.GetTeamPrefab(msg.unitType, teamParsed);
+            if (prefab == null) { Debug.LogError($"❌ [복원 실패] 프리팹 없음: {msg.unitType} / {teamParsed}"); continue; }
 
+            // 2) 요청 좌표 -> Vector3
+            Vector3 req = (msg.position != null && msg.position.Length >= 3)
+                            ? new Vector3(msg.position[0], msg.position[1], msg.position[2])
+                            : Vector3.zero;
+
+            // 3) 인스턴스 생성 + NavMesh 보정 후 배치
             var go = Instantiate(prefab);
-            go.SetActive(false);
+            var agent = go.GetComponent<NavMeshAgent>();
 
-            // NavMesh 스냅
-            Vector3 spawnPos = position;
-            if (UnityEngine.AI.NavMesh.SamplePosition(position, out var navHit, 2.5f, UnityEngine.AI.NavMesh.AllAreas))
-                spawnPos = navHit.position;
-            go.transform.SetPositionAndRotation(spawnPos, Quaternion.identity);
+            Vector3 target = req;
+            if (agent)
+            {
+                var filter = new NavMeshQueryFilter
+                {
+                    agentTypeID = agent.agentTypeID,
+                    areaMask = NavMesh.AllAreas
+                };
+                if (NavMesh.SamplePosition(req, out var nav, 2.0f, filter))
+                    target = nav.position;
 
-            // ⚠️ 데이터 먼저 주입
+                // Warp 성공 시에만 ResetPath 호출
+                bool warped = agent.Warp(target);
+                if (!warped)
+                {
+                    Debug.LogWarning("[BattleScene] Warp 실패 → transform 배치로 대체");
+                    go.transform.SetPositionAndRotation(target, Quaternion.identity);
+                }
+                else if (agent.isOnNavMesh)
+                {
+                    agent.ResetPath();
+                    agent.isStopped = false;
+                }
+            }
+            else
+            {
+                go.transform.SetPositionAndRotation(target, Quaternion.identity);
+            }
+
+            // 4) 활성화 후 컴포넌트 초기화/등록
+            if (!go.activeSelf) go.SetActive(true);
+
             var entity = go.GetComponent<Entity>();
-            entity.SetData(data);
-
-            entity.SetUnitId(msg.unitId);
-            entity.SetOwnerId(msg.ownerId);
+            if (entity)
+            {
+                entity.SetData(data);
+                entity.SetUnitId(msg.unitId);
+                entity.SetOwnerId(msg.ownerId);
+            }
             GameManager2.Instance.RegisterBattleEntity(entity);
-            go.GetComponent<TeamComponent>()?.SetTeam(parsedTeam);
-            int parsedLayer = LayerMask.NameToLayer(msg.layer);
-            if (parsedLayer != -1) go.layer = parsedLayer;
+            go.GetComponent<TeamComponent>()?.SetTeam(teamParsed);
 
-            go.SetActive(true);
+            if (!string.IsNullOrEmpty(msg.layer))
+            {
+                int li = LayerMask.NameToLayer(msg.layer);
+                if (li >= 0) go.layer = li;
+            }
 
             go.GetComponent<HealthComponent>()?.Initialize(data);
             go.GetComponent<AnimationComponent>()?.Initialize(data);
             go.GetComponent<AttackComponent>()?.Initialize(data);
             go.GetComponent<EffectComponent>()?.Initialize(data);
-            go.GetComponent<UnitNetwork>()?.InitializeNetwork(msg.ownerId == UserNetwork.Instance.MyId);
-
-            Debug.Log($"✅ 복원 완료: {msg.unitType} ({msg.unitId})");
         }
-
-        Debug.Log("🚩 [BattleSceneManager] 복원 완료 신호 전송됨");
-        GameManager2.Instance?.NotifyBattleSceneReady();
-
-        GameManager2.Instance?.RestoreAllCoreHp();
-
+        
         yield return new WaitUntil(() => TimerManager.Instance != null && TimerManager.Instance.countdownText != null);
         Debug.Log("⏲ 전투씬에서 타이머 직접 시작함");
         TimerManager.Instance?.ResetUI();
         TimerManager.Instance?.BeginCountdown();
     }
 
-    public void EndBattleByTimeout()
-    {
-        if (battleEnded) return;
-        battleEnded = true;
-
-        Debug.Log("⏰ 전투 시간 종료 → EndBattleAndReturn()");
-        EndBattleAndReturn();
-    }
-
     private void EndBattleByCoreDeath(Team loser)
     {
         if (battleEnded) return;
         battleEnded = true;
+        EndBattleAndReturn();
+    }
 
-        Debug.Log($"💀 {loser} 코어 파괴됨 → EndBattleAndReturn()");
+    public void EndBattleByTimeout()
+    {
+        if (battleEnded) return;
+        battleEnded = true;
         EndBattleAndReturn();
     }
 
     private void EndBattleAndReturn()
     {
-        foreach (var entity in GameManager2.Instance.GetBattleEntities())
+        foreach (var e in GameManager2.Instance.GetBattleEntities())
         {
-            if (entity == null) continue;
-
-            // 코어는 파괴하지 않고 비활성화만
-            if (entity.GetComponent<Core>() != null)
-            {
-                entity.gameObject.SetActive(false); // ✅ 코어 숨기기만 함
-                continue;
-            }
-
-            // 유닛은 제거
-            Destroy(entity.gameObject);
+            if (!e) continue;
+            if (e.GetComponent<Core>() != null) { e.gameObject.SetActive(false); continue; }
+            Destroy(e.gameObject);
         }
 
         GameManager2.Instance?.SaveAllCoreHp();
-
-        // ✅ 다음 라운드를 위해 전투 유닛 리스트 비우기
         GameManager2.Instance?.ClearBattleEntities();
-        // 준비 완료 전송
         UserNetwork.Instance?.ResetReadyState();
         UserNetwork.Instance?.SendReady();
     }
