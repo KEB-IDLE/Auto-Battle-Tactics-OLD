@@ -180,4 +180,46 @@ public class UnitManager : MonoBehaviour
 
         Debug.Log($"✅ [적 유닛 복원 완료] {unitType} ({initData.unitId}) 위치: {position}");
     }
+    public int GetAgentTypeId(string unitType)
+    {
+        var d = GetEntityData(unitType);
+        if (d == null) return -1;
+
+        // 1) 프리팹에 있는 NavMeshAgent에서 직접 가져오기(가장 정확)
+        GameObject prefab = d.bluePrefab != null ? d.bluePrefab : d.redPrefab;
+        if (prefab != null)
+        {
+            var agent = prefab.GetComponent<NavMeshAgent>();
+            if (agent != null) return agent.agentTypeID;
+        }
+
+        // 2) (프로젝트에 있을 경우) scale 이름으로 AgentType 검색
+        //    EntityData에 entityScale( Small / Medium / Large ) 같은 필드가 있다면 사용
+        try
+        {
+            string wanted = null;
+            // 예: EntityData에 entityScale 이 enum으로 있다면 이렇게 매칭
+            // wanted = d.entityScale.ToString(); // "Small"/"Medium"/"Large"
+
+            if (!string.IsNullOrEmpty(wanted))
+            {
+                int count = NavMesh.GetSettingsCount();
+                for (int i = 0; i < count; i++)
+                {
+                    var s = NavMesh.GetSettingsByIndex(i);
+                    string name = NavMesh.GetSettingsNameFromID(s.agentTypeID);
+                    if (string.Equals(name, wanted, StringComparison.OrdinalIgnoreCase))
+                        return s.agentTypeID;
+                }
+            }
+        }
+        catch { /* entityScale 없으면 그냥 넘어감 */ }
+
+        // 3) 마지막 보루: 첫 설정이나 -1 반환
+        if (NavMesh.GetSettingsCount() > 0)
+            return NavMesh.GetSettingsByIndex(0).agentTypeID;
+
+        Debug.LogWarning($"[UnitManager] GetAgentTypeId 실패: {unitType} → -1 반환");
+        return -1;
+    }
 }

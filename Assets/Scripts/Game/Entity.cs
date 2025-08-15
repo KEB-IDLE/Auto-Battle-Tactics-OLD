@@ -11,7 +11,6 @@ using UnityEngine.AI;
 [RequireComponent(typeof(TeamComponent))]
 [RequireComponent(typeof(EffectComponent))]
 [RequireComponent(typeof(UnitNetwork))]
-
 public class Entity : MonoBehaviour
 {
     [HideInInspector] public EntityData entityData;
@@ -26,40 +25,93 @@ public class Entity : MonoBehaviour
 
     public string UnitId { get; private set; }
     public string OwnerId { get; private set; }
-    public string UnitType => entityData.unitType;
+
+    // ⚠️ entityData가 null일 수 있으니 안전하게
+    public string UnitType => entityData != null ? entityData.unitType : string.Empty;
     public EntityData Data => entityData;
     public Team Team => _team.Team;
 
+    // 지연 초기화 상태 플래그
+    public bool IsInitialized { get; private set; }
+    private bool _eventsBound;
 
     public virtual void Awake()
     {
-        _health = GetComponent<HealthComponent>();
-        _attack = GetComponent<AttackComponent>();
-        _move = GetComponent<MoveComponent>();
-        _team = GetComponent<TeamComponent>();
-        _animation = GetComponent<AnimationComponent>();
-        _effect = GetComponent<EffectComponent>();
-        _healthBar = GetComponentInChildren<HealthBar>(true);
+        _health     = GetComponent<HealthComponent>();
+        _attack     = GetComponent<AttackComponent>();
+        _move       = GetComponent<MoveComponent>();
+        _team       = GetComponent<TeamComponent>();
+        _animation  = GetComponent<AnimationComponent>();
+        _effect     = GetComponent<EffectComponent>();
+        _healthBar  = GetComponentInChildren<HealthBar>(true);
 
-        if (entityData == null)
-        {
-            Debug.LogError($"{name} EntityData is null!");
-            return;
-        }
+        // ❗ 여기서는 절대 entityData를 요구하지 말 것.
+        // 초기화 전 전투 로직이 돌지 않도록 잠시 꺼둔다.
+        SetSubsystemsActive(false);
     }
 
     public void Start()
     {
-       _health.Initialize(entityData);
-        _healthBar.Initialize(_health);
+        // 프리팹에 데이터가 직결되어 있거나, SetData가 Awake~Start 사이에 들어왔다면 여기서 초기화됨
+        TryInitialize();
+    }
+
+    public void OnDestroy()
+    {
+        if (_eventsBound) UnbindEvent();
+    }
+
+    public void SetUnitId(string id)
+    {
+        UnitId = id;
+        Debug.Log($"[Entity] SetUnitId: {id}");
+    }
+
+    // 런타임 데이터 주입 진입점
+    public void SetData(EntityData data)
+    {
+        entityData = data;
+        TryInitialize(); // 데이터가 늦게 와도 즉시 한 번만 초기화
+    }
+
+    public void SetOwnership(bool isMine) => _move.SetIsMine(isMine);
+    public void SetOwnerId(string id) => OwnerId = id;
+
+    // ---- 지연 초기화 본체 ----
+    private void TryInitialize()
+    {
+        if (IsInitialized) return;
+        if (entityData == null) return; // 데이터 아직 없음 → 대기
+
+        // 초기화 순서: 스탯/바/전투/이동/애니/이펙트 → 이벤트 바인딩 → 풀 등록 → 서브시스템 활성화
+        _health.Initialize(entityData);
+        if (_healthBar != null) _healthBar.Initialize(_health);
+
         _attack.Initialize(entityData);
         _move.Initialize(entityData);
         _animation.Initialize(entityData);
         _effect.Initialize(entityData);
-        BindEvent();
-        
-        // 필요한 풀을 자동으로 등록
-        RegisterRequiredPools();
+
+        if (!_eventsBound)
+        {
+            BindEvent();
+            _eventsBound = true;
+        }
+
+        RegisterRequiredPools(); // 아래에 null 가드 추가됨
+
+        SetSubsystemsActive(true);
+
+        IsInitialized = true;
+    }
+
+    private void SetSubsystemsActive(bool active)
+    {
+        if (_attack != null)     _attack.enabled     = active;
+        if (_move != null)       _move.enabled       = active;
+        if (_animation != null)  _animation.enabled  = active;
+        if (_effect != null)     _effect.enabled     = active;
+        // Health/Team/Bar는 enabled 유지해도 무방
     }
 
     /// <summary>
@@ -72,21 +124,22 @@ public class Entity : MonoBehaviour
             Debug.LogError("ObjectPoolManager.Instance is null!");
             return;
         }
+        if (entityData == null) return; // 안전 가드
 
-        // 1. 발사체 풀 등록 (원거리 공격 유닛만)
+        // 1. 발사체 풀 (원거리만)
         if (entityData.attackType == AttackType.Ranged && entityData.projectilePrefab != null)
         {
             string projectilePoolName = entityData.projectilePoolName;
             if (!ObjectPoolManager.Instance.HasPool(projectilePoolName))
             {
                 ObjectPoolManager.Instance.RegisterProjectilePool(
-                    projectilePoolName, 
-                    entityData.projectilePrefab, 
+                    projectilePoolName,
+                    entityData.projectilePrefab,
                     poolSize: 15
                 );
             }
 
-            // 2. Flight Effect 풀 등록 (발사체에 Flight Effect가 있는 경우)
+            // 1-1. Flight Effect 풀
             if (entityData.projectileData != null && entityData.projectileData.FlightEffectPrefab != null)
             {
                 string flightEffectPoolName = entityData.projectileData.FlightEffectPrefab.name;
@@ -101,48 +154,29 @@ public class Entity : MonoBehaviour
             }
         }
 
-        // 3. 공격 이펙트 풀 등록
-        if (entityData.attackEffectPrefab != null)
-        {
-            string attackEffectPoolName = entityData.attackEffectPrefab.name;
-            if (!ObjectPoolManager.Instance.HasPool(attackEffectPoolName))
-            {
-                ObjectPoolManager.Instance.RegisterEffectPool(
-                    attackEffectPoolName,
-                    entityData.attackEffectPrefab,
-                    poolSize: 8
-                );
-            }
-        }
+        // 2. 공격 이펙트
+        RegisterEffectPool(entityData.attackEffectPrefab);
 
-        // 4. 기타 이펙트들 등록
-        RegisterEffectPool(entityData.summonEffectPrefab, "summon");
-        RegisterEffectPool(entityData.takeDamageEffectPrefeb, "takeDamage");  
-        RegisterEffectPool(entityData.deathEffectPrefab, "death");
+        // 3. 기타 이펙트들
+        RegisterEffectPool(entityData.summonEffectPrefab);
+        RegisterEffectPool(entityData.takeDamageEffectPrefeb);
+        RegisterEffectPool(entityData.deathEffectPrefab);
     }
 
-    /// <summary>
-    /// 개별 이펙트 풀을 등록하는 헬퍼 메서드
-    /// </summary>
-    private void RegisterEffectPool(GameObject effectPrefab, string effectType)
+    private void RegisterEffectPool(GameObject effectPrefab)
     {
-        if (effectPrefab != null)
+        if (effectPrefab == null) return;
+
+        string poolName = effectPrefab.name;
+        if (!ObjectPoolManager.Instance.HasPool(poolName))
         {
-            string poolName = effectPrefab.name;
-            if (!ObjectPoolManager.Instance.HasPool(poolName))
-            {
-                ObjectPoolManager.Instance.RegisterEffectPool(
-                    poolName,
-                    effectPrefab,
-                    poolSize: 5
-                );
-            }
+            ObjectPoolManager.Instance.RegisterEffectPool(
+                poolName,
+                effectPrefab,
+                poolSize: 5
+            );
         }
     }
-
-
-
-
 
     public void BindEvent()
     {
@@ -166,6 +200,9 @@ public class Entity : MonoBehaviour
 
     public void UnbindEvent()
     {
+        if (_attack == null || _move == null || _animation == null || _health == null || _healthBar == null || _effect == null)
+            return;
+
         _attack.OnAttackStateChanged -= _animation.HandleAttack;
         _move.OnMove -= _animation.HandleMove;
         _health.OnDeath -= _animation.HandleDeath;
@@ -178,13 +215,4 @@ public class Entity : MonoBehaviour
         CombatManager.OnGameEnd -= _move.StopAllAction;
         CombatManager.OnGameEnd -= _animation.StopAllAction;
     }
-    public void SetUnitId(string id)
-    {
-        UnitId = id;
-        Debug.Log($"[Entity] SetUnitId: {id}");
-    }
-
-    public void SetData(EntityData data) => entityData = data;
-    public void SetOwnership(bool isMine) => _move.SetIsMine(isMine);
-    public void SetOwnerId(string id) => OwnerId = id;
 }
