@@ -222,4 +222,14 @@ public class UnitManager : MonoBehaviour
         Debug.LogWarning($"[UnitManager] GetAgentTypeId 실패: {unitType} → -1 반환");
         return -1;
     }
+    public static int GetTeamAreaMask()
+    {
+        // UserNetwork.MyTeam이 Blue/Red로 셋업되어 있다는 전제
+        string areaName = (UserNetwork.Instance != null && UserNetwork.Instance.MyTeam == Team.Blue)
+            ? "BlueSpawn" : "RedSpawn";
+
+        int idx = NavMesh.GetAreaFromName(areaName);
+        return (idx >= 0) ? (1 << idx) : NavMesh.AllAreas; // 안전 폴백
+    }
+
 }
