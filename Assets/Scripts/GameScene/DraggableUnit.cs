@@ -10,6 +10,7 @@ public class DraggableUnit : MonoBehaviour
     [SerializeField] float rayMax = 600f;
     [SerializeField] float snapPrimary = 1.2f;
     [SerializeField] float snapFallback = 3.0f;
+    [SerializeField] bool debugLog = false;  // FIX: 디버그 스위치
 
     Camera cam;
     bool isDragging;
@@ -24,7 +25,7 @@ public class DraggableUnit : MonoBehaviour
     void OnEnable()
     {
         cam = Camera.main;
-        // 유닛 현재 높이를 지나는 수평 평면
+        // (참고) backupPlane은 OnMouseDown 때도 갱신한다.
         backupPlane = new Plane(Vector3.up, new Vector3(0f, transform.position.y, 0f));
     }
 
@@ -34,6 +35,9 @@ public class DraggableUnit : MonoBehaviour
         if (cam == null) cam = Camera.main;
         if (cam == null) return;
 
+        // FIX: 클릭 시점의 높이에 맞춰 드래그 평면 갱신
+        backupPlane = new Plane(Vector3.up, new Vector3(0f, transform.position.y, 0f));
+
         var r = cam.ScreenPointToRay(Input.mousePosition);
 
         // 바닥을 먼저 맞춘다(유닛 레이어가 아님)
@@ -41,12 +45,14 @@ public class DraggableUnit : MonoBehaviour
         {
             var p = hit.point;
             offsetXZ = new Vector2(transform.position.x - p.x, transform.position.z - p.z);
+            if (debugLog) Debug.Log($"[Drag] down hit={p} off=({offsetXZ.x:F2},{offsetXZ.y:F2})");
         }
         // 바닥을 못 맞추면 현재 높이 평면으로
         else if (backupPlane.Raycast(r, out float enter))
         {
             var p = r.GetPoint(enter);
             offsetXZ = new Vector2(transform.position.x - p.x, transform.position.z - p.z);
+            if (debugLog) Debug.Log($"[Drag] down plane={p} off=({offsetXZ.x:F2},{offsetXZ.y:F2})");
         }
         else return;
 
@@ -69,10 +75,11 @@ public class DraggableUnit : MonoBehaviour
         Vector3 desired;
         if (Physics.Raycast(r, out var hit, rayMax, groundMask, QueryTriggerInteraction.Ignore))
         {
+            // FIX: offsetXZ.y를 z 축에 더해줌(이전 .z 혼동 방지)
             desired = new Vector3(
                 hit.point.x + offsetXZ.x,
-                transform.position.y,             // y는 나중에 NavMesh로 맞춤
-                hit.point.z + offsetXZ.y          // ← Vector2는 .y 사용(이전 코드의 .z 오류 수정)
+                transform.position.y,             
+                hit.point.z + offsetXZ.y
             );
         }
         else if (backupPlane.Raycast(r, out float enter))
@@ -98,7 +105,12 @@ public class DraggableUnit : MonoBehaviour
 
         if (agentTypeId >= 0)
         {
-            var filter = new NavMeshQueryFilter { agentTypeID = agentTypeId, areaMask = NavMesh.AllAreas };
+            // FIX: 팀 영역 마스크와 에이전트 타입 동시 적용
+            var filter = new NavMeshQueryFilter
+            {
+                agentTypeID = agentTypeId,
+                areaMask = UnitManager.GetTeamAreaMask()
+            };
             ok = NavMesh.SamplePosition(desired, out navHit, snapPrimary, filter)
               || NavMesh.SamplePosition(desired, out navHit, snapFallback, filter);
         }
@@ -108,7 +120,19 @@ public class DraggableUnit : MonoBehaviour
               || NavMesh.SamplePosition(desired, out navHit, snapFallback, NavMesh.AllAreas);
         }
 
-        if (ok) snapped = navHit.position;
+        if (ok)
+        {
+            snapped = navHit.position;
+            if (debugLog)
+            {
+                float d = Vector3.Distance(desired, snapped);
+                Debug.Log($"[Drag] snap ok dist={d:F2}m → {snapped}");
+            }
+        }
+        else if (debugLog)
+        {
+            Debug.LogWarning("[Drag] snap fail (no navmesh nearby)");
+        }
 
         transform.position = snapped;
     }
