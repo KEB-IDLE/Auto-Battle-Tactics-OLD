@@ -364,12 +364,13 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
 
 using System;
 using System.Collections;
+using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
 using UnityEngine;
 
 public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
 {
-    // 기존 필드
+
     [HideInInspector] public float attackDamage;
     [HideInInspector] public float attackCoreDamage;
     [HideInInspector] public float attackImpactRatio;
@@ -402,11 +403,17 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
     public event Action<Transform> OnAttackEffect;
 #pragma warning restore 67
 
-
-    public void Awake()
+    void Awake()
     {
         _audio = GetComponent<AudioSource>();
+        if (_audio == null) _audio = gameObject.AddComponent<AudioSource>();
+
+        _audio.playOnAwake = false;
+        _audio.spatialBlend = 0f;  
+        _audio.minDistance = 3f;
+        _audio.maxDistance = 25f;
     }
+
     public void Initialize(EntityData data)
     {
         attackDamage = data.attackDamage;
@@ -418,7 +425,9 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         detectionRadius = data.detectionRadius;
         attackRange = data.attackRange;
         attackType = data.attackType;
-        attackSound = data.attackSound;
+        attackSound = data.attackSound ?? attackSound;
+        if (attackSound == null)
+            Debug.LogWarning($"[SFX] attackSound is NULL on {name} (EntityData: {data.name})", this);
         disengageRange = data.disengageRange;
         magicRadius = data.magicRadius;
         
@@ -529,7 +538,6 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         {
             _orientable?.LookAtTarget(target);
             yield return new WaitForSeconds(impactDelay);
-            _audio.PlayOneShot(attackSound);
             TryAttack(target);
             yield return new WaitForSeconds(attackCooldown - impactDelay);
         }
@@ -593,6 +601,22 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         isAttackingFlag = false;
         isDead = true;
     }
+
+
+    public void RequestAttackSound()
+    {
+        if (_audio == null) { Debug.LogWarning("[SFX] AudioSource missing", this); return; }
+        if (attackSound == null) { Debug.LogWarning("[SFX] attackSound is null", this); return; }
+        if (!isActiveAndEnabled) { Debug.LogWarning("[SFX] component disabled", this); return; }
+
+        Debug.Log($"[SFX] PlayOneShot '{attackSound.name}' on {name}", this);
+        _audio.PlayOneShot(attackSound);
+   
+
+        if (attackSound != null && _audio != null && isActiveAndEnabled)
+            _audio.PlayOneShot(attackSound);
+    }
+
     public void EventSender(Transform t) => OnAttackEffect?.Invoke(t);
     public Transform LockedTargetTransform => (lockedTarget as MonoBehaviour)?.transform;
     public bool IsAttacking() => isAttackingFlag;

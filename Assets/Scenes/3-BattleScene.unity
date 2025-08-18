@@ -4153,19 +4153,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3760281847762428348, guid: 55e13ddd82ca1894faa4e652df5ff335, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3760281847762673298, guid: 55e13ddd82ca1894faa4e652df5ff335, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -13.8
+      value: 30.56
       objectReference: {fileID: 0}
     - target: {fileID: 3760281847762673298, guid: 55e13ddd82ca1894faa4e652df5ff335, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: -1.98
       objectReference: {fileID: 0}
     - target: {fileID: 3760281847762673298, guid: 55e13ddd82ca1894faa4e652df5ff335, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 10.5
+      value: -28.91
       objectReference: {fileID: 0}
     - target: {fileID: 3760281847762673298, guid: 55e13ddd82ca1894faa4e652df5ff335, type: 3}
       propertyPath: m_LocalRotation.w
@@ -4197,11 +4197,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5130035903238768891, guid: 55e13ddd82ca1894faa4e652df5ff335, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.4441161
+      value: 0.91848344
       objectReference: {fileID: 0}
     - target: {fileID: 5130035903238768891, guid: 55e13ddd82ca1894faa4e652df5ff335, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0.8959693
+      value: -0.3954595
       objectReference: {fileID: 0}
     - target: {fileID: 5486766989756024572, guid: 55e13ddd82ca1894faa4e652df5ff335, type: 3}
       propertyPath: entityData
@@ -4689,6 +4689,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b4bb285803efd84d809f724bc969a50, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  userId: 
 --- !u!4 &603287757
 Transform:
   m_ObjectHideFlags: 0
@@ -10258,7 +10259,7 @@ PrefabInstance:
       objectReference: {fileID: 11400000, guid: e15c4de3da209a54cb572b0caee681a8, type: 2}
     - target: {fileID: -5895234309400238581, guid: 0414c6baeda086e47a9c31450d79af78, type: 3}
       propertyPath: m_Volume
-      value: 0.2
+      value: 0.66
       objectReference: {fileID: 0}
     - target: {fileID: -2636728362335333910, guid: 0414c6baeda086e47a9c31450d79af78, type: 3}
       propertyPath: _team
@@ -10275,6 +10276,10 @@ PrefabInstance:
     - target: {fileID: 6159849336836508998, guid: 0414c6baeda086e47a9c31450d79af78, type: 3}
       propertyPath: m_Name
       value: Knight_S_Entity
+      objectReference: {fileID: 0}
+    - target: {fileID: 6159849336836508998, guid: 0414c6baeda086e47a9c31450d79af78, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6159849336836743752, guid: 0414c6baeda086e47a9c31450d79af78, type: 3}
       propertyPath: m_LocalPosition.x

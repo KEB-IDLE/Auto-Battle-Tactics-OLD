@@ -40,7 +40,7 @@ MonoBehaviour:
   takeDamageEffectPrefeb: {fileID: 0}
   deathEffectPrefab: {fileID: 0}
   summonSound: {fileID: 0}
-  attackSound: {fileID: 0}
+  attackSound: {fileID: 8300000, guid: 83b1b308665afb644911d41d937489cd, type: 3}
   deathSound: {fileID: 0}
   animatorController: {fileID: 9100000, guid: 978dfb3f95c533c4aa9742b18291eb77, type: 2}
   attackClip: {fileID: 7400000, guid: f653247add3aab64bb8f0b4c6465a742, type: 3}

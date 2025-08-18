@@ -8,6 +8,7 @@ public class UserNetwork : MonoBehaviour
 {
     public static UserNetwork Instance { get; private set; }
     private Queue<string> pendingInitMessages = new();
+
     public string userId = SessionManager.Instance.profile.user_id.ToString();
 
     public Team MyTeam { get; private set; }

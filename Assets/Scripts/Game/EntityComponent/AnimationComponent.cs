@@ -7,11 +7,11 @@ public class AnimationComponent : MonoBehaviour
 {
     private Animator _animator;
     private AnimatorOverrideController _controller;
-    //private AudioSource _audioSource;
-    //private AudioClip summonSound;
-    //private AudioClip attackSound;
-    //private AudioClip deathSound;
-  
+    private AudioSource _audioSource;
+    private AudioClip summonSound;
+    private AudioClip attackSound;
+    private AudioClip deathSound;
+
 
     void Awake()
     {
@@ -33,13 +33,6 @@ public class AnimationComponent : MonoBehaviour
             _controller["Die"] = data.deathClip;
         if (data.idleClip != null)
             _controller["Idle"] = data.idleClip;
-        //if (data.summonSound != null)
-        //    this.summonSound = data.summonSound;
-        //if (data.attackSound != null)
-        //    this.attackSound = data.attackSound;
-        //if (data.deathSound != null)
-        //    this.deathSound = data.deathSound;
-
 
     }
 

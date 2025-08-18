@@ -11,6 +11,7 @@ using UnityEngine.AI;
 [RequireComponent(typeof(TeamComponent))]
 [RequireComponent(typeof(EffectComponent))]
 [RequireComponent(typeof(UnitNetwork))]
+[RequireComponent(typeof(AudioSource))]
 public class Entity : MonoBehaviour
 {
     [HideInInspector] public EntityData entityData;

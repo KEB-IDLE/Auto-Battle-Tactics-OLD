@@ -36,7 +36,7 @@ public class Magic_Fire : AttackStrategyBaseSO
 
             var dmg = col.GetComponent<IDamageable>();
             var core = col.GetComponent<Core>();
-
+            context.RequestAttackSound();
             if (dmg != null && dmg.IsAlive())
                 dmg.RequestDamage(core != null ? context.attackCoreDamage : context.attackDamage);
             (dmg as HealthComponent)?.ApplyImmediateDamage();
