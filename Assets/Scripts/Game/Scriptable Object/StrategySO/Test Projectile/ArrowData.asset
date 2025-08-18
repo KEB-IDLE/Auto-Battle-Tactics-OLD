@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   projectilePrefab: {fileID: 1942215709378787983, guid: 7e3d132b7dc843a4bbe5499eafe20e82, type: 3}
   FlightEffectPrefab: {fileID: 0}
-  speedWeight: 0
-  verticalSpeedWeight: 0
-  localRotationOffset: {x: 0, y: 0, z: 0}
-  detectionRadius: 0
+  speedWeight: 1.5
+  verticalSpeedWeight: 0.2
+  localRotationOffset: {x: -90, y: 0, z: 0}
+  detectionRadius: 0.7
   explosionRadius: 0

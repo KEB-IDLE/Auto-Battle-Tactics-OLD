@@ -16,7 +16,7 @@ MonoBehaviour:
   maxHP: 150
   attackDamage: 20
   attackCoreDamage: 2
-  attackImpactRatio: 0.5
+  attackImpactRatio: 0.2
   moveSpeed: 5
   entityScale: 0
   gold: 10
