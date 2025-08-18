@@ -21,9 +21,6 @@ public class LoginManager : MonoBehaviour
     public TMP_InputField registerNicknameInput; // 회원가입 닉네임 입력 필드
     public TMP_Text registerStatusText;          // 회원가입 상태 메시지 출력 텍스트
 
-    /// <summary>
-    /// 싱글턴 인스턴스를 초기화합니다.
-    /// </summary>
     private void Awake()
     {
         if (Instance == null)

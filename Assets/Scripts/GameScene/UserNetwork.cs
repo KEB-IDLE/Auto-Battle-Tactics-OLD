@@ -4,6 +4,156 @@ using System.Text;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 
+public class UserNetwork : MonoBehaviour
+{
+    public static UserNetwork Instance { get; private set; }
+    private Queue<string> pendingInitMessages = new();
+    public string MyId { get; private set; } = System.Guid.NewGuid().ToString();
+    public Team MyTeam { get; private set; }
+    public bool IsTeamReady { get; private set; } = false;
+    private WebSocket socket;
+    public static WebSocket GetSocket() => Instance?.socket;
+
+    void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+    }
+
+    private string websocketUrl = "ws://localhost:3000";    // Local development
+    //private string websocketUrl = "wss://jamsik.p-e.kr";  // Production (HTTPS)
+
+    async void Start()
+    {
+        socket = new WebSocket(websocketUrl);
+
+        socket.OnOpen += () => Debug.Log("[UserNetwork] Connected to server");
+
+        socket.OnMessage += (bytes) =>
+        {
+            HandleMessage(bytes);
+        };
+
+        socket.OnClose += (_) => Debug.LogWarning("Connection closed");
+        socket.OnError += (e) => Debug.LogError("WebSocket error: " + e);
+
+        await socket.Connect();
+    }
+
+    void Update()
+    {
+#if !UNITY_WEBGL || UNITY_EDITOR
+        socket?.DispatchMessageQueue();
+#endif
+    }
+
+    void LateUpdate()
+    {
+        if (pendingInitMessages.Count > 0 && UnitManager.Instance != null)
+        {
+            while (pendingInitMessages.Count > 0)
+            {
+                string msg = pendingInitMessages.Dequeue();
+                UnitManager.Instance.OnReceiveInitMessage(msg);
+            }
+        }
+    }
+
+    public void SetTeam(Team team)
+    {
+        MyTeam = team;
+        IsTeamReady = true;
+        Debug.Log($"Team set: {team}");
+
+        var controller = Object.FindFirstObjectByType<TeamUIController>();
+        if (controller == null)
+        {
+            Debug.LogError("TeamUIController not found");
+        }
+        else
+        {
+            controller.SetTeam(team);
+        }
+    }
+
+    void HandleMessage(byte[] bytes)
+    {
+        string json = Encoding.UTF8.GetString(bytes).Trim();
+        var header = JsonUtility.FromJson<MessageTypeHeader>(json);
+
+        switch (header.type)
+        {
+            case "startCountdown":
+                TimerManager.Instance?.ResetUI();
+                TimerManager.Instance?.BeginCountdown();
+                break;
+            case "gameStart":
+                {
+                    string scene = SceneManager.GetActiveScene().name;
+
+                    if (scene == "2-GameScene")
+                    {
+                        GameManager2.Instance?.OnAllPlayersReadyFromServer();
+                    }
+                    else if (scene == "3-BattleScene")
+                    {
+                        GameManager2.Instance?.ReturnToPlacementScene();
+                    }
+                    break;
+                }
+
+            case "init":
+                if (UnitManager.Instance != null)
+                    UnitManager.Instance.OnReceiveInitMessage(json);
+                else
+                    pendingInitMessages.Enqueue(json);
+                break;
+            case "teamAssign":
+                var teamMsg = JsonUtility.FromJson<TeamAssignMessage>(json);
+                Team parsedTeam = (Team)System.Enum.Parse(typeof(Team), teamMsg.team);
+                SetTeam(parsedTeam);
+                break;
+            case "assignId":
+                var assign = JsonUtility.FromJson<AssignIdMessage>(json);
+                MyId = assign.clientId;
+                Debug.Log($"Client ID set: {MyId}");
+                break;
+        }
+    }
+
+    private bool alreadyReadySent = false;
+
+    public void SendReady()
+    {
+        if (socket != null && socket.State == WebSocketState.Open && !alreadyReadySent)
+        {
+            alreadyReadySent = true;
+
+            var readyMsg = new ReadyMessage
+            {
+                type = "ready",
+                ownerId = MyId
+            };
+
+            string json = JsonUtility.ToJson(readyMsg);
+            socket.SendText(json);
+
+            Debug.Log("Ready message sent");
+        }
+    }
+
+    public void ResetReadyState()
+    {
+        alreadyReadySent = false;
+    }
+}
+
 [System.Serializable]
 public class TeamAssignMessage
 {
@@ -30,158 +180,4 @@ public class AssignIdMessage
 {
     public string type;
     public string clientId;
-}
-[System.Serializable]
-
-public class UserNetwork : MonoBehaviour
-{
-    public static UserNetwork Instance { get; private set; }
-    private Queue<string> pendingInitMessages = new();
-    public string MyId { get; private set; } = System.Guid.NewGuid().ToString();
-    public Team MyTeam { get; private set; }
-    public bool IsTeamReady { get; private set; } = false;
-    public bool IsSocketReady => socket != null && socket.State == WebSocketState.Open;
-    private Dictionary<Team, float> savedCoreHp = new();
-
-
-    private WebSocket socket;
-    private static List<string> connectedIds = new();
-    public static WebSocket GetSocket() => Instance?.socket;
-    public static IReadOnlyList<string> GetAllConnectedIds() => connectedIds;
-
-    public void SetTeam(Team team)
-    {
-        MyTeam = team;
-        IsTeamReady = true;
-        Debug.Log($"✅ 내 팀 설정됨: {team}");
-
-        var controller = Object.FindFirstObjectByType<TeamUIController>();
-        if (controller == null)
-        {
-            Debug.LogError("❌ TeamUIController 못 찾음");
-        }
-        else
-        {
-            controller.SetTeam(team);
-        }
-    }
-
-    void Awake()
-    {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-
-        Instance = this;
-        DontDestroyOnLoad(gameObject);
-    }
-
-    async void Start()
-    {
-        socket = new WebSocket("ws://localhost:3000");
-        //socket = new WebSocket("ws://localhost:7979");
-
-        socket.OnOpen += () => Debug.Log("🟢 [UserNetwork] 서버에 연결됨");
-
-        socket.OnMessage += (bytes) =>
-        {
-            string json = Encoding.UTF8.GetString(bytes);
-            HandleMessage(bytes);
-        };
-
-        socket.OnClose += (_) => Debug.LogWarning("🔌 연결 종료");
-        socket.OnError += (e) => Debug.LogError("❌ 오류 발생: " + e);
-
-        await socket.Connect();
-    }
-
-    void Update()
-    {
-#if !UNITY_WEBGL || UNITY_EDITOR
-        socket?.DispatchMessageQueue();
-#endif
-    }
-    void LateUpdate()
-    {
-        if (pendingInitMessages.Count > 0 && UnitManager.Instance != null)
-        {
-            while (pendingInitMessages.Count > 0)
-            {
-                string msg = pendingInitMessages.Dequeue();
-                UnitManager.Instance.OnReceiveInitMessage(msg);
-            }
-        }
-    }
-    void HandleMessage(byte[] bytes)
-    {
-        string json = Encoding.UTF8.GetString(bytes).Trim();
-        var header = JsonUtility.FromJson<MessageTypeHeader>(json);
-
-        switch (header.type)
-        {
-            case "startCountdown":
-                TimerManager.Instance?.ResetUI();
-                TimerManager.Instance?.BeginCountdown();
-                break;
-            case "gameStart":
-                {
-                    string scene = SceneManager.GetActiveScene().name;
-
-                    if (scene == "2-GameScene")
-                    {
-                        GameManager2.Instance?.OnAllPlayersReadyFromServer();
-                    }
-                    else if (scene == "3-BattleScene")
-                    {
-
-                        GameManager2.Instance?.ReturnToPlacementScene();
-                    }
-                    break;
-                }
-
-            case "init":
-                if (UnitManager.Instance != null)
-                    UnitManager.Instance.OnReceiveInitMessage(json);
-                else
-                    pendingInitMessages.Enqueue(json); // ✅ 저장해놨다가 나중에 처리
-                break;
-            case "teamAssign":
-                var teamMsg = JsonUtility.FromJson<TeamAssignMessage>(json);
-                Team parsedTeam = (Team)System.Enum.Parse(typeof(Team), teamMsg.team);
-                SetTeam(parsedTeam);
-                break;
-            case "assignId":
-                var assign = JsonUtility.FromJson<AssignIdMessage>(json);
-                MyId = assign.clientId;
-                Debug.Log($"🆔 [UserNetwork] 내 클라이언트 ID 설정됨: {MyId}");
-                break;
-        }
-    }
-
-    private bool alreadyReadySent = false;
-
-    public void SendReady()
-    {
-        if (socket != null && socket.State == WebSocketState.Open && !alreadyReadySent)
-        {
-            alreadyReadySent = true;
-
-            var readyMsg = new ReadyMessage
-            {
-                type = "ready",
-                ownerId = MyId
-            };
-
-            string json = JsonUtility.ToJson(readyMsg);
-            socket.SendText(json);
-
-            Debug.Log("📤 [UserNetwork] ready 전송 완료");
-        }
-    }
-    public void ResetReadyState()
-    {
-        alreadyReadySent = false;
-    }
 }

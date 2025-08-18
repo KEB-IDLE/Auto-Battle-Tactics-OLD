@@ -19,7 +19,7 @@ public class UIManager : MonoBehaviour
     public TMP_Text goldText;             // 골드 텍스트
 
     // IconPanel - 프로필 아이콘 관련 UI 요소
-    public Image[] iconPanelImages;                                  // 아이콘 버튼 이미지 배열
+    public Image[] iconPanelImages;                             // 아이콘 버튼 이미지 배열
     Color enabledColor = Color.white;                           // 아이콘 활성화 색상
     Color disabledColor = new Color(1f, 1f, 1f, 80f / 255f);    // 비활성화 색상(반투명)
 

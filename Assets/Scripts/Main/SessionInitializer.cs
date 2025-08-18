@@ -22,8 +22,6 @@ public class SessionInitializer : MonoBehaviour
 
             UIManager.Instance.UpdateRecord();
 
-            
-
             UIManager.Instance.UpdateGlobalRanking();
 
             UIManager.Instance.SetProfileCharacter(SessionManager.Instance.profile.profile_char_id);
