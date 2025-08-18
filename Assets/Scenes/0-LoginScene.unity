@@ -3232,7 +3232,7 @@ GameObject:
   - component: {fileID: 792751459}
   - component: {fileID: 792751460}
   m_Layer: 0
-  m_Name: LoginManager
+  m_Name: LoginController
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8772,7 +8772,7 @@ SceneRoots:
   - {fileID: 410087041}
   - {fileID: 832575519}
   - {fileID: 605628853}
-  - {fileID: 1796823180}
   - {fileID: 792751459}
+  - {fileID: 1796823180}
   - {fileID: 468541730}
   - {fileID: 1278886872}

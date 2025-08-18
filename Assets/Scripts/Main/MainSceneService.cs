@@ -6,9 +6,9 @@ using UnityEngine;
 /// 유저 관련 서버 API 요청을 처리하는 싱글턴 클래스입니다.
 /// 프로필 캐릭터, 아이콘, 수치(레벨/경험치/골드), 랭킹 등의 데이터를 서버와 동기화합니다.
 /// </summary>
-public class GameAPIClient : MonoBehaviour
+public class MainSceneService : MonoBehaviour
 {
-    public static GameAPIClient Instance { get; private set; }
+    public static MainSceneService Instance { get; private set; }
 
     private void Awake()
     {

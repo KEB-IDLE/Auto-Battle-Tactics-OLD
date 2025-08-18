@@ -6,10 +6,8 @@ using UnityEngine.UI;
 /// <summary>
 /// 로그인 및 회원가입 UI를 관리하고, 서버와의 인증 통신을 수행하는 매니저 클래스입니다.
 /// </summary>
-public class LoginManager : MonoBehaviour
+public class LoginController : MonoBehaviour
 {
-    public static LoginManager Instance { get; private set; }
-
     // === 로그인 UI 요소 ===
     public TMP_InputField emailInput;        // 로그인 이메일 입력 필드
     public TMP_InputField passwordInput;     // 로그인 비밀번호 입력 필드
@@ -20,19 +18,6 @@ public class LoginManager : MonoBehaviour
     public TMP_InputField registerPasswordInput; // 회원가입 비밀번호 입력 필드
     public TMP_InputField registerNicknameInput; // 회원가입 닉네임 입력 필드
     public TMP_Text registerStatusText;          // 회원가입 상태 메시지 출력 텍스트
-
-    private void Awake()
-    {
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-    }
 
     /// <summary>
     /// 로그인 버튼 클릭 시 호출됩니다. 입력값을 검증하고 서버에 로그인 요청을 보냅니다.
