@@ -135,7 +135,7 @@ public class GameManager2 : MonoBehaviour
 
     public bool IsMyUnit(Entity entity)
     {
-        return entity.OwnerId == UserNetwork.Instance.MyId;
+        return entity.OwnerId == UserNetwork.Instance.userId;
     }
     public void AddInitMessage(InitMessage msg)
     {

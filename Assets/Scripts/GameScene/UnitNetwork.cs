@@ -60,7 +60,7 @@ public class UnitNetwork : MonoBehaviour
             position = new float[] { pos.x, pos.y, pos.z },
             hp = Mathf.FloorToInt(GetComponent<HealthComponent>()?.CurrentHp ?? _entity.Data.maxHP),
             atk = Mathf.FloorToInt(_entity.Data.attackDamage),
-            ownerId = UserNetwork.Instance.MyId,
+            ownerId = UserNetwork.Instance.userId,
             team = UserNetwork.Instance.MyTeam.ToString(),
             layer = LayerMask.LayerToName(gameObject.layer)
         };

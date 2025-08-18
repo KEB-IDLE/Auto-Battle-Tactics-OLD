@@ -59,7 +59,7 @@ public class UnitManager : MonoBehaviour
             return;
         }
         // 팀 결정
-        Team team = (ownerId == UserNetwork.Instance.MyId)
+        Team team = (ownerId == UserNetwork.Instance.userId)
             ? UserNetwork.Instance.MyTeam
             : (UserNetwork.Instance.MyTeam == Team.Red ? Team.Blue : Team.Red);
 
@@ -76,7 +76,7 @@ public class UnitManager : MonoBehaviour
         GameManager2.Instance.Register(entity);
 
         // 네트워크 초기화
-        bool isMine = (ownerId == UserNetwork.Instance.MyId);
+        bool isMine = (ownerId == UserNetwork.Instance.userId);
         bool isPlacement = GameManager2.Instance.IsPlacementPhase;
         go.GetComponent<UnitNetwork>()?.InitializeNetwork(isMine);
 
@@ -126,7 +126,7 @@ public class UnitManager : MonoBehaviour
             return;
 
         // 내 유닛은 복원하지 않음 (씬에서 이미 복원됨)
-        if (initData.ownerId == UserNetwork.Instance.MyId)
+        if (initData.ownerId == UserNetwork.Instance.userId)
         {
             Debug.Log($"⚠️ [무시됨] 내 유닛 메시지임 → {initData.unitId}");
             return;
