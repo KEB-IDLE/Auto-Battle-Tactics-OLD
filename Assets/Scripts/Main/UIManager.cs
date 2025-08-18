@@ -1,6 +1,7 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 /// <summary>
@@ -70,7 +71,7 @@ public class UIManager : MonoBehaviour
     /// <param name="charId">변경할 캐릭터 ID</param>
     private IEnumerator UpdateProfileCharacter(int charId)
     {
-        yield return GameAPIClient.Instance.SetProfileCharacter(
+        yield return MainSceneService.Instance.SetProfileCharacter(
             charId,
             profile => { SessionManager.Instance.profile = profile; },
             err => Debug.LogWarning("메인 캐릭터 변경 실패: " + err)
@@ -187,7 +188,7 @@ public class UIManager : MonoBehaviour
     /// <param name="iconId">구매할 아이콘 ID</param>
     public void PurchaseProfileIcon(int iconId)
     {
-        StartCoroutine(GameAPIClient.Instance.PurchaseIcon(
+        StartCoroutine(MainSceneService.Instance.PurchaseIcon(
             iconId,
             res =>
             {
@@ -216,7 +217,7 @@ public class UIManager : MonoBehaviour
     /// <param name="iconId">변경할 아이콘 ID</param>
     public void SetProfileIcon(int iconId)
     {
-        StartCoroutine(GameAPIClient.Instance.SetProfileIcon(
+        StartCoroutine(MainSceneService.Instance.SetProfileIcon(
             iconId,
             profile =>
             {
@@ -234,7 +235,7 @@ public class UIManager : MonoBehaviour
     /// <param name="deltaLevel">변경할 레벨 증감량</param>
     public void ChangeLevel(int deltaLevel)
     {
-        StartCoroutine(GameAPIClient.Instance.AddLevel(
+        StartCoroutine(MainSceneService.Instance.AddLevel(
             deltaLevel,
             onComplete: UpdateProfile
         ));
@@ -246,7 +247,7 @@ public class UIManager : MonoBehaviour
     /// <param name="deltaExp">변경할 경험치 증감량</param>
     public void ChangeExp(int deltaExp)
     {
-        StartCoroutine(GameAPIClient.Instance.AddExp(
+        StartCoroutine(MainSceneService.Instance.AddExp(
             deltaExp,
             onComplete: UpdateProfile
         ));
@@ -258,7 +259,7 @@ public class UIManager : MonoBehaviour
     /// <param name="deltaGold">변경할 골드 증감량</param>
     public void ChangeGold(int deltaGold)
     {
-        StartCoroutine(GameAPIClient.Instance.AddGold(
+        StartCoroutine(MainSceneService.Instance.AddGold(
             deltaGold,
             onComplete: UpdateProfile
         ));
@@ -284,7 +285,7 @@ public class UIManager : MonoBehaviour
             rank_point = record.rank_point + deltaPoint
         };
 
-        StartCoroutine(GameAPIClient.Instance.UpdateRecord(
+        StartCoroutine(MainSceneService.Instance.UpdateRecord(
             req,
             updated =>
             {
@@ -309,7 +310,7 @@ public class UIManager : MonoBehaviour
     /// </summary>
     public void UpdateGlobalRanking()
     {
-        StartCoroutine(GameAPIClient.Instance.GetGlobalRanking(
+        StartCoroutine(MainSceneService.Instance.GetGlobalRanking(
             entries =>
             {
                 for (int i = 0; i < entries.Length && i < rankNumberTexts.Length; i++)
@@ -359,6 +360,11 @@ public class UIManager : MonoBehaviour
             else
                 Debug.LogWarning($"잘못된 프로필 아이콘 ID: {profile.profile_icon_id}");
         }
+    }
+
+    public void LoadGameScene()
+    {
+        SceneManager.LoadScene("2-GameScene");
     }
 }
 
