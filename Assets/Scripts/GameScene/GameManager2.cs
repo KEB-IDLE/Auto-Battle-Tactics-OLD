@@ -93,7 +93,7 @@ public class GameManager2 : MonoBehaviour
 
         BattleStarted = true;
         IsPlacementPhase = false;
-        
+
 
         Debug.Log("✅ 전투 시작!");
     }
@@ -340,6 +340,35 @@ public class GameManager2 : MonoBehaviour
             core.BindEvent();
         }
     }
+    public void ApplySavedCoreHpToCurrentSceneCores()
+    {
+        var cores = Object.FindObjectsByType<Core>(FindObjectsSortMode.None);
+        foreach (var core in cores)
+        {
+            var team = core.GetComponent<TeamComponent>()?.Team ?? Team.Red;
+            var hp = core.GetComponent<HealthComponent>();
+            if (!hp) continue;
+
+            // 코어의 최대체력 구하기
+            var data = core.GetObjectData();
+            float maxHP = (data != null) ? data.maxHP : (hp.MaxHp > 0 ? hp.MaxHp : 100f);
+
+            // 저장된 HP가 있으면 적용, 없으면 최대체력
+            float applyHp = maxHP;
+            if (coreHpByTeam != null && coreHpByTeam.TryGetValue(team, out var saved))
+                applyHp = saved;
+
+            if (!hp.IsInitialized) hp.Initialize(maxHP); // 미초기화면 먼저 초기화
+            hp.RestoreHP(applyHp);
+
+            // UI 동기화
+            core.GetComponentInChildren<HealthBar>()?.Initialize(hp);
+            core.BindEvent();
+
+            Debug.Log($"🔁 [GM] 코어 HP 적용: {team} = {applyHp}/{maxHP}");
+        }
+    }
+
     public void RemoveInitMessageByUnitId(string unitId)
     {
         int before = allInitMessages.Count;

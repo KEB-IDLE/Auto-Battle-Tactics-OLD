@@ -6,10 +6,13 @@ using UnityEngine.SceneManagement;
 
 public class UserNetwork : MonoBehaviour
 {
+    public string MyId => userId;      // 예전 코드 호환
+    public string ClientId => userId;  // 혹시 다른 곳에서 ClientId를 참조할 수도 있어 대비
+
     public static UserNetwork Instance { get; private set; }
     private Queue<string> pendingInitMessages = new();
 
-    public string userId = SessionManager.Instance.profile.user_id.ToString();
+    public string userId;
 
     public Team MyTeam { get; private set; }
     public bool IsTeamReady { get; private set; } = false;
@@ -26,6 +29,8 @@ public class UserNetwork : MonoBehaviour
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
+
+        userId = SessionManager.Instance.profile.user_id.ToString();
     }
 
     private string websocketUrl = "ws://localhost:3000";    // Local development
