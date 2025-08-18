@@ -1,5 +1,6 @@
 #if UNITY_EDITOR
 using System.Linq;
+using System.Net.Mail;
 using Unity.VisualScripting;
 using UnityEditor;
 #endif
@@ -132,6 +133,7 @@ public class EntityEditor : Editor
             var healthBar = fillGO.AddComponent<HealthBar>();
             healthBar.fillImage = fillImg;
         }
+        AttachBillboard(go.transform);
 
         var rb = go.GetComponent<Rigidbody>();
         if (rb == null)
@@ -143,6 +145,15 @@ public class EntityEditor : Editor
                        | RigidbodyConstraints.FreezeRotationZ;
 
         Selection.activeGameObject = go;
+
+        void AttachBillboard(Transform root)
+        {
+            var hbc = root.Find("HealthBarCanvas");
+            if (hbc != null && hbc.GetComponent<Billboard>() == null)
+            {
+                hbc.gameObject.AddComponent<Billboard>(); // 기본값: YAxisOnly, MainCamera 자동 탐색
+            }
+        }
     }
 }
 #endif
