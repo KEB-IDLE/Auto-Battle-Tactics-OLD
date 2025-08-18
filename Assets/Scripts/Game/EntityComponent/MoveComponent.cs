@@ -113,6 +113,7 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
         }
         else
         {
+            Debug.Log("Unit is not on navmesh");
             return; // ❗ 여기서 끝내면 ResetPath/SetDestination 호출 안 함
         }
     }

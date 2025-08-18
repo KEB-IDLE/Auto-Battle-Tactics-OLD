@@ -71,6 +71,7 @@ public class Entity : MonoBehaviour
     public void SetData(EntityData data)
     {
         entityData = data;
+        if (!Application.isPlaying) return;
         TryInitialize(); // 데이터가 늦게 와도 즉시 한 번만 초기화
     }
 
@@ -80,6 +81,7 @@ public class Entity : MonoBehaviour
     // ---- 지연 초기화 본체 ----
     private void TryInitialize()
     {
+        if(!Application.isPlaying) return;
         if (IsInitialized) return;
         if (entityData == null) return; // 데이터 아직 없음 → 대기
 
@@ -119,6 +121,7 @@ public class Entity : MonoBehaviour
     /// </summary>
     private void RegisterRequiredPools()
     {
+        if (!Application.isPlaying) return;
         if (ObjectPoolManager.Instance == null)
         {
             Debug.LogError("ObjectPoolManager.Instance is null!");
