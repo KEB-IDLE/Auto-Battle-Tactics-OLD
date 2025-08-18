@@ -39,6 +39,8 @@ public class AnimationComponent : MonoBehaviour
             this.attackSound = data.attackSound;
         if (data.deathSound != null)
             this.deathSound = data.deathSound;
+
+
     }
 
     public void HandleAttack(bool isAttacking)

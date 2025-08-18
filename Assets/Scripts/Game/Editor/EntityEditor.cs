@@ -82,11 +82,14 @@ public class EntityEditor : Editor
         {
             var healthBarCanvas = new GameObject("HealthBarCanvas", typeof(Canvas), typeof(CanvasRenderer));
             healthBarCanvas.transform.SetParent(go.transform);
-            healthBarCanvas.transform.localPosition = new Vector3(0, 2.0f, 0); // 머리 위에 위치(조정 가능)
+
+            // ▼ 여기 분기 삽입
+            float y = data.isMounted ? 3.2f : 2.0f;   // EntityData에 isMounted 플래그가 있다면
+            healthBarCanvas.transform.localPosition = new Vector3(0, y, 0);
 
             var canvas = healthBarCanvas.GetComponent<Canvas>();
             canvas.renderMode = RenderMode.WorldSpace;
-            canvas.worldCamera = Camera.main; // 씬에 카메라 하나 있다고 가정
+            canvas.worldCamera = Camera.main;
 
             // Canvas 크기, 스케일 조정
             healthBarCanvas.GetComponent<RectTransform>().sizeDelta = new Vector2(1.5f, 0.3f);

@@ -27,15 +27,16 @@ MonoBehaviour:
   disengageRange: 6
   attackPriority: 0
   attackType: 0
-  attackStrategy: {fileID: 11400000, guid: ab6e9dfcffec7cf4b994f4d8d7a03b45, type: 2}
+  attackStrategy: {fileID: 11400000, guid: 1609767981965624ca90af71c782c9f6, type: 2}
   redPrefab: {fileID: 158504, guid: ddf6f4b328aee7e4295f67f8a2bbd207, type: 3}
   bluePrefab: {fileID: 8273930586231845636, guid: 92987f8766c8f764c9f16bd815d9b141, type: 3}
+  isMounted: 1
   magicRadius: 0
   projectilePrefab: {fileID: 0}
   projectilePoolName: 
   projectileData: {fileID: 0}
   summonEffectPrefab: {fileID: 0}
-  attackEffectPrefab: {fileID: 0}
+  attackEffectPrefab: {fileID: 3156866507962234106, guid: 5f4bbc5889b1d084b8af4d5085dc207c, type: 3}
   takeDamageEffectPrefeb: {fileID: 0}
   deathEffectPrefab: {fileID: 0}
   summonSound: {fileID: 0}
