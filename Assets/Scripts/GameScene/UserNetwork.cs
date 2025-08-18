@@ -184,16 +184,4 @@ public class UserNetwork : MonoBehaviour
     {
         alreadyReadySent = false;
     }
-    public void ProcessPendingMessages()
-    {
-        if (UnitManager.Instance == null) return;
-
-        while (pendingInitMessages.Count > 0)
-        {
-            string msg = pendingInitMessages.Dequeue();
-            UnitManager.Instance.OnReceiveInitMessage(msg);
-        }
-
-        Debug.Log("🧹 [UserNetwork] 대기 중인 init 메시지 처리 완료");
-    }
 }
