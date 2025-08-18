@@ -17,7 +17,7 @@ MonoBehaviour:
   attackDamage: 25
   attackCoreDamage: 5
   attackImpactRatio: 0.5
-  moveSpeed: 1
+  moveSpeed: 3
   entityScale: 0
   gold: 15
   unitType: Knight
@@ -30,6 +30,7 @@ MonoBehaviour:
   attackStrategy: {fileID: 11400000, guid: ab6e9dfcffec7cf4b994f4d8d7a03b45, type: 2}
   redPrefab: {fileID: 6159849336836508998, guid: 0414c6baeda086e47a9c31450d79af78, type: 3}
   bluePrefab: {fileID: 6159849336836508998, guid: b0fad61085f0abe4d9d39873fbe11e69, type: 3}
+  isMounted: 0
   magicRadius: 0
   projectilePrefab: {fileID: 0}
   projectilePoolName: 

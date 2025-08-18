@@ -17,7 +17,7 @@ MonoBehaviour:
   attackDamage: 20
   attackCoreDamage: 5
   attackImpactRatio: 0.7
-  moveSpeed: 5
+  moveSpeed: 3
   entityScale: 0
   gold: 15
   unitType: Mage_Fire
@@ -30,6 +30,7 @@ MonoBehaviour:
   attackStrategy: {fileID: 11400000, guid: 20cb2e38087831c41aec53361d105567, type: 2}
   redPrefab: {fileID: 3760281847762428348, guid: 55e13ddd82ca1894faa4e652df5ff335, type: 3}
   bluePrefab: {fileID: 3104066098313752856, guid: 047a0ee151655dd4f8233b63644e0bdd, type: 3}
+  isMounted: 0
   magicRadius: 3
   projectilePrefab: {fileID: 0}
   projectilePoolName: 
