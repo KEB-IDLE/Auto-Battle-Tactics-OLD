@@ -1,10 +1,8 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.AI;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
-
+using System.Collections.Generic;
+using Unity.AI.Navigation;
 
 public class UnitCardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
@@ -13,13 +11,15 @@ public class UnitCardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDr
     public GameObject bluePrefab;
     public GameObject redPrefab;
 
-    [Header("배치 레이어(화이트리스트)")]
-    public LayerMask placementMask;                // Ground
+    [Header("레이 기본값")]
     public float raycastMaxDistance = 500f;
 
-    [Header("NavMesh 스냅 반경(배치씬)")]
-    public float snapRadiusPrimary = 0.6f;         // 거의 제자리
-    public float snapRadiusFallback = 3.0f;        // 근거리 보정
+    [Header("NavMesh 스냅(팀 스폰 영역만)")]
+    public float snapRadiusPrimary = 0.6f;
+    public float snapRadiusFallback = 2.0f;
+
+    [Header("스폰 볼륨 레이어(없어도 동작함)")]
+    [SerializeField] private LayerMask spawnVolumeMask; // 비우면 "SpawnVolume" 레이어 사용
 
     [Header("디버그")]
     public bool debugLog = true;
@@ -28,24 +28,11 @@ public class UnitCardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDr
     GameObject dragIcon;
     RectTransform rootCanvas;
 
-
     void Awake()
     {
         cam = Camera.main;
         var canvas = GetComponentInParent<Canvas>();
         rootCanvas = canvas ? canvas.GetComponent<RectTransform>() : null;
-
-        // Ground 인덱스/마스크 확정
-        int groundLayer = LayerMask.NameToLayer("Ground");
-        if (groundLayer < 0)
-        {
-            Debug.LogError("Ground 레이어가 Project Settings > Tags and Layers에 없음!");
-        }
-        else
-        {
-            placementMask = 1 << groundLayer;
-            Debug.Log($"[Place] Ground layerIndex={groundLayer}, mask={placementMask.value}");
-        }
     }
 
     public void OnBeginDrag(PointerEventData e)
@@ -66,21 +53,6 @@ public class UnitCardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDr
             rt.sizeDelta = srcImg.rectTransform.sizeDelta;
             rt.localScale = new Vector3(0.5f, 0.5f, 1f);
         }
-#if UNITY_EDITOR
-        {
-            var ray = cam.ScreenPointToRay(e.position);
-            if (Physics.Raycast(ray, out var anyHit, raycastMaxDistance, ~0, QueryTriggerInteraction.Ignore))
-            {
-                Debug.LogWarning($"[DIAG] 아래 첫 히트: {anyHit.collider.name} " +
-                                 $"layer={LayerMask.LayerToName(anyHit.collider.gameObject.layer)} " +
-                                 $"trigger={anyHit.collider.isTrigger}");
-            }
-            else
-            {
-                Debug.LogWarning("[DIAG] 아래에 콜라이더가 아예 없음");
-            }
-        }
-#endif
     }
 
     public void OnDrag(PointerEventData e)
@@ -90,95 +62,124 @@ public class UnitCardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDr
 
     public void OnEndDrag(PointerEventData e)
     {
-        LogRayDiag(e.position);
-
         if (dragIcon) Destroy(dragIcon);
         if (!(GameManager2.Instance?.CanPlaceUnits ?? false)) return;
         if (!GameManager2.Instance.IsPlacementPhase) return;
         if (!cam) cam = Camera.main;
         if (!cam) return;
 
-        // 1) 레이 쏘기 + 거리순 정렬
+        int teamMask = UnitManager.GetTeamAreaMask();
+        int agentType = UnitManager.Instance?.GetAgentTypeId(unitType) ?? GetAgentTypeIdFromPrefabs();
         var ray = cam.ScreenPointToRay(e.position);
-        var hits = Physics.RaycastAll(ray, raycastMaxDistance, ~0, QueryTriggerInteraction.Ignore);
-        System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+        var probe = ray.GetPoint(10f);
+        DebugNavSample(probe, agentType);
 
-        // ───── 기존 로직: 첫 Ground + 옆면 방지 ─────
-        RaycastHit? groundHit = null;
-        foreach (var h in hits)
+        if (!TryGetSpawnPosition(ray, agentType, teamMask, out var spawnPos))
         {
-            int l = h.collider.gameObject.layer;
-            bool isGround = (placementMask.value & (1 << l)) != 0;
-            if (!isGround) continue;
-
-            if (h.normal.y < 0.5f) continue; // 옆면/급경사 제외
-            groundHit = h;
-            break; // 가장 가까운 Ground
-        }
-
-        // ───── 추가(Fallback) 로직: 가장 '위쪽'을 향한 Ground 선택 ─────
-        if (!groundHit.HasValue)
-        {
-            RaycastHit? best = null;
-            float bestNy = -1f;
-
-            foreach (var h in hits)
-            {
-                int l = h.collider.gameObject.layer;
-                bool isGround = ((1 << l) & placementMask.value) != 0;
-                if (!isGround) continue;
-
-                float ny = h.normal.y;     // -1..1
-                if (ny < 0f) continue;     // 뒤집힌 면/밑면 제외
-
-                if (ny > bestNy || (Mathf.Approximately(ny, bestNy) && best.HasValue && h.distance < best.Value.distance))
-                {
-                    best = h;
-                    bestNy = ny;
-                }
-            }
-
-            if (best.HasValue)
-            {
-                groundHit = best;
-                if (debugLog) Debug.Log($"[Place] 1차 필터 실패 → 보정으로 {best.Value.collider.gameObject.name} 선택 (n.y={bestNy:F2}, dist={best.Value.distance:F2})");
-            }
-        }
-
-        if (!groundHit.HasValue)
-        {
-            Debug.LogWarning("[Place] Raycast 실패 (Ground 후보 없음)");
+            Debug.LogWarning("❌ 팀 스폰 영역 밖이거나 NavMesh 스냅 실패");
             return;
         }
 
-        var hit = groundHit.Value; // ← 아래 동일
-
-        // 2) 프리팹의 agentTypeID 읽기
-        int agentTypeId = GetAgentTypeIdFromPrefabs();
-
-        // 3) NavMesh 스냅
-        if (!TrySnapToNavMesh(hit.point, agentTypeId, out var spawnPos))
-        {
-            if (debugLog) Debug.LogWarning("[Place] 유효한 배치 지점 없음");
-            return;
-        }
-
-        // 4) 골드 차감
         var data = UnitManager.Instance.GetEntityData(unitType);
         if (data == null) return;
+
         if (!GoldManager.Instance.TrySpendGold(data.gold))
         {
             if (debugLog) Debug.LogWarning($"❌ 골드 부족: 필요 {data.gold}, 보유 {GoldManager.Instance.GetCurrentGold()}");
             return;
         }
 
-        // 5) 소환
-        string owner = UserNetwork.Instance?.userId ?? "local";
+        string owner = UserNetwork.Instance?.MyId ?? "local";
         UnitManager.Instance.SpawnUnits(unitType, spawnPos, owner);
-
         if (debugLog) Debug.Log($"[Place] {unitType} 소환 → {spawnPos}");
     }
 
+    // ─────────────────────────────────────────────
+
+    static bool IsMyTeamVolume(NavMeshModifierVolume v, int teamAreaMask)
+        => v != null && ((1 << v.area) & teamAreaMask) != 0;
+
+    bool TryGetSpawnPosition(Ray ray, int agentTypeId, int teamAreaMask, out Vector3 pos)
+    {
+        // 인스펙터에서 비워두면 "SpawnVolume" 레이어 자동 사용
+        int volMask = (spawnVolumeMask.value != 0)
+            ? spawnVolumeMask.value
+            : LayerMask.GetMask("SpawnVolume");
+
+        // 1) 스폰 볼륨만 대상으로 1차 레이
+        if (volMask != 0 &&
+            Physics.Raycast(ray, out var hit, raycastMaxDistance, volMask, QueryTriggerInteraction.Collide))
+        {
+            var vol = hit.collider.GetComponentInParent<NavMeshModifierVolume>();
+            if (IsMyTeamVolume(vol, teamAreaMask))
+            {
+                // 콜라이더 바닥 가까운 곳에서 스냅 시도
+                var b = hit.collider.bounds;
+                Vector3 p = hit.point;
+                p.x = Mathf.Clamp(p.x, b.min.x + 0.05f, b.max.x - 0.05f);
+                p.z = Mathf.Clamp(p.z, b.min.z + 0.05f, b.max.z - 0.05f);
+                p.y = b.min.y + 0.2f;
+
+                if (SampleToAnyNavMesh(p, agentTypeId, out pos)) return true;
+
+                // 위에서 아래로 재시도(바닥 높이 오차 보정만)
+                if (Physics.Raycast(new Vector3(p.x, b.max.y + 5f, p.z), Vector3.down,
+                                    out var gh, 200f, ~volMask, QueryTriggerInteraction.Ignore))
+                {
+                    var g = gh.point + Vector3.up * 0.2f;
+                    if (SampleToAnyNavMesh(gh.point + Vector3.up * 0.2f, agentTypeId, out pos)) return true;
+                }
+            }
+        }
+
+        // 2) 혹시 1차에서 못 맞춘 경우: RaycastAll로 "스폰볼륨만" 다시 스캔 (다른 지면/클리프 무시)
+        var hits = Physics.RaycastAll(ray, raycastMaxDistance, ~0, QueryTriggerInteraction.Collide);
+        System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+
+        foreach (var h in hits)
+        {
+            var vol = h.collider.GetComponentInParent<NavMeshModifierVolume>();
+            if (!IsMyTeamVolume(vol, teamAreaMask)) continue;
+
+            var b = h.collider.bounds;
+            var p = h.point;
+            p.x = Mathf.Clamp(p.x, b.min.x + 0.05f, b.max.x - 0.05f);
+            p.z = Mathf.Clamp(p.z, b.min.z + 0.05f, b.max.z - 0.05f);
+            p.y = b.min.y + 0.2f;
+
+            if (SampleToTeamNavMesh(p, agentTypeId, teamAreaMask, out pos)) return true;
+        }
+
+        pos = default;
+        return false;
+    }
+    bool SampleToAnyNavMesh(Vector3 src, int agentTypeId, out Vector3 snapped)
+    {
+        var filter = new NavMeshQueryFilter { agentTypeID = agentTypeId, areaMask = NavMesh.AllAreas };
+        float[] radii = { snapRadiusPrimary, snapRadiusFallback, 8f, 16f };
+        foreach (var r in radii)
+            if (NavMesh.SamplePosition(src, out var nh, r, filter))
+            { snapped = nh.position; return true; }
+        snapped = default; return false;
+    }
+
+
+    bool SampleToTeamNavMesh(Vector3 src, int agentTypeId, int teamAreaMask, out Vector3 snapped)
+    {
+        var filter = new NavMeshQueryFilter { agentTypeID = agentTypeId, areaMask = teamAreaMask };
+        float[] radii = { snapRadiusPrimary, snapRadiusFallback, 6f };
+
+        foreach (var r in radii)
+        {
+            if (NavMesh.SamplePosition(src, out var nh, r, filter))
+            {
+                snapped = nh.position;
+                return true;
+            }
+        }
+        snapped = default;
+        return false;
+    }
 
     int GetAgentTypeIdFromPrefabs()
     {
@@ -187,68 +188,20 @@ public class UnitCardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDr
         var ag = sample.GetComponent<NavMeshAgent>();
         return ag ? ag.agentTypeID : -1;
     }
-
-    bool TrySnapToNavMesh(Vector3 from, int agentTypeId, out Vector3 pos)
+    void DebugNavSample(Vector3 p, int agentTypeId)
     {
-        // 1차: 거의 제자리
-        if (agentTypeId >= 0)
+        string[] names = { "BlueSpawn", "RedSpawn", "Walkable" };
+        foreach (var nm in names)
         {
-            var filter = new NavMeshQueryFilter
-            {
-                agentTypeID = agentTypeId,
-                areaMask = UnitManager.GetTeamAreaMask()   // 팀 스폰 구역만 허용
-            };
-            if (NavMesh.SamplePosition(from, out var hit, snapRadiusPrimary, filter))
-            { pos = new Vector3(from.x, hit.position.y, from.z); return true; }
-            if (NavMesh.SamplePosition(from, out hit, snapRadiusFallback, filter))
-            { pos = hit.position; return true; }
+            int idx = NavMesh.GetAreaFromName(nm);
+            if (idx < 0) { Debug.Log($"{nm}: ❌ 존재하지 않는 Area"); continue; }
+            var f = new NavMeshQueryFilter { agentTypeID = agentTypeId, areaMask = 1 << idx };
+            bool ok = NavMesh.SamplePosition(p, out var h, 3f, f);
+            Debug.Log($"{nm}: {(ok ? "✅ OK" : "❌ NG")}");
         }
-        else
-        {
-            if (NavMesh.SamplePosition(from, out var hit, snapRadiusPrimary, NavMesh.AllAreas))
-            { pos = new Vector3(from.x, hit.position.y, from.z); return true; }
-            if (NavMesh.SamplePosition(from, out hit, snapRadiusFallback, NavMesh.AllAreas))
-            { pos = hit.position; return true; }
-        }
-
-        pos = default;
-        return false;
+        // 모든 영역에서도 안 붙는지 확인
+        var all = new NavMeshQueryFilter { agentTypeID = agentTypeId, areaMask = NavMesh.AllAreas };
+        Debug.Log($"AllAreas: {(NavMesh.SamplePosition(p, out _, 3f, all) ? "✅" : "❌")}");
     }
-    void LogRayDiag(Vector2 screenPos)
-    {
-        if (!cam) return;
-
-        var ray = cam.ScreenPointToRay(screenPos);
-        var hits = Physics.RaycastAll(ray, raycastMaxDistance, ~0, QueryTriggerInteraction.Ignore);
-        System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
-
-        if (hits.Length == 0)
-        {
-            Debug.LogWarning("[DIAG] 아래에 콜라이더가 아예 없음");
-            return;
-        }
-
-        for (int i = 0; i < hits.Length; i++)
-        {
-            var h = hits[i];
-            string path = GetPath(h.collider.transform);
-            Debug.Log($"[ALL #{i}] {path}  dist={h.distance:F2}  layer={LayerMask.LayerToName(h.collider.gameObject.layer)}  trigger={h.collider.isTrigger}");
-        }
-
-        // 첫 번째 히트를 하이라키에서 하이라이트(에디터 전용)
-#if UNITY_EDITOR
-        Selection.activeGameObject = hits[0].collider.gameObject;
-        EditorGUIUtility.PingObject(hits[0].collider.gameObject);
-#endif
-    }
-
-    string GetPath(Transform t)
-    {
-        var names = new System.Collections.Generic.List<string>();
-        while (t != null) { names.Add(t.name); t = t.parent; }
-        names.Reverse();
-        return string.Join("/", names);
-    }
-
 
 }
