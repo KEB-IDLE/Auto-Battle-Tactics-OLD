@@ -52,6 +52,8 @@ public class EntityData : ScriptableObject
     public GameObject redPrefab;
     public GameObject bluePrefab;
 
+    public bool isMounted;
+
     [Header("Magic")]
     public float magicRadius;
 
