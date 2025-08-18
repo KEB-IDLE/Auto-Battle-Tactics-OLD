@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -100,6 +101,28 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
     _isAttackLock = false;
     _isGameEnded = false;
 
+    string agentTypeName = data.entityScale switch
+    {
+        EntityScale.Small  => "Small",
+        EntityScale.Medium => "Medium",
+        EntityScale.Large  => "Large",
+        _ => null
+    };
+
+    if (!string.IsNullOrEmpty(agentTypeName))
+    {
+        // 이름으로 ID를 찾아서 적용
+        int resolved = NavMeshAgentTypeResolver.GetIdOrFallback(agentTypeName, _agent.agentTypeID);
+        if (_agent.agentTypeID != resolved)
+            _agent.agentTypeID = resolved;
+
+        // (선택) 빌드 설정값으로 반지름/키를 맞춰주면 충돌/통과 이슈를 줄일 수 있음
+        var s = NavMesh.GetSettingsByID(_agent.agentTypeID);
+        if (s.agentRadius > 0f) _agent.radius = s.agentRadius;
+        if (s.agentHeight > 0f) _agent.height = s.agentHeight;
+    }
+
+
     // 에이전트가 꺼져있으면(배치 단계 등) 더 진행하지 않음
     if (!_agent.enabled) return;
 
@@ -165,15 +188,43 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
 
     public void SetIsMine(bool isMine) => _isMine = isMine;
 
-    // 필요시만 사용(프로젝트마다 ID 값이 다를 수 있음)
-    int GetAgentTypeIDForScale(EntityScale scale)
+}
+
+public static class NavMeshAgentTypeResolver
+{
+    private static Dictionary<string, int> _nameToId;
+
+    /// <summary>프로젝트의 모든 NavMesh Agent Type을 스캔해 이름→ID 매핑을 캐시합니다.</summary>
+    private static void EnsureCache()
     {
-        switch (scale)
+        if (_nameToId != null) return;
+        _nameToId = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
+        int count = NavMesh.GetSettingsCount();
+        for (int i = 0; i < count; i++)
         {
-            case EntityScale.Small:  return 1479372276;     // Small
-            case EntityScale.Medium: return -1923039037;    // Medium
-            case EntityScale.Large:  return -902729914;     // Large
-            default: return 0;
+            var settings = NavMesh.GetSettingsByIndex(i);     // 각 타입의 설정
+            int id = settings.agentTypeID;
+            string name = NavMesh.GetSettingsNameFromID(id);  // 에디터에 보이는 이름
+            if (!string.IsNullOrEmpty(name))
+                _nameToId[name] = id;
         }
+    }
+
+    /// <summary>이름으로 ID를 찾습니다. 실패 시 false.</summary>
+    public static bool TryGetId(string agentTypeName, out int id)
+    {
+        EnsureCache();
+        return _nameToId.TryGetValue(agentTypeName, out id);
+    }
+
+    /// <summary>이름으로 ID를 찾고, 없으면 fallback 반환.</summary>
+    public static int GetIdOrFallback(string agentTypeName, int fallbackId, bool warnIfMissing = true)
+    {
+        EnsureCache();
+        if (_nameToId.TryGetValue(agentTypeName, out var id)) return id;
+        if (warnIfMissing)
+            Debug.LogWarning($"[NavMeshAgentTypeResolver] AgentType '{agentTypeName}'을(를) 찾지 못했습니다. fallback ID {fallbackId} 사용.");
+        return fallbackId;
     }
 }
