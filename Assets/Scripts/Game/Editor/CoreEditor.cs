@@ -96,11 +96,20 @@ public class CoreEditor : Editor
             var healthBar = fillGO.AddComponent<HealthBar>();
             healthBar.fillImage = fillImg;
         }
-
+        AttachBillboard(parent.transform);
 
         parent.layer = LayerMask.NameToLayer("Core");
         Selection.activeGameObject = parent;
         Debug.Log($"{parent.name} Core 오브젝트 생성됨 (데이터 드리븐)");
+
+        void AttachBillboard(Transform root)
+        {
+            var hbc = root.Find("HealthBarCanvas");
+            if (hbc != null && hbc.GetComponent<Billboard>() == null)
+            {
+                hbc.gameObject.AddComponent<Billboard>();
+            }
+        }
     }
 }
 
