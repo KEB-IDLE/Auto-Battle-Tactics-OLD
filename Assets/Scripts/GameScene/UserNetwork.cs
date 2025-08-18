@@ -8,7 +8,8 @@ public class UserNetwork : MonoBehaviour
 {
     public static UserNetwork Instance { get; private set; }
     private Queue<string> pendingInitMessages = new();
-    public string MyId { get; private set; } = System.Guid.NewGuid().ToString();
+    public string userId = SessionManager.Instance.profile.user_id.ToString();
+
     public Team MyTeam { get; private set; }
     public bool IsTeamReady { get; private set; } = false;
     private WebSocket socket;
@@ -93,20 +94,20 @@ public class UserNetwork : MonoBehaviour
                 TimerManager.Instance?.ResetUI();
                 TimerManager.Instance?.BeginCountdown();
                 break;
-            case "gameStart":
-                {
-                    string scene = SceneManager.GetActiveScene().name;
 
-                    if (scene == "2-GameScene")
-                    {
-                        GameManager2.Instance?.OnAllPlayersReadyFromServer();
-                    }
-                    else if (scene == "3-BattleScene")
-                    {
-                        GameManager2.Instance?.ReturnToPlacementScene();
-                    }
-                    break;
+            case "gameStart":
+                string scene = SceneManager.GetActiveScene().name;
+
+                if (scene == "2-GameScene")
+                {
+                    GameManager2.Instance?.OnAllPlayersReadyFromServer();
                 }
+                else if (scene == "3-BattleScene")
+                {
+                    GameManager2.Instance?.ReturnToPlacementScene();
+                }
+                break;
+
 
             case "init":
                 if (UnitManager.Instance != null)
@@ -114,15 +115,17 @@ public class UserNetwork : MonoBehaviour
                 else
                     pendingInitMessages.Enqueue(json);
                 break;
+
             case "teamAssign":
                 var teamMsg = JsonUtility.FromJson<TeamAssignMessage>(json);
                 Team parsedTeam = (Team)System.Enum.Parse(typeof(Team), teamMsg.team);
                 SetTeam(parsedTeam);
                 break;
+
             case "assignId":
                 var assign = JsonUtility.FromJson<AssignIdMessage>(json);
-                MyId = assign.clientId;
-                Debug.Log($"Client ID set: {MyId}");
+                userId = assign.clientId;
+                Debug.Log($"Client ID set: {userId}");
                 break;
         }
     }
@@ -138,7 +141,7 @@ public class UserNetwork : MonoBehaviour
             var readyMsg = new ReadyMessage
             {
                 type = "ready",
-                ownerId = MyId
+                ownerId = userId
             };
 
             string json = JsonUtility.ToJson(readyMsg);

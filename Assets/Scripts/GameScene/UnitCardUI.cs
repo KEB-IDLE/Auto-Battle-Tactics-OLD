@@ -173,7 +173,7 @@ public class UnitCardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDr
         }
 
         // 5) 소환
-        string owner = UserNetwork.Instance?.MyId ?? "local";
+        string owner = UserNetwork.Instance?.userId ?? "local";
         UnitManager.Instance.SpawnUnits(unitType, spawnPos, owner);
 
         if (debugLog) Debug.Log($"[Place] {unitType} 소환 → {spawnPos}");
