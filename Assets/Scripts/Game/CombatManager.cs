@@ -6,6 +6,16 @@ using System;
 public class CombatManager : MonoBehaviour
 {
     public static event Action OnGameEnd;
-    public static void EndGame() => OnGameEnd?.Invoke();
+    public static void EndGame()
+    {
+        MusicManager.Instance.StopMusic();
+        OnGameEnd?.Invoke();
+    }
+
+
+    public void Start()
+    {
+        MusicManager.Instance.PlayBattle();
+    }
 
 }
