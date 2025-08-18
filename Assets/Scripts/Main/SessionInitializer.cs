@@ -1,5 +1,11 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
+
+/// <summary>
+/// SessionInitializer 클래스는 게임 시작 시 필요한 유저 데이터를 서버에서 불러오는 역할을 합니다.
+/// 데이터를 모두 불러온 후, UIManager를 통해 UI를 갱신하며
+/// SessionManager에 데이터를 저장합니다.
+/// </summary>
 
 public class SessionInitializer : MonoBehaviour
 {

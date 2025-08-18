@@ -18,12 +18,12 @@ public class UIManager : MonoBehaviour
     public TMP_Text levelText;            // 레벨 텍스트
     public TMP_Text goldText;             // 골드 텍스트
 
-    // CustomPanel - 프로필 아이콘 관련 UI 요소
-    public Image[] iconImages;                                  // 아이콘 버튼 이미지 배열
+    // IconPanel - 프로필 아이콘 관련 UI 요소
+    public Image[] iconPanelImages;                                  // 아이콘 버튼 이미지 배열
     Color enabledColor = Color.white;                           // 아이콘 활성화 색상
     Color disabledColor = new Color(1f, 1f, 1f, 80f / 255f);    // 비활성화 색상(반투명)
 
-    // CustomPanel - 캐릭터 관련 UI 요소
+    // CharacterPanel - 캐릭터 관련 UI 요소
     public GameObject[] characterPrefabs;           // 캐릭터 프리팹 배열
     private GameObject currentCharacterInstance;    // 현재 씬에 생성된 캐릭터 인스턴스
 
@@ -131,20 +131,20 @@ public class UIManager : MonoBehaviour
     /// <param name="iconIndex">선택된 아이콘 인덱스</param>
     public void HighlightSelectedIcon(int iconIndex)
     {
-        if (iconImages == null || iconImages.Length == 0) return;
+        if (iconPanelImages == null || iconPanelImages.Length == 0) return;
 
         // 모든 아이콘 크기 초기화
-        for (int i = 0; i < iconImages.Length; i++)
+        for (int i = 0; i < iconPanelImages.Length; i++)
         {
-            iconImages[i].transform.localScale = Vector3.one;
+            iconPanelImages[i].transform.localScale = Vector3.one;
         }
 
         // 선택된 아이콘만 크기 확대 및 버튼 선택 상태 적용
-        if (iconIndex >= 0 && iconIndex < iconImages.Length)
+        if (iconIndex >= 0 && iconIndex < iconPanelImages.Length)
         {
-            iconImages[iconIndex].transform.localScale = new Vector3(1.2f, 1.2f, 1f);
+            iconPanelImages[iconIndex].transform.localScale = new Vector3(1.2f, 1.2f, 1f);
 
-            Button selectedBtn = iconImages[iconIndex].GetComponent<Button>();
+            Button selectedBtn = iconPanelImages[iconIndex].GetComponent<Button>();
             if (selectedBtn != null)
             {
                 selectedBtn.Select(); // 강제로 선택 상태로 변경
@@ -158,11 +158,11 @@ public class UIManager : MonoBehaviour
     public void RefreshIconButton()
     {
         var ownedIcons = SessionManager.Instance.ownedProfileIcons;
-        for (int i = 0; i < profileIcons.Length; i++)
+        for (int i = 0; i < iconPanelImages.Length; i++)
         {
             int iconId = i + 1;
             bool owned = ownedIcons.Contains(iconId);
-            iconImages[i].color = owned ? enabledColor : disabledColor;
+            iconPanelImages[i].color = owned ? enabledColor : disabledColor;
         }
     }
 
