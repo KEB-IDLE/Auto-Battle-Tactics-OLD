@@ -386,6 +386,8 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
     [HideInInspector] public IOrientable _orientable;
     [HideInInspector] public Transform firePoint;
 
+    private AudioSource _audio;
+    private AudioClip attackSound;
     private AttackType attackType;
     private Coroutine attackCoroutine;
     private bool isAttackingFlag;
@@ -400,6 +402,11 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
     public event Action<Transform> OnAttackEffect;
 #pragma warning restore 67
 
+
+    public void Awake()
+    {
+        _audio = GetComponent<AudioSource>();
+    }
     public void Initialize(EntityData data)
     {
         attackDamage = data.attackDamage;
@@ -411,11 +418,11 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         detectionRadius = data.detectionRadius;
         attackRange = data.attackRange;
         attackType = data.attackType;
-
+        attackSound = data.attackSound;
         disengageRange = data.disengageRange;
         magicRadius = data.magicRadius;
-        isAttackingFlag = false;
-        isDead = false;
+        
+        isAttackingFlag = isDead = false;
         firePoint = transform.Find("FirePoint");
         projectilePoolName = data.projectilePoolName;
 
@@ -522,6 +529,7 @@ public class AttackComponent : MonoBehaviour, IAttackable, IAttackNotifier
         {
             _orientable?.LookAtTarget(target);
             yield return new WaitForSeconds(impactDelay);
+            _audio.PlayOneShot(attackSound);
             TryAttack(target);
             yield return new WaitForSeconds(attackCooldown - impactDelay);
         }

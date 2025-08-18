@@ -15,6 +15,6 @@ MonoBehaviour:
   maxHP: 100
   objectPrefab: {fileID: 6844205953959234942, guid: 44b19885b17e83e4b94e6e95fc0334fb, type: 3}
   takeDamageEffectPrefab: {fileID: 0}
-  deathEffectPrefab: {fileID: 0}
+  deathEffectPrefab: {fileID: 7761031033666763820, guid: 1eb833340b41fb444b576c4dced8d4dc, type: 3}
   takeDamageSound: {fileID: 0}
   deathSound: {fileID: 0}

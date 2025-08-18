@@ -7,15 +7,15 @@ public class AnimationComponent : MonoBehaviour
 {
     private Animator _animator;
     private AnimatorOverrideController _controller;
-    private AudioSource _audioSource;
-    private AudioClip summonSound;
-    private AudioClip attackSound;
-    private AudioClip deathSound;
+    //private AudioSource _audioSource;
+    //private AudioClip summonSound;
+    //private AudioClip attackSound;
+    //private AudioClip deathSound;
+  
 
     void Awake()
     {
         _animator = GetComponent<Animator>();
-        _audioSource = GetComponent<AudioSource>();
     }
 
     public void Initialize(EntityData data)
@@ -33,12 +33,12 @@ public class AnimationComponent : MonoBehaviour
             _controller["Die"] = data.deathClip;
         if (data.idleClip != null)
             _controller["Idle"] = data.idleClip;
-        if (data.summonSound != null)
-            this.summonSound = data.summonSound;
-        if (data.attackSound != null)
-            this.attackSound = data.attackSound;
-        if (data.deathSound != null)
-            this.deathSound = data.deathSound;
+        //if (data.summonSound != null)
+        //    this.summonSound = data.summonSound;
+        //if (data.attackSound != null)
+        //    this.attackSound = data.attackSound;
+        //if (data.deathSound != null)
+        //    this.deathSound = data.deathSound;
 
 
     }
@@ -46,19 +46,14 @@ public class AnimationComponent : MonoBehaviour
     public void HandleAttack(bool isAttacking)
     {
         if (isAttacking)
-        {
             _animator.SetBool("Attack", true);
-            if (this.attackSound != null)
-                _audioSource.PlayOneShot(attackSound);
-        }
-        else _animator.SetBool("Attack", false);
+        else 
+            _animator.SetBool("Attack", false);
     }
 
     public void HandleDeath()
     {
         _animator.SetTrigger("Death");
-        if (this.deathSound != null)
-            _audioSource.PlayOneShot(deathSound);
     }
     public void HandleMove() => _animator.SetTrigger("Move");
     public void StopAllAction()

@@ -48,7 +48,7 @@ public class EntityEditor : Editor
         {
             go = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
             go.name = data.entityName + "_Entity";
-        }   
+        }
         else
             go = new GameObject(data.entityName + "_Entity");
 
@@ -133,7 +133,7 @@ public class EntityEditor : Editor
             var healthBar = fillGO.AddComponent<HealthBar>();
             healthBar.fillImage = fillImg;
         }
-        AttachBillboard(go.transform);
+        AttachBillboardAndAssignCamera(go.transform);
 
         var rb = go.GetComponent<Rigidbody>();
         if (rb == null)
@@ -145,15 +145,63 @@ public class EntityEditor : Editor
                        | RigidbodyConstraints.FreezeRotationZ;
 
         Selection.activeGameObject = go;
-
-        void AttachBillboard(Transform root)
-        {
-            var hbc = root.Find("HealthBarCanvas");
-            if (hbc != null && hbc.GetComponent<Billboard>() == null)
-            {
-                hbc.gameObject.AddComponent<Billboard>(); // 기본값: YAxisOnly, MainCamera 자동 탐색
-            }
-        }
     }
+
+    private void AttachBillboardAndAssignCamera(Transform root)
+    {
+        var hbc = root.Find("HealthBarCanvas");
+        if (hbc == null) return;
+
+        // 1) Billboard 없으면 부착
+        var bb = hbc.GetComponent<Billboard>();
+        if (bb == null) bb = hbc.gameObject.AddComponent<Billboard>();
+
+        // 2) CameraRig/PlayerCamera 탐색
+        var cam = FindPlayerCameraInRig();
+        if (cam == null) return;
+
+        // 3) World Space Canvas에도 동일 카메라 설정(기존 Camera.main 대체)
+        var canvas = hbc.GetComponent<Canvas>();
+        if (canvas != null && canvas.renderMode == RenderMode.WorldSpace)
+            canvas.worldCamera = cam;
+
+#if UNITY_EDITOR
+        var so = new UnityEditor.SerializedObject(bb);
+        var prop = so.FindProperty("targetCamera");
+        if (prop != null)
+        {
+            prop.objectReferenceValue = cam;
+            so.ApplyModifiedProperties();
+            UnityEditor.EditorUtility.SetDirty(bb);
+        }
+#endif
+    }
+
+    private Camera FindPlayerCameraInRig()
+    {
+        // 우선 정확 경로 시도
+        var rig = GameObject.Find("CameraRig");
+        if (rig != null)
+        {
+            var pc = rig.transform.Find("PlayerCamera");
+            if (pc != null)
+            {
+                var cam = pc.GetComponentInChildren<Camera>(true);
+                if (cam != null) return cam;
+            }
+            // Rig 아래 첫 Camera
+            var any = rig.GetComponentsInChildren<Camera>(true).FirstOrDefault();
+            if (any != null) return any;
+        }
+
+        var all = Resources.FindObjectsOfTypeAll<Camera>()
+            .Where(c => c.gameObject.scene.IsValid()) 
+            .ToArray();
+        var byName = all.FirstOrDefault(c => c.name == "PlayerCamera");
+        if (byName != null) return byName;
+
+        return Camera.main;
+    }
+
 }
 #endif

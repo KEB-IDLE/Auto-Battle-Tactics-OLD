@@ -16,7 +16,7 @@ MonoBehaviour:
   maxHP: 150
   attackDamage: 25
   attackCoreDamage: 5
-  attackImpactRatio: 0.5
+  attackImpactRatio: 0.45
   moveSpeed: 3
   entityScale: 0
   gold: 15
@@ -40,7 +40,7 @@ MonoBehaviour:
   takeDamageEffectPrefeb: {fileID: 0}
   deathEffectPrefab: {fileID: 0}
   summonSound: {fileID: 0}
-  attackSound: {fileID: 0}
+  attackSound: {fileID: 8300000, guid: 92b95d973a4680a4787476dc22824cd0, type: 3}
   deathSound: {fileID: 0}
   animatorController: {fileID: 9100000, guid: 978dfb3f95c533c4aa9742b18291eb77, type: 2}
   attackClip: {fileID: 7400000, guid: 33bd65223d28b1c4cb76a7bebb02a099, type: 3}
