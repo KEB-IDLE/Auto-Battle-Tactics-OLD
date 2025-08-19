@@ -12,8 +12,8 @@ public class APIService : MonoBehaviour
 {
     public static APIService Instance { get; private set; }
 
-    private string baseUrl = "http://localhost:3000/api";   // 로컬 개발용 API 기본 URL
-    //private string baseUrl = "https://jamsik.p-e.kr/api"; // 배포 서버용 API 기본 URL
+    //private string baseUrl = "http://localhost:3000/api";   // 로컬 개발용 API 기본 URL
+    private string baseUrl = "https://jamsik.p-e.kr/api"; // 배포 서버용 API 기본 URL
 
     private void Awake()
     {

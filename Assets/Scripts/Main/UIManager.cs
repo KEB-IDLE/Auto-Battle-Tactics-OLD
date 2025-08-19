@@ -266,14 +266,14 @@ public class UIManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 랭크 전적(매치 수, 승리, 패배, 점수) 변경 요청을 서버에 보내고,
+    /// 랭크 전적(매치 수, 승리, 패배, 점수)을 서버에 갱신 요청하고,
     /// 성공 시 UI와 글로벌 랭킹을 갱신합니다.
     /// </summary>
     /// <param name="deltaMatch">매치 수 증감량</param>
     /// <param name="deltaWins">승리 수 증감량</param>
     /// <param name="deltaLosses">패배 수 증감량</param>
-    /// <param name="deltaPoint">랭킹 점수 증감량</param>
-    public void ChangeRecord(int deltaMatch, int deltaWins, int deltaLosses, int deltaPoint)
+    /// <param name="point">새로운 랭킹 점수 값</param>
+    public void ChangeRecord(int deltaMatch, int deltaWins, int deltaLosses, int point)
     {
         var record = SessionManager.Instance.record;
 
@@ -282,7 +282,7 @@ public class UIManager : MonoBehaviour
             rank_match_count = record.rank_match_count + deltaMatch,
             rank_wins = record.rank_wins + deltaWins,
             rank_losses = record.rank_losses + deltaLosses,
-            rank_point = record.rank_point + deltaPoint
+            rank_point = point   // 증감량이 아니라 새 값으로 대체
         };
 
         StartCoroutine(MainSceneService.Instance.UpdateRecord(
@@ -298,11 +298,11 @@ public class UIManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 테스트용 버튼 함수 - 랭크 전적 업데이트 시뮬레이션
+    /// 테스트용 버튼
     /// </summary>
     public void TestRecord()
     {
-        ChangeRecord(1, 1, 0, 10);
+        ChangeRecord(1, 1, 0, 100);
     }
 
     /// <summary>
