@@ -38,13 +38,13 @@ public class Entity : MonoBehaviour
 
     public virtual void Awake()
     {
-        _health     = GetComponent<HealthComponent>();
-        _attack     = GetComponent<AttackComponent>();
-        _move       = GetComponent<MoveComponent>();
-        _team       = GetComponent<TeamComponent>();
-        _animation  = GetComponent<AnimationComponent>();
-        _effect     = GetComponent<EffectComponent>();
-        _healthBar  = GetComponentInChildren<HealthBar>(true);
+        _health = GetComponent<HealthComponent>();
+        _attack = GetComponent<AttackComponent>();
+        _move = GetComponent<MoveComponent>();
+        _team = GetComponent<TeamComponent>();
+        _animation = GetComponent<AnimationComponent>();
+        _effect = GetComponent<EffectComponent>();
+        _healthBar = GetComponentInChildren<HealthBar>(true);
 
         // ❗ 여기서는 절대 entityData를 요구하지 말 것.
         // 초기화 전 전투 로직이 돌지 않도록 잠시 꺼둔다.
@@ -82,7 +82,7 @@ public class Entity : MonoBehaviour
     // ---- 지연 초기화 본체 ----
     private void TryInitialize()
     {
-        if(!Application.isPlaying) return;
+        if (!Application.isPlaying) return;
         if (IsInitialized) return;
         if (entityData == null) return; // 데이터 아직 없음 → 대기
 
@@ -110,10 +110,10 @@ public class Entity : MonoBehaviour
 
     private void SetSubsystemsActive(bool active)
     {
-        if (_attack != null)     _attack.enabled     = active;
-        if (_move != null)       _move.enabled       = active;
-        if (_animation != null)  _animation.enabled  = active;
-        if (_effect != null)     _effect.enabled     = active;
+        if (_attack != null) _attack.enabled = active;
+        if (_move != null) _move.enabled = active;
+        if (_animation != null) _animation.enabled = active;
+        if (_effect != null) _effect.enabled = active;
         // Health/Team/Bar는 enabled 유지해도 무방
     }
 
@@ -200,6 +200,7 @@ public class Entity : MonoBehaviour
         CombatManager.OnGameEnd += _attack.StopAllAction;
         CombatManager.OnGameEnd += _move.StopAllAction;
         CombatManager.OnGameEnd += _animation.StopAllAction;
+        CombatManager.OnRoundStart += _move.IsBattleStarted;
     }
 
     public void UnbindEvent()
@@ -218,5 +219,6 @@ public class Entity : MonoBehaviour
         CombatManager.OnGameEnd -= _attack.StopAllAction;
         CombatManager.OnGameEnd -= _move.StopAllAction;
         CombatManager.OnGameEnd -= _animation.StopAllAction;
+        CombatManager.OnRoundStart -= _move.IsBattleStarted;
     }
 }

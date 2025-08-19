@@ -18,12 +18,13 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
     bool _isMoving;
     bool _isAttackLock;
     bool _isGameEnded;
+    bool _isBattleStarted;
 
     void Awake()
     {
-        _agent        = GetComponent<NavMeshAgent>();
-        _attacker     = GetComponent<IAttackable>();
-        _health       = GetComponent<IDamageable>();
+        _agent = GetComponent<NavMeshAgent>();
+        _attacker = GetComponent<IAttackable>();
+        _health = GetComponent<IDamageable>();
         _teamProvider = GetComponent<ITeamProvider>();
         _attackNotifier = GetComponent<IAttackNotifier>();
     }
@@ -49,7 +50,7 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
     void Update()
     {
         // 에이전트 유효성 / NavMesh 탑재 확인
-        if (_agent == null || !_agent.enabled || !_agent.isOnNavMesh)
+        if (_agent == null || !_agent.enabled || !_agent.isOnNavMesh || !_isBattleStarted)
             return;
 
         if (_isGameEnded || _isAttackLock || (_health != null && !_health.IsAlive()))
@@ -90,60 +91,61 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
     }
 
     public void Initialize(EntityData data)
-{
-    if (_agent == null) return;
-
-    _agent.speed = data.moveSpeed;
-    _agent.acceleration = data.moveSpeed;
-    _agent.autoBraking = true;
-
-    _isMoving = false;
-    _isAttackLock = false;
-    _isGameEnded = false;
-
-    string agentTypeName = data.entityScale switch
     {
-        EntityScale.Small  => "Small",
-        EntityScale.Medium => "Medium",
-        EntityScale.Large  => "Large",
-        _ => null
-    };
+        if (_agent == null) return;
 
-    if (!string.IsNullOrEmpty(agentTypeName))
-    {
-        // 이름으로 ID를 찾아서 적용
-        int resolved = NavMeshAgentTypeResolver.GetIdOrFallback(agentTypeName, _agent.agentTypeID);
-        if (_agent.agentTypeID != resolved)
-            _agent.agentTypeID = resolved;
+        _agent.speed = data.moveSpeed;
+        _agent.acceleration = data.moveSpeed;
+        _agent.autoBraking = true;
 
-        // (선택) 빌드 설정값으로 반지름/키를 맞춰주면 충돌/통과 이슈를 줄일 수 있음
-        var s = NavMesh.GetSettingsByID(_agent.agentTypeID);
-        if (s.agentRadius > 0f) _agent.radius = s.agentRadius;
-        if (s.agentHeight > 0f) _agent.height = s.agentHeight;
-    }
+        _isMoving = false;
+        _isAttackLock = false;
+        _isGameEnded = false;
+        _isBattleStarted = false;
 
-
-    // 에이전트가 꺼져있으면(배치 단계 등) 더 진행하지 않음
-    if (!_agent.enabled) return;
-
-    // NavMesh 위가 아니면 한 번만 올려보고 실패하면 바로 중단
-    if (!_agent.isOnNavMesh)
-    {
-        if (NavMesh.SamplePosition(transform.position, out var hit, 3f, NavMesh.AllAreas)
-            && _agent.Warp(hit.position))
+        string agentTypeName = data.entityScale switch
         {
-            // OK
-        }
-        else
-        {
-            Debug.Log("Unit is not on navmesh");
-            return; // ❗ 여기서 끝내면 ResetPath/SetDestination 호출 안 함
-        }
-    }
+            EntityScale.Small => "Small",
+            EntityScale.Medium => "Medium",
+            EntityScale.Large => "Large",
+            _ => null
+        };
 
-    if (_agent.hasPath) _agent.ResetPath();
-    if (coreTransform != null) _agent.SetDestination(coreTransform.position);
-}
+        if (!string.IsNullOrEmpty(agentTypeName))
+        {
+            // 이름으로 ID를 찾아서 적용
+            int resolved = NavMeshAgentTypeResolver.GetIdOrFallback(agentTypeName, _agent.agentTypeID);
+            if (_agent.agentTypeID != resolved)
+                _agent.agentTypeID = resolved;
+
+            // (선택) 빌드 설정값으로 반지름/키를 맞춰주면 충돌/통과 이슈를 줄일 수 있음
+            var s = NavMesh.GetSettingsByID(_agent.agentTypeID);
+            if (s.agentRadius > 0f) _agent.radius = s.agentRadius;
+            if (s.agentHeight > 0f) _agent.height = s.agentHeight;
+        }
+
+
+        // 에이전트가 꺼져있으면(배치 단계 등) 더 진행하지 않음
+        if (!_agent.enabled) return;
+
+        // NavMesh 위가 아니면 한 번만 올려보고 실패하면 바로 중단
+        if (!_agent.isOnNavMesh)
+        {
+            if (NavMesh.SamplePosition(transform.position, out var hit, 3f, NavMesh.AllAreas)
+                && _agent.Warp(hit.position))
+            {
+                // OK
+            }
+            else
+            {
+                Debug.Log("Unit is not on navmesh");
+                return; // ❗ 여기서 끝내면 ResetPath/SetDestination 호출 안 함
+            }
+        }
+
+        if (_agent.hasPath) _agent.ResetPath();
+        if (coreTransform != null) _agent.SetDestination(coreTransform.position);
+    }
     private void OnAttackStateChanged(bool isAttacking)
     {
         _isAttackLock = isAttacking;
@@ -187,7 +189,18 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
     }
 
     public void SetIsMine(bool isMine) => _isMine = isMine;
+    public void IsBattleStarted()
+    {
+        var rb = GetComponent<Rigidbody>();
 
+        rb.constraints = RigidbodyConstraints.None;
+        rb.constraints =
+            RigidbodyConstraints.FreezeRotationX |
+            RigidbodyConstraints.FreezeRotationY |
+            RigidbodyConstraints.FreezeRotationZ;
+
+        _isBattleStarted = true;
+    }
 }
 
 public static class NavMeshAgentTypeResolver
