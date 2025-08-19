@@ -10,8 +10,6 @@ using UnityEngine.UI;
 /// </summary>
 public class UIManager : MonoBehaviour
 {
-    public static UIManager Instance;
-
     // MainPanel - 유저 프로필 관련 UI 요소
     public TMP_Text nicknameText;         // 닉네임 텍스트
     public Image profileIcon;             // 프로필 아이콘 이미지
@@ -41,19 +39,6 @@ public class UIManager : MonoBehaviour
     public Image[] rankIcons;             // 아이콘 이미지 배열
     public TMP_Text[] rankNameTexts;      // 닉네임 텍스트 배열
     public TMP_Text[] rankPointTexts;     // 점수 텍스트 배열
-
-    private void Awake()
-    {
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-    }
 
     /// <summary>
     /// 메인 프로필 캐릭터를 서버에 저장하고 UI 갱신을 시작합니다.

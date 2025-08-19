@@ -2,13 +2,10 @@ using UnityEngine;
 
 public class Temp : MonoBehaviour
 {
-    void Die()
-    {
-        UIManager.Instance.ShowGameEndPanel();
-    }
+    public UIManager uiManager;
 
-    void End()
+    public void GameEnd()
     {
-        UIManager.Instance.EndGameScene();
+        uiManager.EndGameScene();
     }
 }

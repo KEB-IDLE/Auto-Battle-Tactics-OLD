@@ -9,6 +9,8 @@ using UnityEngine;
 
 public class SessionInitializer : MonoBehaviour
 {
+    public UIManager uiManager;
+
     public IEnumerator LoadAllUserDataCoroutine()
     {
         yield return LoadProfile();
@@ -16,15 +18,15 @@ public class SessionInitializer : MonoBehaviour
         yield return LoadRecord();
         //yield return LoadMatchHistory();
 
-        if (UIManager.Instance != null)
+        if (uiManager != null)
         {
-            UIManager.Instance.UpdateProfile();
+            uiManager.UpdateProfile();
 
-            UIManager.Instance.UpdateRecord();
+            uiManager.UpdateRecord();
 
-            UIManager.Instance.UpdateGlobalRanking();
+            uiManager.UpdateGlobalRanking();
 
-            UIManager.Instance.SetProfileCharacter(SessionManager.Instance.profile.profile_char_id);
+            uiManager.SetProfileCharacter(SessionManager.Instance.profile.profile_char_id);
         }
     }
 
