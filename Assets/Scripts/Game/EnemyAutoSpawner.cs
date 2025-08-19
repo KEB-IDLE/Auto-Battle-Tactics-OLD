@@ -1,210 +1,4 @@
-﻿//using System.Collections;
-//using System.Collections.Generic;
-//using UnityEngine;
-
-///// <summary>
-///// 맵의 "뒤쪽 절반(적 진영)" 그리드에 적 유닛을 자동으로 소환한다.
-///// Map.cs의 hexMapSizeX, hexMapSizeZ, mapGridPositions를 그대로 사용.
-///// </summary>
-//public class EnemyAutoSpawner : MonoBehaviour
-//{
-//    [Header("References")]
-//    [SerializeField] private Map map;                    // 반드시 씬의 Map를 할당
-//    [SerializeField] private List<GameObject> enemyPrefabs; // 소환할 적 유닛 프리팹 목록
-
-//    [Header("Spawn Rules")]
-//    [Tooltip("최대 동시 적 유닛 수(적 진영 슬롯 수를 넘기면 자연히 멈춤)")]
-//    [SerializeField] private int maxAlive = 8;
-
-//    [Tooltip("자동 스폰 사용 여부")]
-//    [SerializeField] private bool autoSpawn = true;
-
-//    [Tooltip("첫 스폰 지연 (초)")]
-//    [SerializeField] private float firstDelay = 1.0f;
-
-//    [Tooltip("다음 스폰까지 간격 (초)")]
-//    [SerializeField] private float spawnInterval = 3.0f;
-
-//    [Tooltip("한 번에 소환할 개수(웨이브 느낌)")]
-//    [SerializeField] private int spawnPerTick = 1;
-
-//    // 적 진영 슬롯 관리 (원본 자산처럼 Z를 절반으로 쪼개 관리)
-//    // 원본 AIopponent.cs도 [Map.hexMapSizeX, Map.hexMapSizeZ / 2]로 배열을 만들고 있었음.
-//    private GameObject[,] enemyGridHalf; // [x, zHalf]
-
-//    // 적 진영의 Z 오프셋(= 맵 절반). 원본은 z + 4 처럼 상수로 썼지만, 일반화하면 hexMapSizeZ / 2.
-//    private int enemyZOffset;
-
-//    private void Awake()
-//    {
-//        if (map == null)
-//        {
-//            Debug.LogError("[EnemyAutoSpawner] Map reference is missing.");
-//            enabled = false;
-//            return;
-//        }
-
-//        enemyZOffset = Map.hexMapSizeZ / 2; // 적 진영은 뒤쪽 절반을 사용
-//        enemyGridHalf = new GameObject[Map.hexMapSizeX, Map.hexMapSizeZ / 2];
-//    }
-
-//    private void Start()
-//    {
-//        if (autoSpawn)
-//            StartCoroutine(AutoSpawnLoop());
-//    }
-
-//    private IEnumerator AutoSpawnLoop()
-//    {
-//        yield return new WaitForSeconds(firstDelay);
-
-//        while (true)
-//        {
-//            for (int i = 0; i < spawnPerTick; i++)
-//                TrySpawnOne();
-
-//            yield return new WaitForSeconds(spawnInterval);
-//        }
-//    }
-
-//    /// <summary>빈 슬롯을 찾아 1개 스폰 시도</summary>
-//    public bool TrySpawnOne()
-//    {
-//        if (enemyPrefabs == null || enemyPrefabs.Count == 0)
-//        {
-//            Debug.LogWarning("[EnemyAutoSpawner] enemyPrefabs is empty.");
-//            return false;
-//        }
-
-//        // 현재 살아있는(배치된) 적 수
-//        int alive = CountAlive();
-//        if (alive >= maxAlive) return false;
-
-//        if (!FindEmptySlot(out int gx, out int gzHalf))
-//            return false;
-
-//        var prefab = enemyPrefabs[Random.Range(0, enemyPrefabs.Count)];
-//        var go = Instantiate(prefab);
-
-//        // 월드 좌표: map.mapGridPositions[x, z] 에서 z는 적 진영 오프셋을 더한 실제 인덱스
-//        int gz = gzHalf + enemyZOffset;
-//        go.transform.position = map.mapGridPositions[gx, gz];     // Map.cs에서 좌표를 미리 만들어 둡니다.
-//        go.transform.rotation = Quaternion.identity;
-
-//        enemyGridHalf[gx, gzHalf] = go;
-
-//        // 죽을 때 슬롯 비우도록 마커 부착
-//        var marker = go.AddComponent<EnemyGridMarker>();
-//        marker.Init(this, gx, gzHalf);
-
-//        InitializeSpawnedUnit(go);
-
-//        return true;
-//    }
-
-//    /// <summary>남아있는(배치된) 적 수</summary>
-//    private int CountAlive()
-//    {
-//        int c = 0;
-//        for (int x = 0; x < enemyGridHalf.GetLength(0); x++)
-//            for (int z = 0; z < enemyGridHalf.GetLength(1); z++)
-//                if (enemyGridHalf[x, z] != null) c++;
-//        return c;
-//    }
-
-//    private void InitializeSpawnedUnit(GameObject go)
-//    {
-//        // (선택) NavMesh 위로 정확히 스냅
-//        var agent = go.GetComponent<UnityEngine.AI.NavMeshAgent>();
-//        if (agent != null)
-//        {
-//            if (UnityEngine.AI.NavMesh.SamplePosition(go.transform.position, out var hit, 2.0f, agent.areaMask))
-//                agent.Warp(hit.position);
-//            agent.isStopped = true;
-//            agent.updatePosition = true;
-//            agent.updateRotation = true;
-//        }
-
-//        // (권장) 팀/타깃팅 주입 — 네 프로젝트 API에 맞게 이름만 바꿔줘
-//        go.GetComponent<TeamComponent>()?.SetTeam(Team.Red);
-//        //var attack = go.GetComponent<AttackComponent>();
-//        //if (attack != null)
-//        //{
-//        //    attack.SetTeam(Team.Red);
-//        //    attack.SetTargetTeam(Team.Blue); // 또는 LayerMask 기반 강제
-//        //}
-
-//        // (중요) 전투/AI 시작 신호 — 너의 시작 트리거 함수명으로 교체
-//        //go.GetComponent<ChampionController>()?.OnCombatStart();
-//        // go.GetComponent<Brain>()?.StartCombat(); 등 프로젝트에 맞게
-//    }
-
-
-//    /// <summary>적 진영 절반에서 빈 슬롯을 선형으로 탐색(원하면 랜덤화 가능)</summary>
-//    private bool FindEmptySlot(out int gx, out int gzHalf)
-//    {
-//        // 간단: 앞에서부터 첫 빈 칸
-//        for (int z = 0; z < enemyGridHalf.GetLength(1); z++)
-//            for (int x = 0; x < enemyGridHalf.GetLength(0); x++)
-//                if (enemyGridHalf[x, z] == null)
-//                {
-//                    gx = x;
-//                    gzHalf = z;
-//                    return true;
-//                }
-
-//        gx = gzHalf = -1;
-//        return false;
-//    }
-
-//    /// <summary>유닛이 파괴될 때 슬롯을 비워준다.</summary>
-//    internal void ReleaseSlot(int gx, int gzHalf, GameObject dead)
-//    {
-//        if (gx < 0 || gzHalf < 0) return;
-//        if (gx >= enemyGridHalf.GetLength(0) || gzHalf >= enemyGridHalf.GetLength(1)) return;
-
-//        if (enemyGridHalf[gx, gzHalf] == dead)
-//            enemyGridHalf[gx, gzHalf] = null;
-//    }
-
-//    /// <summary>필요 시 모든 적 리셋</summary>
-//    public void ResetAllEnemies()
-//    {
-//        for (int x = 0; x < enemyGridHalf.GetLength(0); x++)
-//            for (int z = 0; z < enemyGridHalf.GetLength(1); z++)
-//            {
-//                if (enemyGridHalf[x, z] == null) continue;
-//                Destroy(enemyGridHalf[x, z]);
-//                enemyGridHalf[x, z] = null;
-//            }
-//    }
-//}
-
-///// <summary>
-///// 적 유닛 오브젝트에 붙여 슬롯 해제 전파.
-///// 파괴시 OnDestroy에서 스포너에게 슬롯 반환.
-///// </summary>
-//public class EnemyGridMarker : MonoBehaviour
-//{
-//    private EnemyAutoSpawner spawner;
-//    private int gx, gzHalf;
-
-//    public void Init(EnemyAutoSpawner s, int x, int zHalf)
-//    {
-//        spawner = s;
-//        gx = x;
-//        gzHalf = zHalf;
-//    }
-
-//    private void OnDestroy()
-//    {
-//        if (spawner != null)
-//            spawner.ReleaseSlot(gx, gzHalf, this.gameObject);
-//    }
-//}
-
-
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -227,6 +21,9 @@ public class EnemyAutoSpawner : MonoBehaviour
 
     [Tooltip("자동 스폰 사용 여부")]
     [SerializeField] private bool autoSpawn = true;
+
+    [Header("Spawn Placement Source")]
+    [SerializeField] private bool spawnAtSphereTriggers = true; // ← Sphere 위치 그대로 사용
 
     [Tooltip("첫 스폰 지연 (초)")]
     [SerializeField] private float firstDelay = 1.0f;
@@ -296,6 +93,12 @@ public class EnemyAutoSpawner : MonoBehaviour
     {
         if (autoSpawn)
             StartCoroutine(AutoSpawnLoop());
+        CombatManager.OnRoundEnd += T;
+    }
+
+    public void T()
+    {
+        TrySpawnOne();
     }
 
     private IEnumerator AutoSpawnLoop()
@@ -311,7 +114,6 @@ public class EnemyAutoSpawner : MonoBehaviour
         }
     }
 
-    /// <summary>빈 슬롯을 찾아 1개 스폰 시도</summary>
     public bool TrySpawnOne()
     {
         if (enemyPrefabs == null || enemyPrefabs.Count == 0)
@@ -320,22 +122,19 @@ public class EnemyAutoSpawner : MonoBehaviour
             return false;
         }
 
-        // 현재 살아있는(배치된) 적 수
         int alive = CountAlive();
         if (alive >= maxAlive) return false;
 
         if (!FindEmptySlot(out int gx, out int gzHalf))
             return false;
 
-        var prefab = enemyPrefabs[Random.Range(0, enemyPrefabs.Count)];
+        // 1) 스폰 희망 좌표: Sphere 트리거 위치(옵션 켜짐) 또는 기존 좌표
+        Vector3 desiredPos = GetSpawnWorldPos(gx, gzHalf);
 
-        // 배치 가능 여부(예: NavMesh) 선검사
-        int gz = gzHalf + enemyZOffset;
-        Vector3 desiredPos = map.mapGridPositions[gx, gz];
-
-        // NavMesh가 있다면 근처로 스냅 가능한지 미리 확인
+        // 2) NavMesh 스냅(가능하면)
         Vector3 finalPos = desiredPos;
         bool canPlace = true;
+        var prefab = enemyPrefabs[Random.Range(0, enemyPrefabs.Count)];
         var agentOnPrefab = prefab.GetComponent<UnityEngine.AI.NavMeshAgent>();
         if (agentOnPrefab != null)
         {
@@ -347,35 +146,31 @@ public class EnemyAutoSpawner : MonoBehaviour
 
         if (!canPlace)
         {
-            // 이 슬롯은 배치 불가. 다음 빈 슬롯을 찾아 재시도.
-            // (무한루프 방지를 위해 여기서 한 번만 재귀/반복 시도)
-            if (FindEmptySlot(out gx, out gzHalf))
-            {
-                gz = gzHalf + enemyZOffset;
-                desiredPos = map.mapGridPositions[gx, gz];
-                finalPos = desiredPos;
-            }
-            else
-            {
+            // 이 슬롯이 배치 불가면 한 번 더 다른 빈 슬롯을 찾아본다(선택).
+            if (!FindEmptySlot(out gx, out gzHalf))
                 return false;
-            }
+            desiredPos = GetSpawnWorldPos(gx, gzHalf);
+            finalPos = desiredPos;
+
+            if (agentOnPrefab != null &&
+                UnityEngine.AI.NavMesh.SamplePosition(desiredPos, out var hit2, 2.0f, agentOnPrefab.areaMask))
+                finalPos = hit2.position;
         }
 
-        // 실제 생성
+        // 3) 실제 생성/기록
         var go = Instantiate(prefab);
-        go.transform.position = finalPos;
+        go.transform.position = finalPos;                    // ★ 여기서도 헬퍼가 반영된 위치
         go.transform.rotation = Quaternion.identity;
 
         enemyGridHalf[gx, gzHalf] = go;
 
-        // 죽을 때 슬롯 비우도록 마커 부착
         var marker = go.AddComponent<EnemyGridMarker>();
         marker.Init(this, gx, gzHalf);
 
         InitializeSpawnedUnit(go);
-
         return true;
     }
+
 
     /// <summary>남아있는(배치된) 적 수</summary>
     private int CountAlive()
@@ -408,9 +203,20 @@ public class EnemyAutoSpawner : MonoBehaviour
         // (권장) 팀/타깃팅 주입 — 네 프로젝트 API에 맞게 이름만 바꿔줘
         go.GetComponent<TeamComponent>()?.SetTeam(Team.Red);
 
-        // (중요) 전투/AI 시작 신호 — 프로젝트에 맞는 함수로 교체
-        // go.GetComponent<ChampionController>()?.OnCombatStart();
-        // go.GetComponent<Brain>()?.StartCombat();
+       
+    }
+
+    private Vector3 GetSpawnWorldPos(int gx, int gzHalf)
+    {
+        if (spawnAtSphereTriggers && map != null && map.mapGridTriggerArray != null)
+        {
+            var info = map.mapGridTriggerArray[gx, gzHalf];   // TriggerInfo 컴포넌트
+            if (info != null) return info.transform.position; // ★ Sphere 위치 그대로
+        }
+
+        // 폴백: 기존 방식(뒤쪽 절반 오프셋 포함)
+        int gz = gzHalf + enemyZOffset;
+        return map.mapGridPositions[gx, gz];
     }
 
     /// <summary>
@@ -476,6 +282,8 @@ public class EnemyAutoSpawner : MonoBehaviour
                 enemyGridHalf[x, z] = null;
             }
     }
+
+    
 
     #region Gizmos
     private void OnDrawGizmosSelected()
