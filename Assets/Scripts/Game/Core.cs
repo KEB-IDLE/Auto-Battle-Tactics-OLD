@@ -24,7 +24,7 @@ public class Core : MonoBehaviour
         _core = GetComponent<CoreComponent>();
         _healthBar = GetComponentInChildren<HealthBar>(true);
 
-        Debug.Log($"🧱 [검사용] Core.Awake() 호출됨: {gameObject.name}, ID: {GetInstanceID()}, Team: {_team.Team}");
+        // Debug.Log($"🧱 [검사용] Core.Awake() 호출됨: {gameObject.name}, ID: {GetInstanceID()}, Team: {_team.Team}");
 
         if (objectData == null)
         {
@@ -35,7 +35,7 @@ public class Core : MonoBehaviour
         if (!_health.IsInitialized)
         {
             _health.Initialize(objectData.maxHP);
-            Debug.Log($"⚙️ [Core] HealthComponent 초기화: {objectData.maxHP}");
+            // Debug.Log($"⚙️ [Core] HealthComponent 초기화: {objectData.maxHP}");
         }
 
         if (_healthBar != null)

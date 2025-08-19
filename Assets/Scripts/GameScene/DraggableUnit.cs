@@ -1,187 +1,203 @@
+// DraggableUnit.cs
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.UI;
 
-/// 배치된 유닛을 드래그해서 옮기고, 판매존에 올리면 판매
 public class DraggableUnit : MonoBehaviour
 {
+    [Header("Pick")]
+    [SerializeField] LayerMask pickableLayers = ~0;   // 유닛 레이어 선택
+    [SerializeField] float pickRayDistance = 500f;
+
     [Header("Ray & Snap")]
-    [SerializeField] LayerMask groundMask;   // 평면/지형/바닥 레이어들(유닛 레이어 아님)
-    [SerializeField] float rayMax = 600f;
     [SerializeField] float snapPrimary = 1.2f;
-    [SerializeField] float snapFallback = 3.0f;
-    [SerializeField] bool debugLog = false;  // FIX: 디버그 스위치
+    [SerializeField] float snapFallback = 3f;
+    [SerializeField] bool debugLog = false;
+
+    [Tooltip("드래그 투영 평면의 Y. NaN이면 드래그 시작 시 유닛 Y 사용")]
+    [SerializeField] float placementPlaneY = float.NaN;
+
+    [Header("UI")]
+    [SerializeField] string sellPanelName = "CardPanel";
 
     Camera cam;
+
+    // ── 드래그 상태 ───────────────────────────────
     bool isDragging;
-    Vector2 offsetXZ;              // 마우스-유닛 간 XZ 오프셋
-    Plane backupPlane;             // 지형을 못 맞출 때 쓸, 현재 높이의 수평 평면
+    Transform target;
+    Entity targetEntity;
+    NavMeshAgent targetAgent;
+    Rigidbody targetRb;
+
+    Vector2 offsetXZ;
+    float dragDepth;
+    Vector3 lastValidPos;
+    bool agentWasEnabled;
+    bool rbWasKinematic;
 
     // ── 판매 존 캐시 ──────────────────────────────
-    static RectTransform sellZone; // CardPanel
+    static RectTransform sellZone;
     static Canvas sellCanvas;
     static Camera uiCam;
 
-    void OnEnable()
+    void Awake() { cam = Camera.main; }
+
+    void Update()
     {
-        cam = Camera.main;
-        // (참고) backupPlane은 OnMouseDown 때도 갱신한다.
-        backupPlane = new Plane(Vector3.up, new Vector3(0f, transform.position.y, 0f));
+        // 배치 단계 아닐 땐 드래그 강제 종료
+        if (!GameManager2.Instance || !GameManager2.Instance.IsPlacementPhase)
+        {
+            if (isDragging) CancelDrag();
+            return;
+        }
+
+        if (Input.GetMouseButtonDown(0)) TryBeginDrag();
+        if (isDragging && Input.GetMouseButton(0)) DoDrag();
+        if (isDragging && Input.GetMouseButtonUp(0)) EndDrag();
     }
 
-    void OnMouseDown()
+    void TryBeginDrag()
     {
-        if (!GameManager2.Instance || !GameManager2.Instance.IsPlacementPhase) return;
         if (cam == null) cam = Camera.main;
         if (cam == null) return;
 
-        // FIX: 클릭 시점의 높이에 맞춰 드래그 평면 갱신
-        backupPlane = new Plane(Vector3.up, new Vector3(0f, transform.position.y, 0f));
+        // 화면 클릭 → 물리 레이로 유닛 선택
+        Ray ray = cam.ScreenPointToRay(Input.mousePosition);
+        if (!Physics.Raycast(ray, out var hit, pickRayDistance, pickableLayers,
+                       QueryTriggerInteraction.Collide)) return;
 
-        var r = cam.ScreenPointToRay(Input.mousePosition);
+        var entity = hit.collider.GetComponentInParent<Entity>();
+        if (!entity) return;
 
-        // 바닥을 먼저 맞춘다(유닛 레이어가 아님)
-        if (Physics.Raycast(r, out var hit, rayMax, groundMask, QueryTriggerInteraction.Ignore))
-        {
-            var p = hit.point;
-            offsetXZ = new Vector2(transform.position.x - p.x, transform.position.z - p.z);
-            if (debugLog) Debug.Log($"[Drag] down hit={p} off=({offsetXZ.x:F2},{offsetXZ.y:F2})");
-        }
-        // 바닥을 못 맞추면 현재 높이 평면으로
-        else if (backupPlane.Raycast(r, out float enter))
-        {
-            var p = r.GetPoint(enter);
-            offsetXZ = new Vector2(transform.position.x - p.x, transform.position.z - p.z);
-            if (debugLog) Debug.Log($"[Drag] down plane={p} off=({offsetXZ.x:F2},{offsetXZ.y:F2})");
-        }
-        else return;
+        target = entity.transform;
+        targetEntity = entity;
+        targetAgent = target.GetComponent<NavMeshAgent>();
+        targetRb = target.GetComponent<Rigidbody>();
 
+        if (float.IsNaN(placementPlaneY)) placementPlaneY = target.position.y;
+
+        // z-깊이 고정 후 1:1 스크린→월드 매핑
+        dragDepth = cam.WorldToScreenPoint(target.position).z;
+        var pick = cam.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, dragDepth));
+        offsetXZ = new Vector2(target.position.x - pick.x, target.position.z - pick.z);
+
+        if (debugLog) Debug.Log($"[Drag] DOWN {entity.name} pick={pick} off=({offsetXZ.x:F2},{offsetXZ.y:F2})");
+
+        // 드래그동안 에이전트/물리 잠금
+        if (targetAgent) { agentWasEnabled = targetAgent.enabled; targetAgent.enabled = false; }
+        if (targetRb) { rbWasKinematic = targetRb.isKinematic; targetRb.isKinematic = true; targetRb.angularVelocity = Vector3.zero; }
+
+        lastValidPos = target.position;
         isDragging = true;
-
-        // 드래그 중에는 NavMeshAgent 비활성화(원치 않는 이동 방지)
-        var agent = GetComponent<NavMeshAgent>();
-        if (agent) agent.enabled = false;
     }
 
-    void OnMouseDrag()
+    void DoDrag()
     {
-        if (!isDragging || !GameManager2.Instance || !GameManager2.Instance.IsPlacementPhase) return;
-        if (cam == null) cam = Camera.main;
-        if (cam == null) return;
+        if (cam == null || target == null) return;
 
-        var r = cam.ScreenPointToRay(Input.mousePosition);
+        // 카드패널 위에선 위치 갱신 멈춤(판매만 판정)
+        if (PointerInsideSellZone()) return;
 
-        // 마우스가 가리키는 바닥 위치 계산
-        Vector3 desired;
-        if (Physics.Raycast(r, out var hit, rayMax, groundMask, QueryTriggerInteraction.Ignore))
-        {
-            // FIX: offsetXZ.y를 z 축에 더해줌(이전 .z 혼동 방지)
-            desired = new Vector3(
-                hit.point.x + offsetXZ.x,
-                transform.position.y,             
-                hit.point.z + offsetXZ.y
-            );
-        }
-        else if (backupPlane.Raycast(r, out float enter))
-        {
-            var p = r.GetPoint(enter);
-            desired = new Vector3(
-                p.x + offsetXZ.x,
-                transform.position.y,
-                p.z + offsetXZ.y
-            );
-        }
-        else return;
+        var pick = cam.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, dragDepth));
+        Vector3 desired = new Vector3(pick.x + offsetXZ.x, target.position.y, pick.z + offsetXZ.y);
 
-        // 해당 유닛의 AgentType으로 NavMesh 스냅
         Vector3 snapped = desired;
-        var entity = GetComponent<Entity>();
-        int agentTypeId = (entity && UnitManager.Instance)
-            ? UnitManager.Instance.GetAgentTypeId(entity.UnitType)
-            : -1;
-
-        bool ok = false;
+        bool ok;
         NavMeshHit navHit;
 
+        // 같은 로직: 팀 스폰 NavMesh + 에이전트 타입으로 스냅
+        int agentTypeId = -1;
+        if (targetEntity && UnitManager.Instance)
+            agentTypeId = UnitManager.Instance.GetAgentTypeId(targetEntity.UnitType);
+
+        int areaMask = UnitManager.GetTeamAreaMask();
         if (agentTypeId >= 0)
         {
-            // FIX: 팀 영역 마스크와 에이전트 타입 동시 적용
-            var filter = new NavMeshQueryFilter
-            {
-                agentTypeID = agentTypeId,
-                areaMask = UnitManager.GetTeamAreaMask()
-            };
+            var filter = new NavMeshQueryFilter { agentTypeID = agentTypeId, areaMask = areaMask };
             ok = NavMesh.SamplePosition(desired, out navHit, snapPrimary, filter)
               || NavMesh.SamplePosition(desired, out navHit, snapFallback, filter);
         }
         else
         {
-            ok = NavMesh.SamplePosition(desired, out navHit, snapPrimary, NavMesh.AllAreas)
-              || NavMesh.SamplePosition(desired, out navHit, snapFallback, NavMesh.AllAreas);
+            ok = NavMesh.SamplePosition(desired, out navHit, snapPrimary, areaMask)
+              || NavMesh.SamplePosition(desired, out navHit, snapFallback, areaMask);
         }
 
         if (ok)
         {
             snapped = navHit.position;
+            lastValidPos = snapped;
             if (debugLog)
             {
                 float d = Vector3.Distance(desired, snapped);
-                Debug.Log($"[Drag] snap ok dist={d:F2}m → {snapped}");
+                Debug.Log($"[Drag] snap ok dist={d:F2} → {snapped}");
             }
         }
-        else if (debugLog)
+        else
         {
-            Debug.LogWarning("[Drag] snap fail (no navmesh nearby)");
+            if (debugLog) Debug.LogWarning("[Drag] snap fail");
+            snapped = lastValidPos; // 실패 시 이전 정상 위치 유지
         }
 
-        transform.position = snapped;
+        target.position = snapped;
     }
 
-    void OnMouseUp()
+    void EndDrag()
     {
         if (!isDragging) return;
+
+        // 에이전트/물리 원상복귀
+        if (targetAgent && (agentWasEnabled || GameManager2.Instance.BattleStarted)) targetAgent.enabled = true;
+        agentWasEnabled = false;
+        if (targetRb) targetRb.isKinematic = rbWasKinematic;
+
+        // 판매 판정
+        if (PointerInsideSellZone()) TrySell(targetEntity);
+
+        if (debugLog) Debug.Log($"[Drag] UP {target?.name}");
+
+        // 상태 해제
+        target = null; targetEntity = null; targetAgent = null; targetRb = null;
         isDragging = false;
+    }
 
-        // 전투가 시작돼 있으면 NavMeshAgent 다시 활성화
-        var agent = GetComponent<NavMeshAgent>();
-        if (agent && GameManager2.Instance.BattleStarted) agent.enabled = true;
-
-        // 판매존 확인
-        CacheSellZone();
-        if (sellZone != null &&
-            RectTransformUtility.RectangleContainsScreenPoint(sellZone, Input.mousePosition, uiCam))
-        {
-            TrySell();
-        }
+    void CancelDrag()
+    {
+        if (targetAgent && agentWasEnabled) targetAgent.enabled = true;
+        if (targetRb) targetRb.isKinematic = rbWasKinematic;
+        target = null; targetEntity = null; targetAgent = null; targetRb = null;
+        isDragging = false;
     }
 
     // ───────────────────────── 판매 관련 ─────────────────────────
+    bool PointerInsideSellZone()
+    {
+        CacheSellZone();
+        return sellZone &&
+               RectTransformUtility.RectangleContainsScreenPoint(sellZone, Input.mousePosition, uiCam);
+    }
     void CacheSellZone()
     {
         if (sellZone) return;
-        var go = GameObject.Find("CardPanel");
+        var go = GameObject.Find(sellPanelName);
         if (!go) return;
-
         sellZone = go.GetComponent<RectTransform>();
         sellCanvas = go.GetComponentInParent<Canvas>();
-        uiCam = (sellCanvas && sellCanvas.renderMode == RenderMode.ScreenSpaceOverlay)
-              ? null : sellCanvas ? sellCanvas.worldCamera : null;
+        uiCam = (sellCanvas && sellCanvas.renderMode == RenderMode.ScreenSpaceOverlay) ? null
+             : sellCanvas ? sellCanvas.worldCamera : null;
     }
 
-    void TrySell()
+    void TrySell(Entity entity)
     {
-        var entity = GetComponent<Entity>();
         if (!entity) return;
-
         var data = UnitManager.Instance?.GetEntityData(entity.UnitType);
         int price = data ? data.gold : 0;
-
         int cur = GoldManager.Instance?.GetCurrentGold() ?? 0;
         GoldManager.Instance?.SetGold(cur + price);
 
         GameManager2.Instance?.Unregister(entity);
         GameManager2.Instance?.RemoveInitMessageByUnitId(entity.UnitId);
-        Destroy(gameObject);
+        Destroy(entity.gameObject);
 
         Debug.Log($"🪙 판매 완료: {entity.UnitType} (+{price})");
     }

@@ -20,6 +20,8 @@ public class BattleSceneManager : MonoBehaviour
         while (!GameManager2.Instance || !GameManager2.Instance.BattleStarted)
             yield return null;
 
+        GameManager2.Instance.ApplySavedCoreHpToCurrentSceneCores();
+
         var initMessages = GameManager2.Instance.GetInitMessages();
         Debug.Log($"📦 [BattleScene] 복원할 InitMessage 개수: {initMessages.Count}");
 
@@ -96,12 +98,14 @@ public class BattleSceneManager : MonoBehaviour
             go.GetComponent<AttackComponent>()?.Initialize(data);
             go.GetComponent<EffectComponent>()?.Initialize(data);
         }
-        
+
+
         yield return new WaitUntil(() => TimerManager.Instance != null && TimerManager.Instance.countdownText != null);
         Debug.Log("⏲ 전투씬에서 타이머 직접 시작함");
         TimerManager.Instance?.ResetUI();
         TimerManager.Instance?.BeginCountdown();
     }
+
 
     private void EndBattleByCoreDeath(Team loser)
     {

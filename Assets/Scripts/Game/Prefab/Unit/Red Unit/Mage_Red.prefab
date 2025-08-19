@@ -146,6 +146,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 145554, guid: 657ffc2bdd1e7f84881a9f3fb84a78a6, type: 3}
       insertIndex: -1
       addedObject: {fileID: 5486766989756024572}
+    - targetCorrespondingSourceObject: {fileID: 145554, guid: 657ffc2bdd1e7f84881a9f3fb84a78a6, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -3885488713218984315}
   m_SourcePrefab: {fileID: 100100000, guid: 657ffc2bdd1e7f84881a9f3fb84a78a6, type: 3}
 --- !u!1 &3760281847762428348 stripped
 GameObject:
@@ -438,6 +441,27 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   entityData: {fileID: 11400000, guid: a32312fe29dba164bbba87a16e1647c0, type: 2}
+--- !u!114 &-3885488713218984315
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3760281847762428348}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b431532ca744f904385cb4952f7422d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pickableLayers:
+    serializedVersion: 2
+    m_Bits: 16384
+  pickRayDistance: 500
+  snapPrimary: 1.2
+  snapFallback: 3
+  debugLog: 1
+  placementPlaneY: NaN
+  sellPanelName: CardPanel
 --- !u!4 &3760281847762673298 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 444348, guid: 657ffc2bdd1e7f84881a9f3fb84a78a6, type: 3}
