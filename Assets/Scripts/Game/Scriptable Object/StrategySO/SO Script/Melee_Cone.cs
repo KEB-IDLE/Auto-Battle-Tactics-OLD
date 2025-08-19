@@ -35,9 +35,10 @@ public class Melee_Cone : AttackStrategyBaseSO
             float angleToTarget = Vector3.Angle(forward, toTarget);
             if (angleToTarget > coneAngle * 0.5f) continue;
 
-            var core = col.GetComponent<Core>();
+            //var core = col.GetComponent<Core>();
             context.RequestAttackSound();
-            dmg.RequestDamage(core != null ? context.attackCoreDamage : context.attackDamage);
+            //dmg.RequestDamage(core != null ? context.attackCoreDamage : context.attackDamage);
+            dmg.RequestDamage(context.attackDamage);
             (dmg as HealthComponent)?.ApplyImmediateDamage();
         }
         context.EventSender(context.transform);

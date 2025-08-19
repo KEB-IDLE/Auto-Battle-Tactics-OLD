@@ -122,9 +122,10 @@ public class Projectile : MonoBehaviour
             if (dist <= data.detectionRadius)
             {
                 var hp = targetEntity.GetComponent<HealthComponent>();
-                var core = targetEntity.GetComponent<Core>();
+                //var core = targetEntity.GetComponent<Core>();
 
-                float damageToApply = (core != null) ? coreDamage : damage;
+                float damageToApply = damage;
+                //float damageToApply = (core != null) ? coreDamage : damage;
 
                 if (hp != null) hp.RequestDamage(damageToApply);
                 hp?.ApplyImmediateDamage();
@@ -142,8 +143,9 @@ public class Projectile : MonoBehaviour
                         if (teamComp == null || teamComp.Team == team) continue;
 
                         var otherHp = enemy.GetComponent<HealthComponent>();
-                        var otherCore = enemy.GetComponent<Core>();
-                        float explosionDamage = (otherCore != null) ? coreDamage : damage;
+                        //var otherCore = enemy.GetComponent<Core>();
+                        float explosionDamage = damage;
+                        //float explosionDamage = (otherCore != null) ? coreDamage : damage;
                         if (otherHp != null)
                         {
                             otherHp.RequestDamage(explosionDamage);
@@ -218,6 +220,13 @@ public class Projectile : MonoBehaviour
             Destroy(flightEffect);
         }
         flightEffect = null;
+    }
+
+    public void Init(GameObject _target)
+    {
+        //target = _target;
+
+        //isMoving = true;
     }
 
 

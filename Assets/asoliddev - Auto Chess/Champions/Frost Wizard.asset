@@ -13,8 +13,7 @@ MonoBehaviour:
   m_Name: Frost Wizard
   m_EditorClassIdentifier: 
   prefab: {fileID: 5364804981758500472, guid: 2f67e8080b1549c4faa35f4ca869301a, type: 3}
-  attackProjectile: {fileID: 504887762509234602, guid: e94f8a8182f6ca34bbea07f54c94b04c,
-    type: 3}
+  attackProjectile: {fileID: 4932088507883938021, guid: 0e5709a7ddb77924090c112cf73bb98a, type: 3}
   uiname: Frost Wizard
   cost: 3
   type1: {fileID: 11400000, guid: 7f6e8df42876b24448eb70be660c3fac, type: 2}

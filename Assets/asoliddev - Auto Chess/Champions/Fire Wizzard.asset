@@ -13,8 +13,7 @@ MonoBehaviour:
   m_Name: Fire Wizzard
   m_EditorClassIdentifier: 
   prefab: {fileID: 7694065919687656627, guid: 26f713449d9ab3e4391a3d045accd48f, type: 3}
-  attackProjectile: {fileID: 1597069992993035993, guid: 85891e03d6c87514a98a053eaf190895,
-    type: 3}
+  attackProjectile: {fileID: 8378648546881499446, guid: 867c572a5be680d42a042d2349f10143, type: 3}
   uiname: Fire Wizard
   cost: 3
   type1: {fileID: 11400000, guid: 7f6e8df42876b24448eb70be660c3fac, type: 2}

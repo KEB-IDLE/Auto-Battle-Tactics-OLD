@@ -13,8 +13,7 @@ MonoBehaviour:
   m_Name: Nature Wizard
   m_EditorClassIdentifier: 
   prefab: {fileID: 6285827556954042335, guid: a0747b0ddae085443a2a2f1f7004f221, type: 3}
-  attackProjectile: {fileID: 2047516437370248868, guid: e6736dc1205bf254dbdaa1d89efce89b,
-    type: 3}
+  attackProjectile: {fileID: 7986504087968017091, guid: 12a56ee4630040c4eb17ae9707ed4cef, type: 3}
   uiname: Nature Wizard
   cost: 3
   type1: {fileID: 11400000, guid: 7f6e8df42876b24448eb70be660c3fac, type: 2}

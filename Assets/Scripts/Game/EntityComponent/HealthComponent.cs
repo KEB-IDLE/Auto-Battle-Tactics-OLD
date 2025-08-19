@@ -106,7 +106,7 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
         OnDeathEffect?.Invoke(this.transform);
 
         var entity = GetComponent<Entity>();
-        var core = GetComponent<Core>();
+        //var core = GetComponent<Core>();
 
         if (entity != null)
         {
@@ -114,11 +114,11 @@ public class HealthComponent : MonoBehaviour, IDamageable, IDeathNotifier
             entity.UnbindEvent();
         }
 
-        else if (core != null)
-        {
-            core.UnBindEvent();
-            CombatManager.EndGame();
-        }
+        //else if (core != null)
+        //{
+        //    core.UnBindEvent();
+        //    CombatManager.EndGame();
+        //}
 
 
         gameObject.SetActive(false);

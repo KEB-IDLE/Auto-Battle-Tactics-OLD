@@ -13,8 +13,7 @@ MonoBehaviour:
   m_Name: Nature Archer
   m_EditorClassIdentifier: 
   prefab: {fileID: 7335760998143173694, guid: a78cdd60c8f7c5a44ac65db50df6b8fa, type: 3}
-  attackProjectile: {fileID: 517170212901868865, guid: 61d66d2f4311e6341bff4d93a7ae93f8,
-    type: 3}
+  attackProjectile: {fileID: 1942215709378787983, guid: 7e3d132b7dc843a4bbe5499eafe20e82, type: 3}
   uiname: Nature Archer
   cost: 3
   type1: {fileID: 11400000, guid: f3e567881c605d247b05775a39e704ed, type: 2}

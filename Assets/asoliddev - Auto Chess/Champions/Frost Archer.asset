@@ -13,8 +13,7 @@ MonoBehaviour:
   m_Name: Frost Archer
   m_EditorClassIdentifier: 
   prefab: {fileID: 6619147471966085893, guid: a7d695c7c921d6546b374f5a3cb1a3db, type: 3}
-  attackProjectile: {fileID: 8898893296069002340, guid: c14aa66cc778e414187125618135ae6d,
-    type: 3}
+  attackProjectile: {fileID: 1942215709378787983, guid: 7e3d132b7dc843a4bbe5499eafe20e82, type: 3}
   uiname: Frost Archer
   cost: 3
   type1: {fileID: 11400000, guid: f3e567881c605d247b05775a39e704ed, type: 2}

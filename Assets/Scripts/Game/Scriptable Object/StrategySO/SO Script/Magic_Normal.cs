@@ -29,9 +29,10 @@ public class Magic_Normal : AttackStrategyBaseSO
                 continue;
 
             var dmg = col.GetComponent<IDamageable>();
-            var core = col.GetComponent<Core>();
+            //var core = col.GetComponent<Core>();
             if (dmg != null && dmg.IsAlive())
-                dmg.RequestDamage(core != null ? context.attackCoreDamage : context.attackDamage);
+                dmg.RequestDamage(context.attackDamage);
+                //dmg.RequestDamage(core != null ? context.attackCoreDamage : context.attackDamage);
             (dmg as HealthComponent)?.ApplyImmediateDamage();
         }
     }

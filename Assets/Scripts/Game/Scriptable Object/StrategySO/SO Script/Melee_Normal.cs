@@ -25,9 +25,10 @@ public class Melee_Normal : AttackStrategyBaseSO
             {
                 context.lockedTarget = target;
 
-                var core = mb.GetComponent<Core>();
+                //var core = mb.GetComponent<Core>();
                 context.RequestAttackSound();
-                target.RequestDamage(core != null ? context.attackCoreDamage : context.attackDamage);
+                target.RequestDamage(context.attackDamage);
+                //target.RequestDamage(core != null ? context.attackCoreDamage : context.attackDamage);
                 (target as HealthComponent)?.ApplyImmediateDamage();
             }
 

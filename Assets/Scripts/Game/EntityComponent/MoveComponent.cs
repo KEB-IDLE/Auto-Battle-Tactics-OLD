@@ -43,7 +43,7 @@ public class MoveComponent : MonoBehaviour, IMoveNotifier, IOrientable
 
     void Start()
     {
-        coreTransform = CoreRegistry.Instance.GetEnemyCore(_teamProvider.Team);
+        //coreTransform = CoreRegistry.Instance.GetEnemyCore(_teamProvider.Team);
         // 배치 단계에서는 스폰 시점에 isStopped=true가 들어오므로 여기서 건드릴 필요 없음
     }
 
