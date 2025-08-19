@@ -362,9 +362,33 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    public void LoadGameScene()
+    public void StartGameScene()
     {
         SceneManager.LoadScene("2-GameScene");
+    }
+    public void EndGameScene()
+    {
+        ChangeLevel(1);
+
+        ChangeGold(1000);
+
+        ChangeRecord(1, 1, 0, 10);      // 게임 최종 결과 점수로 변경 요
+
+        SceneManager.LoadScene("1-MainScene");
+    }
+
+    // 반드시 최상위 객체 Canvas 밑에 판넬 위치해야 작동
+    public void ShowGameEndPanel()
+    {
+        GameObject canvas = GameObject.Find("Canvas");
+        if (canvas != null)
+        {
+            Transform panelTransform = canvas.transform.Find("GameEndPanel");
+            if (panelTransform != null)
+                panelTransform.gameObject.SetActive(true);
+            else
+                Debug.LogError("Canvas 밑에 GameEndPanel이 없습니다.");
+        }
     }
 }
 
