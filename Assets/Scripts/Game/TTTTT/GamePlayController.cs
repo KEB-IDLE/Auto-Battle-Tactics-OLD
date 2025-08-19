@@ -22,6 +22,7 @@ public class GamePlayController : MonoBehaviour
     public GameObject[] oponentChampionInventoryArray;
     [HideInInspector]
     public GameObject[,] gridChampionsArray;
+    public Camera playerCamera;
 
     public GameStage currentGameStage;
     private float timer = 0;
@@ -214,6 +215,8 @@ public class GamePlayController : MonoBehaviour
     /// </summary>
     public bool BuyChampionFromShop(Champion champion)
     {
+
+        Debug.Log($"[BUY] click champion={champion?.name}, gold={currentGold}");
         //get first empty inventory slot
         int emptyIndex = -1;
         for (int i = 0; i < ownChampionInventoryArray.Length; i++)
@@ -241,6 +244,7 @@ public class GamePlayController : MonoBehaviour
 
         //setup chapioncontroller
         championController.Init(champion, ChampionController.TEAMID_PLAYER);
+        championController.SetCamera(playerCamera);
 
         //set grid position
         championController.SetGridPosition(Map.GRIDTYPE_OWN_INVENTORY, emptyIndex, -1);
@@ -268,6 +272,8 @@ public class GamePlayController : MonoBehaviour
         uIController.UpdateUI();
 
         //return true if succesful buy
+        if (emptyIndex == -1) { Debug.Log("[BUY] fail: no empty slot"); return false; }
+        if (currentGold < champion.cost) { Debug.Log($"[BUY] fail: not enough gold ({currentGold} < {champion.cost})"); return false; }
         return true;
     }
 
@@ -372,7 +378,7 @@ public class GamePlayController : MonoBehaviour
     /// </summary>
     public void StartDrag()
     {
-        Debug.Log($"triggerInfo: {(inputController.triggerInfo ? inputController.triggerInfo.name : "null")}");
+        
 
         if (currentGameStage != GameStage.Preparation)
             return;

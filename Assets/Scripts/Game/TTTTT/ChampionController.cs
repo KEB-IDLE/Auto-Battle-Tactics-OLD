@@ -14,6 +14,7 @@ public class ChampionController : MonoBehaviour
 
     public GameObject levelupEffectPrefab;
     public GameObject projectileStart;
+    //public Camera playerCamera;
 
     [HideInInspector]
     public int gridType = 0;
@@ -72,6 +73,13 @@ public class ChampionController : MonoBehaviour
 
     private List<Effect> effects;
 
+    private Camera _playerCamera;  // ★ 추가
+
+    public void SetCamera(Camera cam)  // ★ 추가
+    {
+        _playerCamera = cam;
+    }
+
     /// Start is called before the first frame update
     void Start()
     {
@@ -115,7 +123,8 @@ public class ChampionController : MonoBehaviour
         if (_isDragged)
         {
             //Create a ray from the Mouse click position
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            var cam = _playerCamera != null ? _playerCamera : Camera.main; // ★ 주입 우선, 폴백은 Main
+            Ray ray = cam.ScreenPointToRay(Input.mousePosition);
 
             //hit distance
             float enter = 100.0f;
@@ -232,7 +241,7 @@ public class ChampionController : MonoBehaviour
         get { return _isDragged; }
         set { _isDragged = value;}
     }
-
+    
     /// <summary>
     /// Resets champion after combat is over
     /// </summary>

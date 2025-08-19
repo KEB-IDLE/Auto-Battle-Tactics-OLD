@@ -2853,6 +2853,7 @@ MonoBehaviour:
   championShop: {fileID: 326393864}
   ownChampionInventoryArray: []
   oponentChampionInventoryArray: []
+  playerCamera: {fileID: 397669099}
   currentGameStage: 0
   PreparationStageDuration: 16
   CombatStageDuration: 60
@@ -8264,6 +8265,22 @@ PrefabInstance:
       propertyPath: m_AnchorMin.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1459829086107056398, guid: d5803500b40650e42a7d975d9cd75a13, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1459829086107056398, guid: d5803500b40650e42a7d975d9cd75a13, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 326393865}
+    - target: {fileID: 1459829086107056398, guid: d5803500b40650e42a7d975d9cd75a13, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnChampionClicked
+      objectReference: {fileID: 0}
+    - target: {fileID: 1459829086107056398, guid: d5803500b40650e42a7d975d9cd75a13, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: UIController, Assembly-CSharp
+      objectReference: {fileID: 0}
     - target: {fileID: 1637305547381846558, guid: d5803500b40650e42a7d975d9cd75a13, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -8564,6 +8581,30 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3802654268446366508, guid: d5803500b40650e42a7d975d9cd75a13, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 326393865}
+    - target: {fileID: 3802654268446366508, guid: d5803500b40650e42a7d975d9cd75a13, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: UIController, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 3829761315598519297, guid: d5803500b40650e42a7d975d9cd75a13, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3829761315598519297, guid: d5803500b40650e42a7d975d9cd75a13, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 326393865}
+    - target: {fileID: 3829761315598519297, guid: d5803500b40650e42a7d975d9cd75a13, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnChampionClicked
+      objectReference: {fileID: 0}
+    - target: {fileID: 3829761315598519297, guid: d5803500b40650e42a7d975d9cd75a13, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: UIController, Assembly-CSharp
+      objectReference: {fileID: 0}
     - target: {fileID: 4575806825607550782, guid: d5803500b40650e42a7d975d9cd75a13, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -8588,6 +8629,22 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4948621597867155939, guid: d5803500b40650e42a7d975d9cd75a13, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4948621597867155939, guid: d5803500b40650e42a7d975d9cd75a13, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 326393865}
+    - target: {fileID: 4948621597867155939, guid: d5803500b40650e42a7d975d9cd75a13, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: Refresh_Click
+      objectReference: {fileID: 0}
+    - target: {fileID: 4948621597867155939, guid: d5803500b40650e42a7d975d9cd75a13, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: UIController, Assembly-CSharp
+      objectReference: {fileID: 0}
     - target: {fileID: 7077833087206487150, guid: d5803500b40650e42a7d975d9cd75a13, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -8612,6 +8669,22 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7113910366934117524, guid: d5803500b40650e42a7d975d9cd75a13, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7113910366934117524, guid: d5803500b40650e42a7d975d9cd75a13, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 326393865}
+    - target: {fileID: 7113910366934117524, guid: d5803500b40650e42a7d975d9cd75a13, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnChampionClicked
+      objectReference: {fileID: 0}
+    - target: {fileID: 7113910366934117524, guid: d5803500b40650e42a7d975d9cd75a13, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: UIController, Assembly-CSharp
+      objectReference: {fileID: 0}
     - target: {fileID: 7213906991226785640, guid: d5803500b40650e42a7d975d9cd75a13, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -8635,6 +8708,38 @@ PrefabInstance:
     - target: {fileID: 7213906991226785640, guid: d5803500b40650e42a7d975d9cd75a13, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7245108504184899065, guid: d5803500b40650e42a7d975d9cd75a13, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7245108504184899065, guid: d5803500b40650e42a7d975d9cd75a13, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 326393865}
+    - target: {fileID: 7245108504184899065, guid: d5803500b40650e42a7d975d9cd75a13, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnChampionClicked
+      objectReference: {fileID: 0}
+    - target: {fileID: 7245108504184899065, guid: d5803500b40650e42a7d975d9cd75a13, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: UIController, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 7441982257318674563, guid: d5803500b40650e42a7d975d9cd75a13, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7441982257318674563, guid: d5803500b40650e42a7d975d9cd75a13, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 326393865}
+    - target: {fileID: 7441982257318674563, guid: d5803500b40650e42a7d975d9cd75a13, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnChampionClicked
+      objectReference: {fileID: 0}
+    - target: {fileID: 7441982257318674563, guid: d5803500b40650e42a7d975d9cd75a13, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: UIController, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 8052848425126836233, guid: d5803500b40650e42a7d975d9cd75a13, type: 3}
       propertyPath: m_AnchorMax.y
